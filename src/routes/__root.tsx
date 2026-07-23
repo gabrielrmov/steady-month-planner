@@ -80,10 +80,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Finlist — Organizador financeiro mensal" },
       {
         property: "og:description",
-        content: "Checklist mensal de contas + dashboard de entradas e saídas.",
+        content: "Organize suas contas a pagar e receber com checklist mensal, categorias e dashboard de fluxo de caixa.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Finlist — Organizador financeiro mensal" },
+      { name: "twitter:description", content: "Organize suas contas a pagar e receber com checklist mensal, categorias e dashboard de fluxo de caixa." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/bed0bb0a-6ef7-4897-8b47-8eab5e05b821/id-preview-aa3bc50d--78c5557e-c2db-4ab4-88f8-e302c686e737.lovable.app-1784814410757.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/bed0bb0a-6ef7-4897-8b47-8eab5e05b821/id-preview-aa3bc50d--78c5557e-c2db-4ab4-88f8-e302c686e737.lovable.app-1784814410757.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
