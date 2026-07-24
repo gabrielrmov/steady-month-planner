@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      cards: {
+        Row: {
+          closing_day: number | null
+          color: string
+          created_at: string
+          credit_limit: number | null
+          due_day: number | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          closing_day?: number | null
+          color?: string
+          created_at?: string
+          credit_limit?: number | null
+          due_day?: number | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          closing_day?: number | null
+          color?: string
+          created_at?: string
+          credit_limit?: number | null
+          due_day?: number | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           color: string
@@ -68,14 +104,19 @@ export type Database = {
       transactions: {
         Row: {
           amount: number
+          card_id: string | null
           category_id: string | null
           created_at: string
           description: string
           due_date: string
           id: string
+          installment_number: number | null
+          installment_total: number | null
           is_recurring: boolean
           notes: string | null
           paid_at: string | null
+          payment_method: string
+          purchase_group_id: string | null
           status: string
           type: string
           updated_at: string
@@ -83,14 +124,19 @@ export type Database = {
         }
         Insert: {
           amount: number
+          card_id?: string | null
           category_id?: string | null
           created_at?: string
           description: string
           due_date: string
           id?: string
+          installment_number?: number | null
+          installment_total?: number | null
           is_recurring?: boolean
           notes?: string | null
           paid_at?: string | null
+          payment_method?: string
+          purchase_group_id?: string | null
           status?: string
           type: string
           updated_at?: string
@@ -98,20 +144,32 @@ export type Database = {
         }
         Update: {
           amount?: number
+          card_id?: string | null
           category_id?: string | null
           created_at?: string
           description?: string
           due_date?: string
           id?: string
+          installment_number?: number | null
+          installment_total?: number | null
           is_recurring?: boolean
           notes?: string | null
           paid_at?: string | null
+          payment_method?: string
+          purchase_group_id?: string | null
           status?: string
           type?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "transactions_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "cards"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "transactions_category_id_fkey"
             columns: ["category_id"]
