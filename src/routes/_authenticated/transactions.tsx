@@ -13,13 +13,30 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Repeat2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, Repeat2, CreditCard } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/transactions")({
   component: TransactionsPage,
 });
 
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+type Tx = {
+  id: string;
+  description: string;
+  amount: number;
+  due_date: string;
+  status: string;
+  type: string;
+  is_recurring: boolean;
+  payment_method: string;
+  card_id: string | null;
+  installment_number: number | null;
+  installment_total: number | null;
+  purchase_group_id: string | null;
+  categories?: { name: string; color: string } | null;
+  cards?: { name: string; color: string } | null;
+};
 
 function TransactionsPage() {
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
@@ -33,12 +50,12 @@ function TransactionsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("transactions")
-        .select("*, categories(name, color)")
+        .select("*, categories(name, color), cards(name, color)")
         .gte("due_date", from)
         .lte("due_date", to)
         .order("due_date");
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as Tx[];
     },
   });
 
@@ -53,6 +70,18 @@ function TransactionsPage() {
     },
   });
 
+  const delGroup = useMutation({
+    mutationFn: async (groupId: string) => {
+      const { error } = await supabase.from("transactions").delete().eq("purchase_group_id", groupId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tx"] });
+      qc.invalidateQueries({ queryKey: ["installments"] });
+      toast.success("Todas as parcelas removidas");
+    },
+  });
+
   const togglePaid = useMutation({
     mutationFn: async ({ id, paid }: { id: string; paid: boolean }) => {
       const { error } = await supabase
@@ -64,8 +93,23 @@ function TransactionsPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tx"] }),
   });
 
-  const expenses = txs.filter((t) => t.type === "expense");
+  const pixExpenses = txs.filter((t) => t.type === "expense" && t.payment_method !== "card");
+  const cardExpenses = txs.filter((t) => t.type === "expense" && t.payment_method === "card");
   const incomes = txs.filter((t) => t.type === "income");
+
+  // Group card expenses by card
+  const cardsGrouped = new Map<string, { name: string; color: string; items: Tx[] }>();
+  for (const t of cardExpenses) {
+    const key = t.card_id ?? "none";
+    if (!cardsGrouped.has(key)) {
+      cardsGrouped.set(key, {
+        name: t.cards?.name ?? "Sem cartão",
+        color: t.cards?.color ?? "#6B7280",
+        items: [],
+      });
+    }
+    cardsGrouped.get(key)!.items.push(t);
+  }
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -90,49 +134,67 @@ function TransactionsPage() {
             <DialogTrigger asChild>
               <Button><Plus className="mr-2 h-4 w-4" /> Nova</Button>
             </DialogTrigger>
-            <TransactionForm onSaved={() => { setOpen(false); qc.invalidateQueries({ queryKey: ["tx"] }); }} defaultMonth={month} />
+            <TransactionForm onSaved={() => { setOpen(false); qc.invalidateQueries({ queryKey: ["tx"] }); qc.invalidateQueries({ queryKey: ["installments"] }); }} defaultMonth={month} />
           </Dialog>
         </div>
       </div>
 
-      <Tabs defaultValue="expense">
+      <Tabs defaultValue="pix">
         <TabsList>
-          <TabsTrigger value="expense">A pagar ({expenses.length})</TabsTrigger>
+          <TabsTrigger value="pix">Pix / Boleto ({pixExpenses.length})</TabsTrigger>
+          <TabsTrigger value="cards">Cartões ({cardExpenses.length})</TabsTrigger>
           <TabsTrigger value="income">A receber ({incomes.length})</TabsTrigger>
         </TabsList>
-        <TabsContent value="expense" className="mt-4">
-          <TxList items={expenses} loading={isLoading} onToggle={togglePaid.mutate} onDelete={del.mutate} />
+        <TabsContent value="pix" className="mt-4">
+          <TxList items={pixExpenses} loading={isLoading} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} />
+        </TabsContent>
+        <TabsContent value="cards" className="mt-4 space-y-4">
+          {!isLoading && cardsGrouped.size === 0 && (
+            <Card className="p-10 text-center text-sm text-muted-foreground">Nenhuma compra no cartão neste mês.</Card>
+          )}
+          {[...cardsGrouped.entries()].map(([key, group]) => {
+            const total = group.items.reduce((s, i) => s + Number(i.amount), 0);
+            return (
+              <div key={key} className="space-y-2">
+                <div className="flex items-center gap-2 px-1">
+                  <div
+                    className="flex h-7 w-7 items-center justify-center rounded-md"
+                    style={{ backgroundColor: group.color + "22", color: group.color }}
+                  >
+                    <CreditCard className="h-3.5 w-3.5" />
+                  </div>
+                  <h3 className="font-semibold">{group.name}</h3>
+                  <span className="ml-auto text-sm font-semibold">{brl(total)}</span>
+                </div>
+                <TxList items={group.items} loading={false} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} showInstallment />
+              </div>
+            );
+          })}
         </TabsContent>
         <TabsContent value="income" className="mt-4">
-          <TxList items={incomes} loading={isLoading} onToggle={togglePaid.mutate} onDelete={del.mutate} incomeMode />
+          <TxList items={incomes} loading={isLoading} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} incomeMode />
         </TabsContent>
       </Tabs>
     </div>
   );
 }
 
-type Tx = {
-  id: string;
-  description: string;
-  amount: number;
-  due_date: string;
-  status: string;
-  is_recurring: boolean;
-  categories?: { name: string; color: string } | null;
-};
-
 function TxList({
   items,
   loading,
   onToggle,
   onDelete,
+  onDeleteGroup,
   incomeMode,
+  showInstallment,
 }: {
   items: Tx[];
   loading: boolean;
   onToggle: (p: { id: string; paid: boolean }) => void;
   onDelete: (id: string) => void;
+  onDeleteGroup: (groupId: string) => void;
   incomeMode?: boolean;
+  showInstallment?: boolean;
 }) {
   if (loading) return <Card className="p-8 text-center text-sm text-muted-foreground">Carregando...</Card>;
   if (items.length === 0)
@@ -153,10 +215,15 @@ function TxList({
               <div className="flex items-center gap-2">
                 <p className={`truncate text-sm font-medium ${paid ? "line-through text-muted-foreground" : ""}`}>
                   {t.description}
+                  {showInstallment && t.installment_total && t.installment_total > 1 && (
+                    <span className="ml-1 text-xs text-muted-foreground">
+                      ({t.installment_number}/{t.installment_total})
+                    </span>
+                  )}
                 </p>
                 {t.is_recurring && <Repeat2 className="h-3.5 w-3.5 text-muted-foreground" />}
               </div>
-              <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <span>{format(new Date(t.due_date + "T00:00:00"), "dd/MM/yyyy")}</span>
                 {t.categories && (
                   <span
@@ -171,9 +238,24 @@ function TxList({
             <span className={`text-sm font-semibold ${incomeMode ? "text-success" : ""} ${paid ? "line-through text-muted-foreground" : ""}`}>
               {brl(Number(t.amount))}
             </span>
-            <Button variant="ghost" size="icon" onClick={() => onDelete(t.id)}>
-              <Trash2 className="h-4 w-4 text-muted-foreground" />
-            </Button>
+            {t.purchase_group_id && t.installment_total && t.installment_total > 1 ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  if (confirm(`Remover todas as ${t.installment_total} parcelas desta compra?`)) {
+                    onDeleteGroup(t.purchase_group_id!);
+                  }
+                }}
+                title="Remover compra inteira"
+              >
+                <Trash2 className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            ) : (
+              <Button variant="ghost" size="icon" onClick={() => onDelete(t.id)}>
+                <Trash2 className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            )}
           </div>
         );
       })}
@@ -187,6 +269,9 @@ function TransactionForm({ onSaved, defaultMonth }: { onSaved: () => void; defau
   const [amount, setAmount] = useState("");
   const [dueDate, setDueDate] = useState(format(defaultMonth, "yyyy-MM-dd"));
   const [categoryId, setCategoryId] = useState<string | undefined>();
+  const [paymentMethod, setPaymentMethod] = useState<"pix" | "card" | "boleto" | "other">("pix");
+  const [cardId, setCardId] = useState<string | undefined>();
+  const [installments, setInstallments] = useState(1);
   const [isRecurring, setIsRecurring] = useState(false);
   const [months, setMonths] = useState(6);
   const [saving, setSaving] = useState(false);
@@ -200,7 +285,18 @@ function TransactionForm({ onSaved, defaultMonth }: { onSaved: () => void; defau
     },
   });
 
+  const { data: cards = [] } = useQuery({
+    queryKey: ["cards"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("cards").select("*").order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const filteredCats = cats.filter((c) => c.kind === type);
+  const isCard = type === "expense" && paymentMethod === "card";
+  const isInstallmentPurchase = isCard && installments > 1;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -210,29 +306,61 @@ function TransactionForm({ onSaved, defaultMonth }: { onSaved: () => void; defau
       setSaving(false);
       return toast.error("Sessão expirada");
     }
+
+    const totalAmount = Number(amount);
+    const method = type === "income" ? "pix" : paymentMethod;
     const base = {
       user_id: userData.user.id,
       description,
-      amount: Number(amount),
       type,
-      due_date: dueDate,
       category_id: categoryId ?? null,
-      is_recurring: isRecurring,
+      is_recurring: isRecurring && !isInstallmentPurchase,
       status: "pending" as const,
+      payment_method: method,
+      card_id: isCard ? cardId ?? null : null,
     };
 
-    const rows = [base];
-    if (isRecurring) {
+    let rows: any[] = [];
+
+    if (isInstallmentPurchase) {
+      // Split into installments
+      const per = Number((totalAmount / installments).toFixed(2));
+      const groupId = crypto.randomUUID();
       const d = new Date(dueDate + "T00:00:00");
-      for (let i = 1; i < months; i++) {
+      for (let i = 0; i < installments; i++) {
         const next = addMonths(d, i);
-        rows.push({ ...base, due_date: format(next, "yyyy-MM-dd") });
+        rows.push({
+          ...base,
+          amount: per,
+          due_date: format(next, "yyyy-MM-dd"),
+          installment_number: i + 1,
+          installment_total: installments,
+          purchase_group_id: groupId,
+          description: `${description} (${i + 1}/${installments})`,
+        });
+      }
+    } else {
+      const first = { ...base, amount: totalAmount, due_date: dueDate };
+      rows.push(first);
+      if (isRecurring) {
+        const d = new Date(dueDate + "T00:00:00");
+        for (let i = 1; i < months; i++) {
+          const next = addMonths(d, i);
+          rows.push({ ...first, due_date: format(next, "yyyy-MM-dd") });
+        }
       }
     }
+
     const { error } = await supabase.from("transactions").insert(rows);
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success(isRecurring ? `${months} contas criadas` : "Conta adicionada");
+    toast.success(
+      isInstallmentPurchase
+        ? `${installments} parcelas criadas`
+        : isRecurring
+        ? `${months} contas criadas`
+        : "Conta adicionada",
+    );
     onSaved();
   };
 
@@ -254,14 +382,65 @@ function TransactionForm({ onSaved, defaultMonth }: { onSaved: () => void; defau
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label htmlFor="amt">Valor</Label>
+            <Label htmlFor="amt">Valor {isInstallmentPurchase && <span className="text-xs text-muted-foreground">(total)</span>}</Label>
             <Input id="amt" type="number" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} required />
           </div>
           <div>
-            <Label htmlFor="due">Vencimento</Label>
+            <Label htmlFor="due">{isInstallmentPurchase ? "1ª parcela" : "Vencimento"}</Label>
             <Input id="due" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
           </div>
         </div>
+
+        {type === "expense" && (
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Pagamento</Label>
+              <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as any)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pix">Pix</SelectItem>
+                  <SelectItem value="boleto">Boleto</SelectItem>
+                  <SelectItem value="card">Cartão</SelectItem>
+                  <SelectItem value="other">Outro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {isCard && (
+              <div>
+                <Label>Cartão</Label>
+                <Select value={cardId} onValueChange={setCardId}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    {cards.length === 0 && <div className="p-2 text-xs text-muted-foreground">Cadastre um cartão primeiro</div>}
+                    {cards.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+        )}
+
+        {isCard && (
+          <div>
+            <Label htmlFor="inst">Parcelas</Label>
+            <Input
+              id="inst"
+              type="number"
+              min="1"
+              max="60"
+              value={installments}
+              onChange={(e) => setInstallments(Math.max(1, Number(e.target.value)))}
+            />
+            {isInstallmentPurchase && amount && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {installments}× de {brl(Number(amount) / installments)}
+              </p>
+            )}
+          </div>
+        )}
+
         <div>
           <Label>Categoria</Label>
           <Select value={categoryId} onValueChange={setCategoryId}>
@@ -273,14 +452,17 @@ function TransactionForm({ onSaved, defaultMonth }: { onSaved: () => void; defau
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-center justify-between rounded-lg border border-border p-3">
-          <div>
-            <Label htmlFor="rec" className="cursor-pointer">Repetir todo mês</Label>
-            <p className="text-xs text-muted-foreground">Cria a mesma conta nos próximos meses</p>
+
+        {!isInstallmentPurchase && (
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <Label htmlFor="rec" className="cursor-pointer">Repetir todo mês</Label>
+              <p className="text-xs text-muted-foreground">Cria a mesma conta nos próximos meses</p>
+            </div>
+            <Switch id="rec" checked={isRecurring} onCheckedChange={setIsRecurring} />
           </div>
-          <Switch id="rec" checked={isRecurring} onCheckedChange={setIsRecurring} />
-        </div>
-        {isRecurring && (
+        )}
+        {isRecurring && !isInstallmentPurchase && (
           <div>
             <Label htmlFor="mo">Por quantos meses?</Label>
             <Input id="mo" type="number" min="2" max="60" value={months} onChange={(e) => setMonths(Number(e.target.value))} />
