@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,8 +16,13 @@ import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus, Trash2, Repeat2, CreditCard, Pencil } from "lucide-react";
 
+const tabSchema = z.object({
+  tab: z.enum(["recurring", "sporadic", "cards", "income", "received"]).optional(),
+});
+
 export const Route = createFileRoute("/_authenticated/transactions")({
   component: TransactionsPage,
+  validateSearch: tabSchema,
 });
 
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -40,6 +46,8 @@ type Tx = {
 };
 
 function TransactionsPage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Tx | null>(null);
@@ -171,7 +179,7 @@ function TransactionsPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="recurring">
+      <Tabs value={search.tab ?? "recurring"} onValueChange={(v) => navigate({ search: { tab: v as any }, replace: true })}>
         <TabsList className="flex-wrap">
           <TabsTrigger value="recurring">Recorrentes ({recurring.length})</TabsTrigger>
           <TabsTrigger value="sporadic">Esporádicos ({sporadic.length})</TabsTrigger>

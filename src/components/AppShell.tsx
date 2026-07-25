@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, ListChecks, LogOut, Wallet, Tag, CreditCard, CalendarDays, Hourglass } from "lucide-react";
+import { LayoutDashboard, ListChecks, LogOut, Wallet, Tag, CreditCard, CalendarDays, Hourglass, ArrowDownCircle, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -7,12 +7,14 @@ import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
 const nav = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/transactions", label: "Contas", icon: ListChecks },
-  { to: "/calendar", label: "Calendário", icon: CalendarDays },
-  { to: "/cards", label: "Cartões", icon: CreditCard },
-  { to: "/installments", label: "Parcelas", icon: Hourglass },
-  { to: "/categories", label: "Categorias", icon: Tag },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, tab: undefined },
+  { to: "/transactions", label: "Contas", icon: ListChecks, tab: undefined },
+  { to: "/transactions", label: "Esporádicos", icon: Zap, tab: "sporadic" as const },
+  { to: "/transactions", label: "Recebimentos", icon: ArrowDownCircle, tab: "received" as const },
+  { to: "/calendar", label: "Calendário", icon: CalendarDays, tab: undefined },
+  { to: "/cards", label: "Cartões", icon: CreditCard, tab: undefined },
+  { to: "/installments", label: "Parcelas", icon: Hourglass, tab: undefined },
+  { to: "/categories", label: "Categorias", icon: Tag, tab: undefined },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -41,11 +43,16 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
         <nav className="flex-1 space-y-1 px-3 py-4">
           {nav.map((item) => {
-            const active = location.pathname.startsWith(item.to);
+            const currentTab = (location.search as any)?.tab as string | undefined;
+            const active =
+              item.to === "/transactions"
+                ? location.pathname.startsWith("/transactions") && (currentTab ?? undefined) === item.tab
+                : location.pathname.startsWith(item.to);
             return (
               <Link
-                key={item.to}
+                key={item.label}
                 to={item.to}
+                search={item.tab ? { tab: item.tab } : {}}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   active
@@ -82,15 +89,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             <LogOut className="h-4 w-4" />
           </Button>
         </header>
-        <nav className="flex gap-1 border-b border-border bg-card px-2 py-2 md:hidden">
+        <nav className="flex gap-1 overflow-x-auto border-b border-border bg-card px-2 py-2 md:hidden">
           {nav.map((item) => {
-            const active = location.pathname.startsWith(item.to);
+            const currentTab = (location.search as any)?.tab as string | undefined;
+            const active =
+              item.to === "/transactions"
+                ? location.pathname.startsWith("/transactions") && (currentTab ?? undefined) === item.tab
+                : location.pathname.startsWith(item.to);
             return (
               <Link
-                key={item.to}
+                key={item.label}
                 to={item.to}
+                search={item.tab ? { tab: item.tab } : {}}
                 className={cn(
-                  "flex-1 rounded-md px-3 py-2 text-center text-xs font-medium",
+                  "shrink-0 rounded-md px-3 py-2 text-center text-xs font-medium",
                   active ? "bg-accent text-accent-foreground" : "text-muted-foreground",
                 )}
               >
