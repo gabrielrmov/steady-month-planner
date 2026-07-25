@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate, useSearch } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { LayoutDashboard, ListChecks, LogOut, Wallet, Tag, CreditCard, CalendarDays, Hourglass, ArrowDownCircle, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
