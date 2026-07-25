@@ -43,11 +43,16 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
         <nav className="flex-1 space-y-1 px-3 py-4">
           {nav.map((item) => {
-            const active = location.pathname.startsWith(item.to);
+            const currentTab = (location.search as any)?.tab as string | undefined;
+            const active =
+              item.to === "/transactions"
+                ? location.pathname.startsWith("/transactions") && (currentTab ?? undefined) === item.tab
+                : location.pathname.startsWith(item.to);
             return (
               <Link
-                key={item.to}
+                key={item.label}
                 to={item.to}
+                search={item.tab ? { tab: item.tab } : {}}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   active
