@@ -179,7 +179,7 @@ function TransactionsPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="recurring">
+      <Tabs value={search.tab ?? "recurring"} onValueChange={(v) => navigate({ search: { tab: v as any }, replace: true })}>
         <TabsList className="flex-wrap">
           <TabsTrigger value="recurring">Recorrentes ({recurring.length})</TabsTrigger>
           <TabsTrigger value="sporadic">Esporádicos ({sporadic.length})</TabsTrigger>
