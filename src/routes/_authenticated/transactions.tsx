@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Repeat2, CreditCard } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, Repeat2, CreditCard, Pencil } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/transactions")({
   component: TransactionsPage,
@@ -31,6 +31,7 @@ type Tx = {
   is_recurring: boolean;
   payment_method: string;
   card_id: string | null;
+  category_id: string | null;
   installment_number: number | null;
   installment_total: number | null;
   purchase_group_id: string | null;
@@ -41,6 +42,7 @@ type Tx = {
 function TransactionsPage() {
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Tx | null>(null);
   const from = format(month, "yyyy-MM-dd");
   const to = format(endOfMonth(month), "yyyy-MM-dd");
   const qc = useQueryClient();
@@ -59,13 +61,20 @@ function TransactionsPage() {
     },
   });
 
+  const invalidateAll = () => {
+    qc.invalidateQueries({ queryKey: ["tx"] });
+    qc.invalidateQueries({ queryKey: ["installments"] });
+    qc.invalidateQueries({ queryKey: ["calendar"] });
+    qc.invalidateQueries({ queryKey: ["dashboard"] });
+  };
+
   const del = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("transactions").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["tx"] });
+      invalidateAll();
       toast.success("Removido");
     },
   });
@@ -76,9 +85,8 @@ function TransactionsPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["tx"] });
-      qc.invalidateQueries({ queryKey: ["installments"] });
-      toast.success("Todas as parcelas removidas");
+      invalidateAll();
+      toast.success("Removido de todos os meses");
     },
   });
 
@@ -94,10 +102,12 @@ function TransactionsPage() {
   });
 
   const pixExpenses = txs.filter((t) => t.type === "expense" && t.payment_method !== "card");
+  const recurring = pixExpenses.filter((t) => t.is_recurring);
+  const sporadic = pixExpenses.filter((t) => !t.is_recurring);
   const cardExpenses = txs.filter((t) => t.type === "expense" && t.payment_method === "card");
   const incomes = txs.filter((t) => t.type === "income");
+  const received = incomes.filter((t) => t.status === "paid");
 
-  // Group card expenses by card
   const cardsGrouped = new Map<string, { name: string; color: string; items: Tx[] }>();
   for (const t of cardExpenses) {
     const key = t.card_id ?? "none";
@@ -110,6 +120,11 @@ function TransactionsPage() {
     }
     cardsGrouped.get(key)!.items.push(t);
   }
+
+  const handleEdit = (t: Tx) => {
+    setEditing(t);
+    setOpen(true);
+  };
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -130,23 +145,45 @@ function TransactionsPage() {
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-          <Dialog open={open} onOpenChange={setOpen}>
+          <Dialog
+            open={open}
+            onOpenChange={(v) => {
+              setOpen(v);
+              if (!v) setEditing(null);
+            }}
+          >
             <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" /> Nova</Button>
+              <Button onClick={() => setEditing(null)}>
+                <Plus className="mr-2 h-4 w-4" /> Nova
+              </Button>
             </DialogTrigger>
-            <TransactionForm onSaved={() => { setOpen(false); qc.invalidateQueries({ queryKey: ["tx"] }); qc.invalidateQueries({ queryKey: ["installments"] }); }} defaultMonth={month} />
+            <TransactionForm
+              key={editing?.id ?? "new"}
+              editing={editing}
+              onSaved={() => {
+                setOpen(false);
+                setEditing(null);
+                invalidateAll();
+              }}
+              defaultMonth={month}
+            />
           </Dialog>
         </div>
       </div>
 
-      <Tabs defaultValue="pix">
-        <TabsList>
-          <TabsTrigger value="pix">Pix / Boleto ({pixExpenses.length})</TabsTrigger>
+      <Tabs defaultValue="recurring">
+        <TabsList className="flex-wrap">
+          <TabsTrigger value="recurring">Recorrentes ({recurring.length})</TabsTrigger>
+          <TabsTrigger value="sporadic">Esporádicos ({sporadic.length})</TabsTrigger>
           <TabsTrigger value="cards">Cartões ({cardExpenses.length})</TabsTrigger>
-          <TabsTrigger value="income">A receber ({incomes.length})</TabsTrigger>
+          <TabsTrigger value="income">A receber ({incomes.length - received.length})</TabsTrigger>
+          <TabsTrigger value="received">Recebidos ({received.length})</TabsTrigger>
         </TabsList>
-        <TabsContent value="pix" className="mt-4">
-          <TxList items={pixExpenses} loading={isLoading} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} />
+        <TabsContent value="recurring" className="mt-4">
+          <TxList items={recurring} loading={isLoading} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} onEdit={handleEdit} />
+        </TabsContent>
+        <TabsContent value="sporadic" className="mt-4">
+          <TxList items={sporadic} loading={isLoading} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} onEdit={handleEdit} />
         </TabsContent>
         <TabsContent value="cards" className="mt-4 space-y-4">
           {!isLoading && cardsGrouped.size === 0 && (
@@ -166,13 +203,16 @@ function TransactionsPage() {
                   <h3 className="font-semibold">{group.name}</h3>
                   <span className="ml-auto text-sm font-semibold">{brl(total)}</span>
                 </div>
-                <TxList items={group.items} loading={false} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} showInstallment />
+                <TxList items={group.items} loading={false} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} onEdit={handleEdit} showInstallment />
               </div>
             );
           })}
         </TabsContent>
         <TabsContent value="income" className="mt-4">
-          <TxList items={incomes} loading={isLoading} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} incomeMode />
+          <TxList items={incomes.filter((t) => t.status !== "paid")} loading={isLoading} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} onEdit={handleEdit} incomeMode />
+        </TabsContent>
+        <TabsContent value="received" className="mt-4">
+          <TxList items={received} loading={isLoading} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} onEdit={handleEdit} incomeMode />
         </TabsContent>
       </Tabs>
     </div>
@@ -185,6 +225,7 @@ function TxList({
   onToggle,
   onDelete,
   onDeleteGroup,
+  onEdit,
   incomeMode,
   showInstallment,
 }: {
@@ -193,6 +234,7 @@ function TxList({
   onToggle: (p: { id: string; paid: boolean }) => void;
   onDelete: (id: string) => void;
   onDeleteGroup: (groupId: string) => void;
+  onEdit: (t: Tx) => void;
   incomeMode?: boolean;
   showInstallment?: boolean;
 }) {
@@ -203,6 +245,8 @@ function TxList({
     <Card className="divide-y divide-border">
       {items.map((t) => {
         const paid = t.status === "paid";
+        const isInstallment = !!(t.installment_total && t.installment_total > 1);
+        const hasGroup = !!t.purchase_group_id;
         return (
           <div key={t.id} className="flex items-center gap-3 p-4">
             <input
@@ -215,7 +259,7 @@ function TxList({
               <div className="flex items-center gap-2">
                 <p className={`truncate text-sm font-medium ${paid ? "line-through text-muted-foreground" : ""}`}>
                   {t.description}
-                  {showInstallment && t.installment_total && t.installment_total > 1 && (
+                  {showInstallment && isInstallment && (
                     <span className="ml-1 text-xs text-muted-foreground">
                       ({t.installment_number}/{t.installment_total})
                     </span>
@@ -238,22 +282,25 @@ function TxList({
             <span className={`text-sm font-semibold ${incomeMode ? "text-success" : ""} ${paid ? "line-through text-muted-foreground" : ""}`}>
               {brl(Number(t.amount))}
             </span>
-            {t.purchase_group_id && t.installment_total && t.installment_total > 1 ? (
+            <Button variant="ghost" size="icon" onClick={() => onEdit(t)} title="Editar">
+              <Pencil className="h-4 w-4 text-muted-foreground" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => onDelete(t.id)} title="Excluir este">
+              <Trash2 className="h-4 w-4 text-muted-foreground" />
+            </Button>
+            {hasGroup && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => {
-                  if (confirm(`Remover todas as ${t.installment_total} parcelas desta compra?`)) {
-                    onDeleteGroup(t.purchase_group_id!);
-                  }
+                  const msg = isInstallment
+                    ? `Remover todas as ${t.installment_total} parcelas desta compra?`
+                    : "Remover esta conta de todos os meses?";
+                  if (confirm(msg)) onDeleteGroup(t.purchase_group_id!);
                 }}
-                title="Remover compra inteira"
+                title="Excluir de todos os meses"
               >
-                <Trash2 className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            ) : (
-              <Button variant="ghost" size="icon" onClick={() => onDelete(t.id)}>
-                <Trash2 className="h-4 w-4 text-muted-foreground" />
+                <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
             )}
           </div>
@@ -263,17 +310,29 @@ function TxList({
   );
 }
 
-function TransactionForm({ onSaved, defaultMonth }: { onSaved: () => void; defaultMonth: Date }) {
-  const [type, setType] = useState<"expense" | "income">("expense");
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
-  const [dueDate, setDueDate] = useState(format(defaultMonth, "yyyy-MM-dd"));
-  const [categoryId, setCategoryId] = useState<string | undefined>();
-  const [paymentMethod, setPaymentMethod] = useState<"pix" | "card" | "boleto" | "other">("pix");
-  const [cardId, setCardId] = useState<string | undefined>();
+function TransactionForm({
+  onSaved,
+  defaultMonth,
+  editing,
+}: {
+  onSaved: () => void;
+  defaultMonth: Date;
+  editing: Tx | null;
+}) {
+  const isEdit = !!editing;
+  const [type, setType] = useState<"expense" | "income">((editing?.type as any) ?? "expense");
+  const [description, setDescription] = useState(editing?.description ?? "");
+  const [amount, setAmount] = useState(editing ? String(editing.amount) : "");
+  const [dueDate, setDueDate] = useState(editing?.due_date ?? format(defaultMonth, "yyyy-MM-dd"));
+  const [categoryId, setCategoryId] = useState<string | undefined>(editing?.category_id ?? undefined);
+  const [paymentMethod, setPaymentMethod] = useState<"pix" | "card" | "boleto" | "other">(
+    (editing?.payment_method as any) ?? "pix",
+  );
+  const [cardId, setCardId] = useState<string | undefined>(editing?.card_id ?? undefined);
   const [installments, setInstallments] = useState(1);
-  const [isRecurring, setIsRecurring] = useState(false);
+  const [isRecurring, setIsRecurring] = useState(editing?.is_recurring ?? false);
   const [months, setMonths] = useState(6);
+  const [applyToAll, setApplyToAll] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const { data: cats = [] } = useQuery({
@@ -296,7 +355,8 @@ function TransactionForm({ onSaved, defaultMonth }: { onSaved: () => void; defau
 
   const filteredCats = cats.filter((c) => c.kind === type);
   const isCard = type === "expense" && paymentMethod === "card";
-  const isInstallmentPurchase = isCard && installments > 1;
+  const isInstallmentPurchase = !isEdit && isCard && installments > 1;
+  const hasGroup = !!editing?.purchase_group_id;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -307,8 +367,34 @@ function TransactionForm({ onSaved, defaultMonth }: { onSaved: () => void; defau
       return toast.error("Sessão expirada");
     }
 
-    const totalAmount = Number(amount);
     const method = type === "income" ? "pix" : paymentMethod;
+
+    if (isEdit && editing) {
+      const patch: any = {
+        description,
+        amount: Number(amount),
+        due_date: dueDate,
+        type,
+        category_id: categoryId ?? null,
+        payment_method: method,
+        card_id: isCard ? cardId ?? null : null,
+      };
+      let q = supabase.from("transactions").update(patch);
+      if (applyToAll && hasGroup) {
+        // don't overwrite due_date across the group
+        delete patch.due_date;
+        q = supabase.from("transactions").update(patch).eq("purchase_group_id", editing.purchase_group_id!);
+      } else {
+        q = q.eq("id", editing.id);
+      }
+      const { error } = await q;
+      setSaving(false);
+      if (error) return toast.error(error.message);
+      toast.success(applyToAll && hasGroup ? "Atualizado em todos os meses" : "Atualizado");
+      return onSaved();
+    }
+
+    const totalAmount = Number(amount);
     const base = {
       user_id: userData.user.id,
       description,
@@ -320,10 +406,9 @@ function TransactionForm({ onSaved, defaultMonth }: { onSaved: () => void; defau
       card_id: isCard ? cardId ?? null : null,
     };
 
-    let rows: any[] = [];
+    const rows: any[] = [];
 
     if (isInstallmentPurchase) {
-      // Split into installments
       const per = Number((totalAmount / installments).toFixed(2));
       const groupId = crypto.randomUUID();
       const d = new Date(dueDate + "T00:00:00");
@@ -339,16 +424,20 @@ function TransactionForm({ onSaved, defaultMonth }: { onSaved: () => void; defau
           description: `${description} (${i + 1}/${installments})`,
         });
       }
-    } else {
-      const first = { ...base, amount: totalAmount, due_date: dueDate };
-      rows.push(first);
-      if (isRecurring) {
-        const d = new Date(dueDate + "T00:00:00");
-        for (let i = 1; i < months; i++) {
-          const next = addMonths(d, i);
-          rows.push({ ...first, due_date: format(next, "yyyy-MM-dd") });
-        }
+    } else if (isRecurring) {
+      const groupId = crypto.randomUUID();
+      const d = new Date(dueDate + "T00:00:00");
+      for (let i = 0; i < months; i++) {
+        const next = addMonths(d, i);
+        rows.push({
+          ...base,
+          amount: totalAmount,
+          due_date: format(next, "yyyy-MM-dd"),
+          purchase_group_id: groupId,
+        });
       }
+    } else {
+      rows.push({ ...base, amount: totalAmount, due_date: dueDate });
     }
 
     const { error } = await supabase.from("transactions").insert(rows);
@@ -367,7 +456,7 @@ function TransactionForm({ onSaved, defaultMonth }: { onSaved: () => void; defau
   return (
     <DialogContent className="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Nova conta</DialogTitle>
+        <DialogTitle>{isEdit ? "Editar conta" : "Nova conta"}</DialogTitle>
       </DialogHeader>
       <form onSubmit={submit} className="space-y-4">
         <Tabs value={type} onValueChange={(v) => setType(v as "expense" | "income")}>
@@ -422,7 +511,7 @@ function TransactionForm({ onSaved, defaultMonth }: { onSaved: () => void; defau
           </div>
         )}
 
-        {isCard && (
+        {!isEdit && isCard && (
           <div>
             <Label htmlFor="inst">Parcelas</Label>
             <Input
@@ -453,7 +542,7 @@ function TransactionForm({ onSaved, defaultMonth }: { onSaved: () => void; defau
           </Select>
         </div>
 
-        {!isInstallmentPurchase && (
+        {!isEdit && !isInstallmentPurchase && (
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div>
               <Label htmlFor="rec" className="cursor-pointer">Repetir todo mês</Label>
@@ -462,15 +551,26 @@ function TransactionForm({ onSaved, defaultMonth }: { onSaved: () => void; defau
             <Switch id="rec" checked={isRecurring} onCheckedChange={setIsRecurring} />
           </div>
         )}
-        {isRecurring && !isInstallmentPurchase && (
+        {!isEdit && isRecurring && !isInstallmentPurchase && (
           <div>
             <Label htmlFor="mo">Por quantos meses?</Label>
             <Input id="mo" type="number" min="2" max="60" value={months} onChange={(e) => setMonths(Number(e.target.value))} />
           </div>
         )}
+
+        {isEdit && hasGroup && (
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <Label htmlFor="all" className="cursor-pointer">Aplicar em todos os meses</Label>
+              <p className="text-xs text-muted-foreground">Atualiza todas as ocorrências desta conta (exceto a data)</p>
+            </div>
+            <Switch id="all" checked={applyToAll} onCheckedChange={setApplyToAll} />
+          </div>
+        )}
+
         <DialogFooter>
           <Button type="submit" disabled={saving} className="w-full">
-            {saving ? "Salvando..." : "Salvar"}
+            {saving ? "Salvando..." : isEdit ? "Salvar alterações" : "Salvar"}
           </Button>
         </DialogFooter>
       </form>
