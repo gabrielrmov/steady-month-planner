@@ -89,15 +89,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             <LogOut className="h-4 w-4" />
           </Button>
         </header>
-        <nav className="flex gap-1 border-b border-border bg-card px-2 py-2 md:hidden">
+        <nav className="flex gap-1 overflow-x-auto border-b border-border bg-card px-2 py-2 md:hidden">
           {nav.map((item) => {
-            const active = location.pathname.startsWith(item.to);
+            const currentTab = (location.search as any)?.tab as string | undefined;
+            const active =
+              item.to === "/transactions"
+                ? location.pathname.startsWith("/transactions") && (currentTab ?? undefined) === item.tab
+                : location.pathname.startsWith(item.to);
             return (
               <Link
-                key={item.to}
+                key={item.label}
                 to={item.to}
+                search={item.tab ? { tab: item.tab } : {}}
                 className={cn(
-                  "flex-1 rounded-md px-3 py-2 text-center text-xs font-medium",
+                  "shrink-0 rounded-md px-3 py-2 text-center text-xs font-medium",
                   active ? "bg-accent text-accent-foreground" : "text-muted-foreground",
                 )}
               >
