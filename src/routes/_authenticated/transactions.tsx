@@ -46,6 +46,8 @@ type Tx = {
 };
 
 function TransactionsPage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Tx | null>(null);
