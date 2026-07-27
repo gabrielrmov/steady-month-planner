@@ -117,9 +117,9 @@ function Landing() {
             </div>
           ))}
         </section>
-      </main>
 
         <section className="pb-20">
+
           <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-[var(--shadow-card)]">
             <h2 className="text-2xl font-bold tracking-tight">Comece grátis, evolua quando precisar</h2>
             <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
