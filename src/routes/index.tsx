@@ -3,8 +3,26 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, LineChart, ListChecks, Wallet } from "lucide-react";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Finlist — Organize as contas do mês sem planilha" },
+      {
+        name: "description",
+        content:
+          "Checklist mensal de contas a pagar e receber, cartões, parcelas e dashboard de fluxo de caixa. Comece grátis.",
+      },
+      { property: "og:title", content: "Finlist — Organize as contas do mês sem planilha" },
+      {
+        property: "og:description",
+        content: "Checklist mensal, cartões, parcelas e dashboard de fluxo de caixa. Comece grátis.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Landing,
 });
+
 
 function Landing() {
   return (
@@ -21,6 +39,9 @@ function Landing() {
             <span className="text-lg font-bold tracking-tight">Finlist</span>
           </div>
           <div className="flex items-center gap-2">
+            <Link to="/pricing">
+              <Button variant="ghost" size="sm">Planos</Button>
+            </Link>
             <Link to="/auth">
               <Button variant="ghost" size="sm">Entrar</Button>
             </Link>
@@ -28,6 +49,7 @@ function Landing() {
               <Button size="sm">Começar grátis</Button>
             </Link>
           </div>
+
         </div>
       </header>
 
@@ -95,10 +117,31 @@ function Landing() {
             </div>
           ))}
         </section>
+
+        <section className="pb-20">
+
+          <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-[var(--shadow-card)]">
+            <h2 className="text-2xl font-bold tracking-tight">Comece grátis, evolua quando precisar</h2>
+            <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
+              O plano gratuito já organiza seu mês inteiro. O Pro libera relatórios avançados,
+              cartões ilimitados e exportação dos seus dados.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link to="/auth">
+                <Button size="lg">Criar conta grátis</Button>
+              </Link>
+              <Link to="/pricing">
+                <Button size="lg" variant="outline">Ver planos</Button>
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
 
       <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Finlist
+        © {new Date().getFullYear()} Finlist ·{" "}
+        <Link to="/pricing" className="underline underline-offset-4">Planos</Link>
+
       </footer>
     </div>
   );
