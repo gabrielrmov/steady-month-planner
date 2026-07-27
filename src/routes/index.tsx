@@ -39,6 +39,9 @@ function Landing() {
             <span className="text-lg font-bold tracking-tight">Finlist</span>
           </div>
           <div className="flex items-center gap-2">
+            <Link to="/pricing">
+              <Button variant="ghost" size="sm">Planos</Button>
+            </Link>
             <Link to="/auth">
               <Button variant="ghost" size="sm">Entrar</Button>
             </Link>
@@ -46,6 +49,7 @@ function Landing() {
               <Button size="sm">Começar grátis</Button>
             </Link>
           </div>
+
         </div>
       </header>
 
