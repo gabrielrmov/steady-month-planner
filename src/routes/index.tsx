@@ -3,8 +3,26 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, LineChart, ListChecks, Wallet } from "lucide-react";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Finlist — Organize as contas do mês sem planilha" },
+      {
+        name: "description",
+        content:
+          "Checklist mensal de contas a pagar e receber, cartões, parcelas e dashboard de fluxo de caixa. Comece grátis.",
+      },
+      { property: "og:title", content: "Finlist — Organize as contas do mês sem planilha" },
+      {
+        property: "og:description",
+        content: "Checklist mensal, cartões, parcelas e dashboard de fluxo de caixa. Comece grátis.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Landing,
 });
+
 
 function Landing() {
   return (
