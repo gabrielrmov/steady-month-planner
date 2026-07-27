@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, ListChecks, LogOut, Wallet, Tag, CreditCard, CalendarDays, Hourglass, ArrowDownCircle, Zap } from "lucide-react";
+import { LayoutDashboard, ListChecks, LogOut, Wallet, Tag, CreditCard, CalendarDays, Hourglass, ArrowDownCircle, Zap, BarChart3, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,11 @@ const nav = [
   { to: "/calendar", label: "Calendário", icon: CalendarDays, tab: undefined },
   { to: "/cards", label: "Cartões", icon: CreditCard, tab: undefined },
   { to: "/installments", label: "Parcelas", icon: Hourglass, tab: undefined },
+  { to: "/reports", label: "Relatórios", icon: BarChart3, tab: undefined },
   { to: "/categories", label: "Categorias", icon: Tag, tab: undefined },
+  { to: "/settings", label: "Configurações", icon: Settings, tab: undefined },
 ] as const;
+
 
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
