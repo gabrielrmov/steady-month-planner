@@ -119,8 +119,29 @@ function Landing() {
         </section>
       </main>
 
+        <section className="pb-20">
+          <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-[var(--shadow-card)]">
+            <h2 className="text-2xl font-bold tracking-tight">Comece grátis, evolua quando precisar</h2>
+            <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
+              O plano gratuito já organiza seu mês inteiro. O Pro libera relatórios avançados,
+              cartões ilimitados e exportação dos seus dados.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link to="/auth">
+                <Button size="lg">Criar conta grátis</Button>
+              </Link>
+              <Link to="/pricing">
+                <Button size="lg" variant="outline">Ver planos</Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+
       <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Finlist
+        © {new Date().getFullYear()} Finlist ·{" "}
+        <Link to="/pricing" className="underline underline-offset-4">Planos</Link>
+
       </footer>
     </div>
   );
