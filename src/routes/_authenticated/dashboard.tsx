@@ -138,6 +138,33 @@ function Dashboard() {
         />
       </div>
 
+      {alerts.length > 0 && (
+        <Card className="border-warning/40 p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <BellRing className="h-4 w-4 text-warning-foreground" />
+            <h2 className="font-semibold">Alertas de vencimento</h2>
+          </div>
+          <ul className="space-y-2">
+            {alerts.slice(0, 6).map((t) => {
+              const days = differenceInCalendarDays(new Date(t.due_date + "T00:00:00"), today);
+              const label =
+                days < 0 ? `Atrasada há ${Math.abs(days)} dia(s)` : days === 0 ? "Vence hoje" : `Vence em ${days} dia(s)`;
+              return (
+                <li key={t.id} className="flex items-center justify-between gap-3 text-sm">
+                  <span className="truncate">{t.description}</span>
+                  <span className="flex shrink-0 items-center gap-3">
+                    <span className={days < 0 ? "text-destructive" : "text-muted-foreground"}>{label}</span>
+                    <span className="font-semibold">{brl(Number(t.amount))}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+      )}
+
+
+
       <Card className="p-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
