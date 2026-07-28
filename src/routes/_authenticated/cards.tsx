@@ -160,6 +160,13 @@ function CardsPage() {
                 {c.due_day ? ` · Vence dia ${c.due_day}` : ""}
                 {c.credit_limit ? ` · Limite ${Number(c.credit_limit).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}` : ""}
               </p>
+              <p className="mt-1 text-xs">
+                Fatura de <span className="capitalize">{format(currentInvoice, "MMMM", { locale: ptBR })}</span>:{" "}
+                <span className="font-semibold">
+                  {invoiceTotal(c).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                </span>
+              </p>
+
             </div>
             <Button variant="ghost" size="icon" onClick={() => del.mutate(c.id)}>
               <Trash2 className="h-4 w-4 text-muted-foreground" />
