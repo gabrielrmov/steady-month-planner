@@ -74,9 +74,21 @@ function Dashboard() {
   const expensePending = expenseTotal - expensePaid;
   const balance = incomeTotal - expenseTotal;
 
-  const overdue = txs.filter(
-    (t) => t.status === "pending" && t.type === "expense" && new Date(t.due_date) < new Date(new Date().toDateString()),
-  ).length;
+  const today = new Date(new Date().toDateString());
+  const overdueList = txs.filter(
+    (t) => t.status === "pending" && t.type === "expense" && new Date(t.due_date + "T00:00:00") < today,
+  );
+  const overdue = overdueList.length;
+  const upcoming = txs
+    .filter((t) => {
+      if (t.status !== "pending" || t.type !== "expense") return false;
+      const d = differenceInCalendarDays(new Date(t.due_date + "T00:00:00"), today);
+      return d >= 0 && d <= 7;
+    })
+    .sort((a, b) => a.due_date.localeCompare(b.due_date));
+  const alerts = [...overdueList, ...upcoming];
+
+
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
