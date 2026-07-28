@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTransactionsRouteImport } from './routes/_authenticated/transactions'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedRulesRouteImport } from './routes/_authenticated/rules'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedInstallmentsRouteImport } from './routes/_authenticated/installments'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -50,6 +51,11 @@ const AuthenticatedTransactionsRoute =
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRulesRoute = AuthenticatedRulesRouteImport.update({
+  id: '/rules',
+  path: '/rules',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/installments': typeof AuthenticatedInstallmentsRoute
   '/reports': typeof AuthenticatedReportsRoute
+  '/rules': typeof AuthenticatedRulesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
 }
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/installments': typeof AuthenticatedInstallmentsRoute
   '/reports': typeof AuthenticatedReportsRoute
+  '/rules': typeof AuthenticatedRulesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
 }
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/installments': typeof AuthenticatedInstallmentsRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
+  '/_authenticated/rules': typeof AuthenticatedRulesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
 }
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/installments'
     | '/reports'
+    | '/rules'
     | '/settings'
     | '/transactions'
   fileRoutesByTo: FileRoutesByTo
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/installments'
     | '/reports'
+    | '/rules'
     | '/settings'
     | '/transactions'
   id:
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/installments'
     | '/_authenticated/reports'
+    | '/_authenticated/rules'
     | '/_authenticated/settings'
     | '/_authenticated/transactions'
   fileRoutesById: FileRoutesById
@@ -219,6 +231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/rules': {
+      id: '/_authenticated/rules'
+      path: '/rules'
+      fullPath: '/rules'
+      preLoaderRoute: typeof AuthenticatedRulesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/reports': {
       id: '/_authenticated/reports'
       path: '/reports'
@@ -271,6 +290,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedInstallmentsRoute: typeof AuthenticatedInstallmentsRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
+  AuthenticatedRulesRoute: typeof AuthenticatedRulesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTransactionsRoute: typeof AuthenticatedTransactionsRoute
 }
@@ -282,6 +302,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedInstallmentsRoute: AuthenticatedInstallmentsRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
+  AuthenticatedRulesRoute: AuthenticatedRulesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
 }
