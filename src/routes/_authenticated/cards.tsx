@@ -8,6 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { CreditCard, Plus, Trash2 } from "lucide-react";
+import { startOfMonth, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { invoiceMonthFor } from "@/lib/automation";
+
 
 export const Route = createFileRoute("/_authenticated/cards")({
   component: CardsPage,
@@ -31,6 +35,30 @@ function CardsPage() {
       return data ?? [];
     },
   });
+
+  const { data: cardTxs = [] } = useQuery({
+    queryKey: ["card-invoices"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("id, amount, due_date, card_id, payment_method, status")
+        .eq("payment_method", "card");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const currentInvoice = startOfMonth(new Date());
+  const invoiceTotal = (card: any) =>
+    cardTxs
+      .filter(
+        (t: any) =>
+          t.card_id === card.id &&
+          invoiceMonthFor(new Date(t.due_date + "T12:00:00"), card.closing_day).getTime() ===
+            currentInvoice.getTime(),
+      )
+      .reduce((s: number, t: any) => s + Number(t.amount), 0);
+
 
   const add = useMutation({
     mutationFn: async () => {
@@ -132,6 +160,13 @@ function CardsPage() {
                 {c.due_day ? ` · Vence dia ${c.due_day}` : ""}
                 {c.credit_limit ? ` · Limite ${Number(c.credit_limit).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}` : ""}
               </p>
+              <p className="mt-1 text-xs">
+                Fatura de <span className="capitalize">{format(currentInvoice, "MMMM", { locale: ptBR })}</span>:{" "}
+                <span className="font-semibold">
+                  {invoiceTotal(c).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                </span>
+              </p>
+
             </div>
             <Button variant="ghost" size="icon" onClick={() => del.mutate(c.id)}>
               <Trash2 className="h-4 w-4 text-muted-foreground" />

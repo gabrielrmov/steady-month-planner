@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
+import { format, startOfMonth, endOfMonth, addMonths, subMonths, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ArrowDownCircle, ArrowUpCircle, ChevronLeft, ChevronRight, Wallet, AlertCircle } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, ChevronLeft, ChevronRight, Wallet, AlertCircle, BellRing } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { ensureRecurringForMonth } from "@/lib/automation";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -21,6 +23,20 @@ function Dashboard() {
   const from = format(month, "yyyy-MM-dd");
   const to = format(endOfMonth(month), "yyyy-MM-dd");
   const qc = useQueryClient();
+
+  // Gera automaticamente as contas recorrentes do mês visualizado
+  const generated = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (generated.current.has(from)) return;
+    generated.current.add(from);
+    ensureRecurringForMonth(month).then((n) => {
+      if (n > 0) {
+        qc.invalidateQueries({ queryKey: ["tx"] });
+        toast.success(`${n} contas recorrentes geradas para este mês`);
+      }
+    });
+  }, [from]);
+
 
   const { data: txs = [], isLoading } = useQuery({
     queryKey: ["tx", from, to],
@@ -58,9 +74,21 @@ function Dashboard() {
   const expensePending = expenseTotal - expensePaid;
   const balance = incomeTotal - expenseTotal;
 
-  const overdue = txs.filter(
-    (t) => t.status === "pending" && t.type === "expense" && new Date(t.due_date) < new Date(new Date().toDateString()),
-  ).length;
+  const today = new Date(new Date().toDateString());
+  const overdueList = txs.filter(
+    (t) => t.status === "pending" && t.type === "expense" && new Date(t.due_date + "T00:00:00") < today,
+  );
+  const overdue = overdueList.length;
+  const upcoming = txs
+    .filter((t) => {
+      if (t.status !== "pending" || t.type !== "expense") return false;
+      const d = differenceInCalendarDays(new Date(t.due_date + "T00:00:00"), today);
+      return d >= 0 && d <= 7;
+    })
+    .sort((a, b) => a.due_date.localeCompare(b.due_date));
+  const alerts = [...overdueList, ...upcoming];
+
+
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -109,6 +137,33 @@ function Dashboard() {
           subtitle={overdue > 0 ? `${overdue} em atraso` : "em dia"}
         />
       </div>
+
+      {alerts.length > 0 && (
+        <Card className="border-warning/40 p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <BellRing className="h-4 w-4 text-warning-foreground" />
+            <h2 className="font-semibold">Alertas de vencimento</h2>
+          </div>
+          <ul className="space-y-2">
+            {alerts.slice(0, 6).map((t) => {
+              const days = differenceInCalendarDays(new Date(t.due_date + "T00:00:00"), today);
+              const label =
+                days < 0 ? `Atrasada há ${Math.abs(days)} dia(s)` : days === 0 ? "Vence hoje" : `Vence em ${days} dia(s)`;
+              return (
+                <li key={t.id} className="flex items-center justify-between gap-3 text-sm">
+                  <span className="truncate">{t.description}</span>
+                  <span className="flex shrink-0 items-center gap-3">
+                    <span className={days < 0 ? "text-destructive" : "text-muted-foreground"}>{label}</span>
+                    <span className="font-semibold">{brl(Number(t.amount))}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+      )}
+
+
 
       <Card className="p-6">
         <div className="mb-4 flex items-center justify-between">
