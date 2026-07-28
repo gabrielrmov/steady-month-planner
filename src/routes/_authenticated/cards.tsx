@@ -32,6 +32,30 @@ function CardsPage() {
     },
   });
 
+  const { data: cardTxs = [] } = useQuery({
+    queryKey: ["card-invoices"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("id, amount, due_date, card_id, payment_method, status")
+        .eq("payment_method", "card");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const currentInvoice = startOfMonth(new Date());
+  const invoiceTotal = (card: any) =>
+    cardTxs
+      .filter(
+        (t: any) =>
+          t.card_id === card.id &&
+          invoiceMonthFor(new Date(t.due_date + "T12:00:00"), card.closing_day).getTime() ===
+            currentInvoice.getTime(),
+      )
+      .reduce((s: number, t: any) => s + Number(t.amount), 0);
+
+
   const add = useMutation({
     mutationFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
