@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      bank_connections: {
+        Row: {
+          created_at: string
+          external_item_id: string | null
+          id: string
+          institution_name: string
+          last_error: string | null
+          last_synced_at: string | null
+          provider: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          external_item_id?: string | null
+          id?: string
+          institution_name: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          provider?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          external_item_id?: string | null
+          id?: string
+          institution_name?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          provider?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       cards: {
         Row: {
           closing_day: number | null
@@ -77,6 +116,83 @@ export type Database = {
         }
         Relationships: []
       }
+      category_rules: {
+        Row: {
+          applies_to: string
+          category_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          match_type: string
+          pattern: string
+          priority: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          applies_to?: string
+          category_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          match_type?: string
+          pattern: string
+          priority?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          applies_to?: string
+          category_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          match_type?: string
+          pattern?: string
+          priority?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "category_rules_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_batches: {
+        Row: {
+          created_at: string
+          file_name: string | null
+          id: string
+          imported_count: number
+          skipped_count: number
+          source: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name?: string | null
+          id?: string
+          imported_count?: number
+          skipped_count?: number
+          source?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string | null
+          id?: string
+          imported_count?: number
+          skipped_count?: number
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -109,14 +225,20 @@ export type Database = {
           created_at: string
           description: string
           due_date: string
+          external_id: string | null
+          fingerprint: string | null
           id: string
+          import_batch_id: string | null
           installment_number: number | null
           installment_total: number | null
+          invoice_month: string | null
           is_recurring: boolean
           notes: string | null
           paid_at: string | null
           payment_method: string
           purchase_group_id: string | null
+          recurrence_day: number | null
+          source: string
           status: string
           type: string
           updated_at: string
@@ -129,14 +251,20 @@ export type Database = {
           created_at?: string
           description: string
           due_date: string
+          external_id?: string | null
+          fingerprint?: string | null
           id?: string
+          import_batch_id?: string | null
           installment_number?: number | null
           installment_total?: number | null
+          invoice_month?: string | null
           is_recurring?: boolean
           notes?: string | null
           paid_at?: string | null
           payment_method?: string
           purchase_group_id?: string | null
+          recurrence_day?: number | null
+          source?: string
           status?: string
           type: string
           updated_at?: string
@@ -149,14 +277,20 @@ export type Database = {
           created_at?: string
           description?: string
           due_date?: string
+          external_id?: string | null
+          fingerprint?: string | null
           id?: string
+          import_batch_id?: string | null
           installment_number?: number | null
           installment_total?: number | null
+          invoice_month?: string | null
           is_recurring?: boolean
           notes?: string | null
           paid_at?: string | null
           payment_method?: string
           purchase_group_id?: string | null
+          recurrence_day?: number | null
+          source?: string
           status?: string
           type?: string
           updated_at?: string
@@ -175,6 +309,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
             referencedColumns: ["id"]
           },
         ]
