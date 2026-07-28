@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
+import { format, startOfMonth, endOfMonth, addMonths, subMonths, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ArrowDownCircle, ArrowUpCircle, ChevronLeft, ChevronRight, Wallet, AlertCircle } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, ChevronLeft, ChevronRight, Wallet, AlertCircle, BellRing } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { ensureRecurringForMonth } from "@/lib/automation";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -21,6 +23,20 @@ function Dashboard() {
   const from = format(month, "yyyy-MM-dd");
   const to = format(endOfMonth(month), "yyyy-MM-dd");
   const qc = useQueryClient();
+
+  // Gera automaticamente as contas recorrentes do mês visualizado
+  const generated = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (generated.current.has(from)) return;
+    generated.current.add(from);
+    ensureRecurringForMonth(month).then((n) => {
+      if (n > 0) {
+        qc.invalidateQueries({ queryKey: ["tx"] });
+        toast.success(`${n} contas recorrentes geradas para este mês`);
+      }
+    });
+  }, [from]);
+
 
   const { data: txs = [], isLoading } = useQuery({
     queryKey: ["tx", from, to],
