@@ -33,7 +33,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 const transactionSubItems = [
   { to: "/transactions", label: "Recorrentes", tab: undefined, icon: ListChecks },
