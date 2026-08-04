@@ -61,7 +61,11 @@ function useSubscription() {
         .eq("user_id", uid)
         .maybeSingle();
       if (error) throw error;
-      return data ?? { status: "inactive", plan: "free" };
+      return (data ?? { status: "inactive", plan: "free", current_period_end: null }) as {
+        status: string;
+        plan: string;
+        current_period_end: string | null;
+      };
     },
   });
 }
