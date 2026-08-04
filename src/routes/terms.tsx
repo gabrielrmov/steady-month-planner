@@ -12,8 +12,10 @@ export const Route = createFileRoute("/terms")({
       { property: "og:title", content: "Termos de uso | Finlist" },
       { property: "og:description", content: "Termos de uso do Finlist." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://steady-month-planner.lovable.app/terms" },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://steady-month-planner.lovable.app/terms" }],
   }),
   component: TermsPage,
 });

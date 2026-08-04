@@ -12,8 +12,10 @@ export const Route = createFileRoute("/privacy")({
       { property: "og:title", content: "Privacidade | Finlist" },
       { property: "og:description", content: "Como o Finlist protege seus dados financeiros." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://steady-month-planner.lovable.app/privacy" },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://steady-month-planner.lovable.app/privacy" }],
   }),
   component: PrivacyPage,
 });

@@ -11,6 +11,18 @@ import { toast } from "sonner";
 import { Wallet, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
+  head: () => ({
+    meta: [
+      { title: "Entrar ou criar conta | Finlist" },
+      { name: "description", content: "Acesse o Finlist para organizar contas a pagar, receber, cartões e parcelas do mês." },
+      { property: "og:title", content: "Entrar ou criar conta | Finlist" },
+      { property: "og:description", content: "Acesse o Finlist e organize suas contas do mês." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://steady-month-planner.lovable.app/auth" },
+      { name: "twitter:card", content: "summary" },
+    ],
+    links: [{ rel: "canonical", href: "https://steady-month-planner.lovable.app/auth" }],
+  }),
   component: AuthPage,
 });
 

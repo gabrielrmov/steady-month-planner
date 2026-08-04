@@ -11,6 +11,16 @@ import { toast } from "sonner";
 import { Wallet, ArrowRight, Target, Banknote, Tag, Receipt, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
+  head: () => ({
+    meta: [
+      { title: "Configuração inicial | Finlist" },
+      { name: "description", content: "Configure sua conta Finlist em poucos passos." },
+      { property: "og:title", content: "Configuração inicial | Finlist" },
+      { property: "og:description", content: "Configure sua conta Finlist em poucos passos." },
+      { property: "og:type", content: "website" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: OnboardingPage,
 });
 

@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /transactions
+Disallow: /cards
+Disallow: /calendar
+Disallow: /installments
+Disallow: /categories
+Disallow: /rules
+Disallow: /import
+Disallow: /reports
+Disallow: /settings
+Disallow: /onboarding
+
+Sitemap: https://steady-month-planner.lovable.app/sitemap.xml
