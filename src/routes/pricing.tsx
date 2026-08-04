@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, Wallet } from "lucide-react";
+import { Check, Wallet, Sparkles, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -36,8 +36,10 @@ const plans = [
       "Até 2 cartões",
       "Calendário financeiro",
       "Categorias personalizadas",
+      "Regras de categorização",
     ],
     cta: "Começar grátis",
+    href: "/auth",
     highlight: false,
   },
   {
@@ -54,14 +56,34 @@ const plans = [
       "Suporte prioritário",
     ],
     cta: "Assinar o Pro",
+    href: "/auth?plan=pro",
     highlight: true,
+  },
+];
+
+const faqs = [
+  {
+    q: "Posso cancelar quando quiser?",
+    a: "Sim. O Pro é mensal e o cancelamento é imediato, sem multa.",
+  },
+  {
+    q: "Meus dados ficam salvos se eu voltar para o gratuito?",
+    a: "Ficam. Você continua com acesso aos lançamentos, apenas os recursos Pro são desativados.",
+  },
+  {
+    q: "Quais formas de pagamento são aceitas?",
+    a: "Aceitamos cartão de crédito e outros métodos disponíveis na plataforma de pagamentos.",
+  },
+  {
+    q: "O plano Pro é para uma pessoa só?",
+    a: "Sim, cada assinatura é vinculada a uma única conta. Em breve teremos planos para famílias.",
   },
 ];
 
 function PricingPage() {
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
+      <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link to="/" className="flex items-center gap-2">
             <div
@@ -70,7 +92,7 @@ function PricingPage() {
             >
               <Wallet className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold tracking-tight">Finlist</span>
+            <span className="text-lg font-bold tracking-tight text-foreground">Finlist</span>
           </Link>
           <Link to="/auth">
             <Button size="sm">Entrar</Button>
@@ -80,9 +102,13 @@ function PricingPage() {
 
       <main className="mx-auto max-w-5xl px-6 py-16">
         <div className="mx-auto max-w-2xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight md:text-5xl">Planos simples, sem surpresa</h1>
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            Planos simples, sem surpresa
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight md:text-5xl">Escolha o plano ideal para você</h1>
           <p className="mt-4 text-muted-foreground">
-            Comece de graça hoje e migre para o Pro quando quiser relatórios mais profundos.
+            Comece de graça hoje e migre para o Pro quando quiser relatórios mais profundos e recursos avançados.
           </p>
         </div>
 
@@ -91,7 +117,7 @@ function PricingPage() {
             <Card
               key={p.name}
               className={`relative p-6 shadow-[var(--shadow-card)] ${
-                p.highlight ? "border-primary shadow-[var(--shadow-elegant)]" : ""
+                p.highlight ? "border-primary/50 bg-card shadow-[var(--shadow-elegant)]" : "border-border/60 bg-card"
               }`}
             >
               {p.highlight && (
@@ -99,23 +125,24 @@ function PricingPage() {
                   Mais popular
                 </span>
               )}
-              <h2 className="text-lg font-semibold">{p.name}</h2>
+              <h2 className="text-lg font-semibold text-foreground">{p.name}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{p.desc}</p>
               <div className="mt-5 flex items-baseline gap-2">
-                <span className="text-4xl font-bold tracking-tight">{p.price}</span>
+                <span className="text-4xl font-bold tracking-tight text-foreground">{p.price}</span>
                 <span className="text-sm text-muted-foreground">{p.period}</span>
               </div>
               <ul className="mt-6 space-y-2">
                 {p.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    {f}
+                    <span className="text-muted-foreground">{f}</span>
                   </li>
                 ))}
               </ul>
-              <Link to="/auth" className="mt-6 block">
+              <Link to={p.href} className="mt-6 block">
                 <Button className="w-full" variant={p.highlight ? "default" : "outline"}>
                   {p.cta}
+                  {p.highlight && <ArrowRight className="ml-2 h-4 w-4" />}
                 </Button>
               </Link>
             </Card>
@@ -123,33 +150,32 @@ function PricingPage() {
         </div>
 
         <section className="mt-16">
-          <h2 className="text-center text-xl font-semibold">Perguntas frequentes</h2>
+          <h2 className="text-center text-2xl font-semibold text-foreground">Perguntas frequentes</h2>
           <div className="mx-auto mt-6 max-w-2xl space-y-4">
-            {[
-              {
-                q: "Posso cancelar quando quiser?",
-                a: "Sim. O Pro é mensal e o cancelamento é imediato, sem multa.",
-              },
-              {
-                q: "Meus dados ficam salvos se eu voltar para o gratuito?",
-                a: "Ficam. Você continua com acesso aos lançamentos, apenas os recursos Pro são desativados.",
-              },
-              {
-                q: "O Finlist se conecta ao meu banco?",
-                a: "Ainda não. Os lançamentos são cadastrados por você, o que mantém tudo simples e privado.",
-              },
-            ].map((f) => (
-              <div key={f.q} className="rounded-xl border border-border bg-card p-5">
-                <h3 className="font-medium">{f.q}</h3>
+            {faqs.map((f) => (
+              <Card key={f.q} className="border-border/60 bg-card p-5">
+                <h3 className="font-medium text-foreground">{f.q}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{f.a}</p>
-              </div>
+              </Card>
             ))}
           </div>
         </section>
+
+        <div className="mt-16 rounded-2xl border border-border bg-card p-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            Ainda tem dúvidas? Entre em contato conosco pelo email{" "}
+            <a href="mailto:contato@finlist.app" className="text-primary hover:underline">
+              contato@finlist.app
+            </a>
+          </p>
+        </div>
       </main>
 
-      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Finlist
+      <footer className="border-t border-border px-6 py-6 text-center text-xs text-muted-foreground">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 md:flex-row">
+          <p>© {new Date().getFullYear()} Finlist</p>
+          <Link to="/" className="hover:text-foreground">Voltar para o início</Link>
+        </div>
       </footer>
     </div>
   );
