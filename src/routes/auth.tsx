@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Wallet } from "lucide-react";
+import { Wallet, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -16,6 +16,8 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const search = Route.useSearch<{ plan?: string }>();
+  const isProIntent = search.plan === "pro";
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +35,7 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Bem-vindo!");
+    toast.success("Bem-vindo de volta!");
     navigate({ to: "/dashboard" });
   };
 
@@ -50,8 +52,8 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Conta criada!");
-    navigate({ to: "/dashboard" });
+    toast.success("Conta criada! Vamos configurar tudo.");
+    navigate({ to: "/onboarding", search: isProIntent ? { plan: "pro" } : {} });
   };
 
   const handleGoogle = async () => {
@@ -60,11 +62,16 @@ function AuthPage() {
     });
     if (result.error) return toast.error(result.error.message ?? "Falha no login");
     if (result.redirected) return;
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/onboarding", search: isProIntent ? { plan: "pro" } : {} });
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12">
+      <div className="absolute inset-0 -z-10 opacity-30">
+        <div className="absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-indigo-500/10 blur-3xl" />
+      </div>
+
       <div className="w-full max-w-md">
         <Link to="/" className="mb-8 flex items-center justify-center gap-2">
           <div
@@ -73,10 +80,21 @@ function AuthPage() {
           >
             <Wallet className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold tracking-tight">Finlist</span>
+          <span className="text-xl font-bold tracking-tight text-foreground">Finlist</span>
         </Link>
 
-        <Card className="p-6 shadow-[var(--shadow-card)]">
+        <Card className="border-border/60 bg-card p-6 shadow-[var(--shadow-card)]">
+          <div className="mb-6 text-center">
+            <h1 className="text-xl font-semibold text-foreground">
+              {isProIntent ? "Criar conta e assinar o Pro" : "Entre na sua conta"}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {isProIntent
+                ? "Crie sua conta para começar a usar o Finlist Pro."
+                : "Organize suas contas de forma simples e eficiente."}
+            </p>
+          </div>
+
           <Tabs defaultValue="signin">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Entrar</TabsTrigger>
@@ -95,6 +113,7 @@ function AuthPage() {
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Entrando..." : "Entrar"}
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </form>
             </TabsContent>
@@ -114,7 +133,8 @@ function AuthPage() {
                   <Input id="pw-up" type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Criando..." : "Criar conta"}
+                  {loading ? "Criando..." : "Criar conta grátis"}
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </form>
             </TabsContent>
@@ -133,6 +153,10 @@ function AuthPage() {
             Continuar com Google
           </Button>
         </Card>
+
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          Ao criar uma conta, você concorda com os nossos termos de uso.
+        </p>
       </div>
     </div>
   );
