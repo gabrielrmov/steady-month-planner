@@ -25,10 +25,20 @@ function AuthPage() {
 
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard" });
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("onboarding_completed")
+        .eq("id", data.user.id)
+        .maybeSingle();
+      if (profile?.onboarding_completed) {
+        navigate({ to: "/dashboard" });
+      } else {
+        navigate({ to: "/onboarding", search: isProIntent ? { plan: "pro" } : {} });
+      }
     });
-  }, [navigate]);
+  }, [navigate, isProIntent]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
