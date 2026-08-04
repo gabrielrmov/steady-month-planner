@@ -1,7 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -17,7 +19,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { TrendingDown, TrendingUp, PiggyBank } from "lucide-react";
+import { TrendingDown, TrendingUp, PiggyBank, Crown, ArrowRight, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/reports")({
   head: () => ({
@@ -50,7 +52,28 @@ type Tx = {
   categories: { name: string; color: string } | null;
 };
 
+function useSubscription() {
+  return useQuery({
+    queryKey: ["subscription"],
+    queryFn: async () => {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) return null;
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("status, plan")
+        .eq("user_id", uid)
+        .maybeSingle();
+      if (error) throw error;
+      return data ?? { status: "inactive", plan: "free" };
+    },
+  });
+}
+
 function ReportsPage() {
+  const { data: subscription } = useSubscription();
+  const isPro = subscription?.plan === "pro" && subscription?.status === "active";
+
   const monthsBack = 6;
   const start = format(startOfMonth(subMonths(new Date(), monthsBack - 1)), "yyyy-MM-dd");
   const end = format(endOfMonth(new Date()), "yyyy-MM-dd");
@@ -108,14 +131,44 @@ function ReportsPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Relatórios</h1>
-        <p className="text-sm text-muted-foreground">Últimos {monthsBack} meses</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Relatórios</h1>
+          <p className="text-sm text-muted-foreground">Últimos {monthsBack} meses</p>
+        </div>
+        <Badge variant={isPro ? "default" : "secondary"}>
+          {isPro ? "Pro" : "Gratuito"}
+        </Badge>
       </div>
+
+      {!isPro && (
+        <Card className="border-primary/20 bg-primary/5 p-5">
+          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+            <div className="flex items-start gap-3">
+              <div className="rounded-full bg-primary/10 p-2 text-primary">
+                <Lock className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="font-semibold">Relatórios avançados são um recurso Pro</h2>
+                <p className="text-sm text-muted-foreground">
+                  No plano gratuito você vê apenas o resumo do mês atual. Faça upgrade para desbloquear gráficos de
+                  evolução, gastos por categoria e exportação CSV.
+                </p>
+              </div>
+            </div>
+            <Button asChild>
+              <Link to="/pricing">
+                Fazer upgrade
+                <Crown className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </Card>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         {cards.map((c) => (
-          <Card key={c.label} className="p-5 shadow-[var(--shadow-card)]">
+          <Card key={c.label} className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{c.label}</span>
               <c.icon className={`h-4 w-4 ${c.tone}`} />
@@ -125,7 +178,7 @@ function ReportsPage() {
         ))}
       </div>
 
-      <Card className="p-5 shadow-[var(--shadow-card)]">
+      <Card className={`border-border/60 bg-card p-5 shadow-[var(--shadow-card)] ${!isPro ? "opacity-60" : ""}`}>
         <h2 className="mb-4 font-semibold">Evolução mensal</h2>
         <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
@@ -147,7 +200,7 @@ function ReportsPage() {
         </div>
       </Card>
 
-      <Card className="p-5 shadow-[var(--shadow-card)]">
+      <Card className={`border-border/60 bg-card p-5 shadow-[var(--shadow-card)] ${!isPro ? "opacity-60" : ""}`}>
         <h2 className="mb-4 font-semibold">Gastos por categoria</h2>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
@@ -181,6 +234,17 @@ function ReportsPage() {
           </div>
         )}
       </Card>
+
+      {!isPro && (
+        <div className="text-center">
+          <Button size="lg" asChild>
+            <Link to="/pricing">
+              Desbloquear relatórios completos
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
