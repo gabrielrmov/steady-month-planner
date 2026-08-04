@@ -21,6 +21,16 @@ import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/calendar")({
+  head: () => ({
+    meta: [
+      { title: "Calendário financeiro | Finlist" },
+      { name: "description", content: "Veja entradas e saídas dia a dia em um calendário mensal." },
+      { property: "og:title", content: "Calendário financeiro | Finlist" },
+      { property: "og:description", content: "Veja entradas e saídas dia a dia em um calendário mensal." },
+      { property: "og:type", content: "website" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: CalendarPage,
 });
 

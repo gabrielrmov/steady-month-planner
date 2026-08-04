@@ -21,6 +21,16 @@ const tabSchema = z.object({
 });
 
 export const Route = createFileRoute("/_authenticated/transactions")({
+  head: () => ({
+    meta: [
+      { title: "Contas e lançamentos | Finlist" },
+      { name: "description", content: "Gerencie contas recorrentes, esporádicas, cartões e recebimentos em um só lugar." },
+      { property: "og:title", content: "Contas e lançamentos | Finlist" },
+      { property: "og:description", content: "Gerencie contas recorrentes, esporádicas, cartões e recebimentos em um só lugar." },
+      { property: "og:type", content: "website" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: TransactionsPage,
   validateSearch: tabSchema,
 });

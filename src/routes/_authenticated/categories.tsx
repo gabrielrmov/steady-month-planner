@@ -11,6 +11,16 @@ import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/categories")({
+  head: () => ({
+    meta: [
+      { title: "Categorias | Finlist" },
+      { name: "description", content: "Personalize as categorias das suas entradas e saídas." },
+      { property: "og:title", content: "Categorias | Finlist" },
+      { property: "og:description", content: "Personalize as categorias das suas entradas e saídas." },
+      { property: "og:type", content: "website" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: CategoriesPage,
 });
 

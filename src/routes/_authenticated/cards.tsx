@@ -14,6 +14,16 @@ import { ptBR } from "date-fns/locale";
 import { invoiceMonthFor } from "@/lib/automation";
 
 export const Route = createFileRoute("/_authenticated/cards")({
+  head: () => ({
+    meta: [
+      { title: "Cartões de crédito | Finlist" },
+      { name: "description", content: "Cadastre cartões, acompanhe faturas e limites por mês." },
+      { property: "og:title", content: "Cartões de crédito | Finlist" },
+      { property: "og:description", content: "Cadastre cartões, acompanhe faturas e limites por mês." },
+      { property: "og:type", content: "website" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: CardsPage,
 });
 

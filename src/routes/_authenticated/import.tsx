@@ -13,6 +13,16 @@ import { Building2, FileUp, Landmark, Trash2, Upload, Crown, Lock } from "lucide
 import { categoryForDescription, fingerprint, parseStatement, type CategoryRule, type ParsedTx } from "@/lib/automation";
 
 export const Route = createFileRoute("/_authenticated/import")({
+  head: () => ({
+    meta: [
+      { title: "Importar extratos e Open Finance | Finlist" },
+      { name: "description", content: "Importe OFX e CSV com deduplicação automática e prepare conexões bancárias." },
+      { property: "og:title", content: "Importar extratos e Open Finance | Finlist" },
+      { property: "og:description", content: "Importe OFX e CSV com deduplicação automática e prepare conexões bancárias." },
+      { property: "og:type", content: "website" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: ImportPage,
 });
 

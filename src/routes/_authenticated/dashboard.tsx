@@ -12,6 +12,16 @@ import { ensureRecurringForMonth } from "@/lib/automation";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
+  head: () => ({
+    meta: [
+      { title: "Dashboard financeiro | Finlist" },
+      { name: "description", content: "Visão geral do mês: quanto entra, quanto sai e o checklist de contas a pagar." },
+      { property: "og:title", content: "Dashboard financeiro | Finlist" },
+      { property: "og:description", content: "Visão geral do mês: quanto entra, quanto sai e o checklist de contas a pagar." },
+      { property: "og:type", content: "website" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: Dashboard,
 });
 
