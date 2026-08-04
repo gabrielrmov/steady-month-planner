@@ -31,7 +31,26 @@ export const Route = createFileRoute("/")({
         content: "Checklist mensal, cartões, parcelas e dashboard de fluxo de caixa. Comece grátis.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://steady-month-planner.lovable.app/" },
       { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "canonical", href: "https://steady-month-planner.lovable.app/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "Finlist",
+          applicationCategory: "FinanceApplication",
+          operatingSystem: "Web",
+          url: "https://steady-month-planner.lovable.app/",
+          offers: [
+            { "@type": "Offer", price: "0", priceCurrency: "BRL", name: "Gratuito" },
+            { "@type": "Offer", price: "19", priceCurrency: "BRL", name: "Pro" },
+          ],
+        }),
+      },
     ],
   }),
   component: Landing,
