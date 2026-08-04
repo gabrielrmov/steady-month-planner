@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Building2, FileUp, Landmark, Trash2, Upload } from "lucide-react";
+import { Building2, FileUp, Landmark, Trash2, Upload, Crown, Lock } from "lucide-react";
 import { categoryForDescription, fingerprint, parseStatement, type CategoryRule, type ParsedTx } from "@/lib/automation";
 
 export const Route = createFileRoute("/_authenticated/import")({
@@ -16,6 +17,42 @@ export const Route = createFileRoute("/_authenticated/import")({
 });
 
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const FREE_IMPORT_LIMIT = 3;
+
+function useSubscription() {
+  return useQuery({
+    queryKey: ["subscription"],
+    queryFn: async () => {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) return null;
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("status, plan")
+        .eq("user_id", uid)
+        .maybeSingle();
+      if (error) throw error;
+      return data ?? { status: "inactive", plan: "free" };
+    },
+  });
+}
+
+function useImportCount() {
+  return useQuery({
+    queryKey: ["import-count"],
+    queryFn: async () => {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) return 0;
+      const { count, error } = await supabase
+        .from("import_batches")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", uid);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+}
 
 function ImportPage() {
   const qc = useQueryClient();
@@ -24,6 +61,11 @@ function ImportPage() {
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [cardId, setCardId] = useState<string>("none");
   const [institution, setInstitution] = useState("");
+
+  const { data: subscription } = useSubscription();
+  const isPro = subscription?.plan === "pro" && subscription?.status === "active";
+  const { data: importCount = 0 } = useImportCount();
+  const atImportLimit = !isPro && importCount >= FREE_IMPORT_LIMIT;
 
   const { data: rules = [] } = useQuery({
     queryKey: ["rules"],
@@ -53,6 +95,7 @@ function ImportPage() {
   });
 
   const handleFile = async (file: File) => {
+    if (atImportLimit) return toast.error("Limite de importações do plano gratuito atingido. Faça upgrade para Pro.");
     const text = await file.text();
     const rows = parseStatement(file.name, text);
     setFileName(file.name);
@@ -63,6 +106,7 @@ function ImportPage() {
 
   const importAll = useMutation({
     mutationFn: async () => {
+      if (atImportLimit) throw new Error("Limite de importações do plano gratuito atingido. Faça upgrade para Pro.");
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Sessão expirada");
 
@@ -108,6 +152,7 @@ function ImportPage() {
       setFileName("");
       qc.invalidateQueries({ queryKey: ["tx"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: ["import-count"] });
       toast.success(`${imported} importados${skipped ? `, ${skipped} duplicados ignorados` : ""}`);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -147,14 +192,21 @@ function ImportPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Importar & Open Finance</h1>
-        <p className="text-sm text-muted-foreground">
-          Traga seus lançamentos automaticamente do extrato do banco ou da fatura do cartão.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Importar & Open Finance</h1>
+          <p className="text-sm text-muted-foreground">
+            Traga seus lançamentos automaticamente do extrato do banco ou da fatura do cartão.
+          </p>
+        </div>
+        {!isPro && (
+          <Badge variant="secondary">
+            {importCount}/{FREE_IMPORT_LIMIT} importações no plano gratuito
+          </Badge>
+        )}
       </div>
 
-      <Card className="p-5 shadow-[var(--shadow-card)]">
+      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
         <div className="flex items-center gap-2">
           <FileUp className="h-4 w-4 text-primary" />
           <h2 className="font-semibold">Importar extrato (OFX ou CSV)</h2>
@@ -164,6 +216,29 @@ function ImportPage() {
           suas <Link to="/rules" className="text-primary underline">regras de categorização</Link> são aplicadas.
         </p>
 
+        {atImportLimit && (
+          <div className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <Lock className="mt-0.5 h-5 w-5 text-primary" />
+                <div>
+                  <p className="font-medium">Limite de importações atingido</p>
+                  <p className="text-sm text-muted-foreground">
+                    No plano gratuito você pode importar até {FREE_IMPORT_LIMIT} extratos. Faça upgrade para
+                    importações ilimitadas.
+                  </p>
+                </div>
+              </div>
+              <Button size="sm" asChild>
+                <Link to="/pricing">
+                  Upgrade Pro
+                  <Crown className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        )}
+
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           <div className="md:col-span-1">
             <Label>Arquivo</Label>
@@ -171,6 +246,7 @@ function ImportPage() {
               type="file"
               accept=".ofx,.csv,.txt"
               className="mt-1"
+              disabled={atImportLimit}
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (f) handleFile(f);
@@ -179,7 +255,7 @@ function ImportPage() {
           </div>
           <div>
             <Label>Forma de pagamento</Label>
-            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+            <Select value={paymentMethod} onValueChange={setPaymentMethod} disabled={atImportLimit}>
               <SelectTrigger className="mt-1">
                 <SelectValue />
               </SelectTrigger>
@@ -193,7 +269,7 @@ function ImportPage() {
           {paymentMethod === "card" && (
             <div>
               <Label>Cartão</Label>
-              <Select value={cardId} onValueChange={setCardId}>
+              <Select value={cardId} onValueChange={setCardId} disabled={atImportLimit}>
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Escolher" />
                 </SelectTrigger>
@@ -216,7 +292,7 @@ function ImportPage() {
               <span className="text-muted-foreground">
                 {parsed.length} lançamentos · entradas {brl(totalIn)} · saídas {brl(totalOut)}
               </span>
-              <Button onClick={() => importAll.mutate()} disabled={importAll.isPending}>
+              <Button onClick={() => importAll.mutate()} disabled={importAll.isPending || atImportLimit}>
                 <Upload className="mr-2 h-4 w-4" />
                 {importAll.isPending ? "Importando..." : "Importar tudo"}
               </Button>
@@ -239,7 +315,7 @@ function ImportPage() {
         )}
       </Card>
 
-      <Card className="p-5 shadow-[var(--shadow-card)]">
+      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
         <div className="flex items-center gap-2">
           <Landmark className="h-4 w-4 text-primary" />
           <h2 className="font-semibold">Open Finance (sincronização automática)</h2>

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Download, Sparkles, User } from "lucide-react";
+import { Download, Sparkles, User, Crown, Lock, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -30,13 +30,8 @@ export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
 });
 
-function SettingsPage() {
-  const qc = useQueryClient();
-  const [fullName, setFullName] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [exporting, setExporting] = useState(false);
-
-  const { data: profile } = useQuery({
+function useProfile() {
+  return useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
       const { data: userRes } = await supabase.auth.getUser();
@@ -51,6 +46,38 @@ function SettingsPage() {
       return data;
     },
   });
+}
+
+function useSubscription() {
+  return useQuery({
+    queryKey: ["subscription"],
+    queryFn: async () => {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) return null;
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("status, plan, current_period_end")
+        .eq("user_id", uid)
+        .maybeSingle();
+      if (error) throw error;
+      return (data ?? { status: "inactive", plan: "free", current_period_end: null }) as {
+        status: string;
+        plan: string;
+        current_period_end: string | null;
+      };
+    },
+  });
+}
+
+function SettingsPage() {
+  const qc = useQueryClient();
+  const [fullName, setFullName] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const { data: profile } = useProfile();
+  const { data: subscription } = useSubscription();
+  const isPro = subscription?.plan === "pro" && subscription?.status === "active";
 
   useEffect(() => {
     if (profile?.full_name) setFullName(profile.full_name);
@@ -70,6 +97,7 @@ function SettingsPage() {
   };
 
   const exportCsv = async () => {
+    if (!isPro) return;
     setExporting(true);
     const { data, error } = await supabase
       .from("transactions")
@@ -123,7 +151,7 @@ function SettingsPage() {
         <p className="text-sm text-muted-foreground">Sua conta, plano e dados</p>
       </div>
 
-      <Card className="p-5 shadow-[var(--shadow-card)]">
+      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
         <div className="mb-4 flex items-center gap-2">
           <User className="h-4 w-4 text-muted-foreground" />
           <h2 className="font-semibold">Perfil</h2>
@@ -143,33 +171,59 @@ function SettingsPage() {
         </Button>
       </Card>
 
-      <Card className="p-5 shadow-[var(--shadow-card)]">
+      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-muted-foreground" />
             <h2 className="font-semibold">Plano</h2>
           </div>
-          <Badge variant="secondary">Gratuito</Badge>
+          <Badge variant={isPro ? "default" : "secondary"}>
+            {isPro ? "Pro" : "Gratuito"}
+          </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          Você está no plano gratuito, com lançamentos, cartões e checklist mensal. O plano Pro
-          adiciona relatórios avançados, exportações ilimitadas e histórico completo.
+          {isPro
+            ? "Você está no plano Pro. Aproveite relatórios avançados, exportações e recursos ilimitados."
+            : "Você está no plano gratuito, com lançamentos, cartões e checklist mensal. O plano Pro adiciona relatórios avançados, exportações ilimitadas e histórico completo."}
         </p>
-        <Button className="mt-4" variant="outline" asChild>
-          <a href="/pricing">Ver planos</a>
-        </Button>
+        {isPro && subscription?.current_period_end && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Próxima renovação: {new Date(subscription.current_period_end).toLocaleDateString("pt-BR")}
+          </p>
+        )}
+        <div className="mt-4">
+          {isPro ? (
+            <Button variant="outline" asChild>
+              <Link to="/pricing">Ver detalhes do plano</Link>
+            </Button>
+          ) : (
+            <Button asChild>
+              <Link to="/pricing">
+                Fazer upgrade para Pro
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          )}
+        </div>
       </Card>
 
-      <Card className="p-5 shadow-[var(--shadow-card)]">
+      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
         <div className="mb-4 flex items-center gap-2">
           <Download className="h-4 w-4 text-muted-foreground" />
           <h2 className="font-semibold">Seus dados</h2>
+          {!isPro && (
+            <Badge variant="outline" className="ml-auto gap-1 text-xs">
+              <Lock className="h-3 w-3" />
+              Pro
+            </Badge>
+          )}
         </div>
         <p className="text-sm text-muted-foreground">
           Baixe todos os seus lançamentos em CSV para abrir no Excel ou Google Sheets.
         </p>
-        <Button className="mt-4" variant="outline" onClick={exportCsv} disabled={exporting}>
-          {exporting ? "Gerando..." : "Exportar CSV"}
+        <Button className="mt-4" variant="outline" onClick={exportCsv} disabled={exporting || !isPro}>
+          {exporting ? "Gerando..." : isPro ? "Exportar CSV" : "Upgrade para exportar"}
+          {!isPro && <Crown className="ml-2 h-4 w-4" />}
         </Button>
       </Card>
     </div>

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,18 +6,38 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { CreditCard, Plus, Trash2 } from "lucide-react";
+import { CreditCard, Plus, Trash2, Crown, ArrowRight } from "lucide-react";
 import { startOfMonth, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { invoiceMonthFor } from "@/lib/automation";
-
 
 export const Route = createFileRoute("/_authenticated/cards")({
   component: CardsPage,
 });
 
 const COLORS = ["#2563EB", "#10B981", "#F59E0B", "#EC4899", "#8B5CF6", "#EF4444", "#059669", "#111827"];
+
+const FREE_CARD_LIMIT = 2;
+
+function useSubscription() {
+  return useQuery({
+    queryKey: ["subscription"],
+    queryFn: async () => {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) return null;
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("status, plan")
+        .eq("user_id", uid)
+        .maybeSingle();
+      if (error) throw error;
+      return data ?? { status: "inactive", plan: "free" };
+    },
+  });
+}
 
 function CardsPage() {
   const qc = useQueryClient();
@@ -26,6 +46,9 @@ function CardsPage() {
   const [closingDay, setClosingDay] = useState<string>("");
   const [dueDay, setDueDay] = useState<string>("");
   const [limit, setLimit] = useState<string>("");
+
+  const { data: subscription } = useSubscription();
+  const isPro = subscription?.plan === "pro" && subscription?.status === "active";
 
   const { data: cards = [] } = useQuery({
     queryKey: ["cards"],
@@ -59,9 +82,11 @@ function CardsPage() {
       )
       .reduce((s: number, t: any) => s + Number(t.amount), 0);
 
+  const atLimit = !isPro && cards.length >= FREE_CARD_LIMIT;
 
   const add = useMutation({
     mutationFn: async () => {
+      if (atLimit) throw new Error("Limite do plano gratuito atingido. Faça upgrade para o Pro para adicionar mais cartões.");
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("Sessão expirada");
       const { error } = await supabase.from("cards").insert({
@@ -96,12 +121,19 @@ function CardsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Cartões</h1>
-        <p className="text-sm text-muted-foreground">Cadastre seus cartões para organizar as compras parceladas</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Cartões</h1>
+          <p className="text-sm text-muted-foreground">Cadastre seus cartões para organizar as compras parceladas</p>
+        </div>
+        {!isPro && (
+          <Badge variant="secondary" className="hidden sm:flex">
+            {cards.length}/{FREE_CARD_LIMIT} cartões no plano gratuito
+          </Badge>
+        )}
       </div>
 
-      <Card className="p-5">
+      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
         <form
           onSubmit={(e) => { e.preventDefault(); if (name) add.mutate(); }}
           className="grid gap-3 sm:grid-cols-[1.5fr_repeat(3,1fr)_auto]"
@@ -123,7 +155,7 @@ function CardsPage() {
             <Input id="lm" type="number" step="0.01" placeholder="R$" value={limit} onChange={(e) => setLimit(e.target.value)} />
           </div>
           <div className="flex items-end">
-            <Button type="submit" disabled={!name || add.isPending}>
+            <Button type="submit" disabled={!name || add.isPending || atLimit}>
               <Plus className="mr-1 h-4 w-4" /> Adicionar
             </Button>
           </div>
@@ -140,16 +172,33 @@ function CardsPage() {
             ))}
           </div>
         </form>
+
+        {atLimit && (
+          <div className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-medium text-foreground">Você atingiu o limite do plano gratuito</p>
+                <p className="text-sm text-muted-foreground">Faça upgrade para o Pro e cadastre cartões ilimitados.</p>
+              </div>
+              <Button size="sm" asChild>
+                <Link to="/pricing">
+                  Upgrade Pro
+                  <Crown className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
 
       <div className="grid gap-3 sm:grid-cols-2">
         {cards.length === 0 && (
-          <Card className="p-8 text-center text-sm text-muted-foreground sm:col-span-2">
+          <Card className="border-border/60 bg-card p-8 text-center text-sm text-muted-foreground sm:col-span-2">
             Nenhum cartão cadastrado ainda.
           </Card>
         )}
         {cards.map((c) => (
-          <Card key={c.id} className="flex items-center gap-4 p-4">
+          <Card key={c.id} className="border-border/60 bg-card flex items-center gap-4 p-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg" style={{ backgroundColor: c.color + "22", color: c.color }}>
               <CreditCard className="h-5 w-5" />
             </div>
@@ -166,7 +215,6 @@ function CardsPage() {
                   {invoiceTotal(c).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                 </span>
               </p>
-
             </div>
             <Button variant="ghost" size="icon" onClick={() => del.mutate(c.id)}>
               <Trash2 className="h-4 w-4 text-muted-foreground" />
