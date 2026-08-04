@@ -356,6 +356,8 @@ function Landing() {
           <div className="flex gap-4">
             <Link to="/pricing" className="hover:text-foreground">Planos</Link>
             <Link to="/auth" className="hover:text-foreground">Entrar</Link>
+            <Link to="/terms" className="hover:text-foreground">Termos</Link>
+            <Link to="/privacy" className="hover:text-foreground">Privacidade</Link>
           </div>
           <p>© {new Date().getFullYear()} Finlist. Todos os direitos reservados.</p>
         </div>

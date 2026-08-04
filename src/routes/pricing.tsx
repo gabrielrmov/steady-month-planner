@@ -174,7 +174,11 @@ function PricingPage() {
       <footer className="border-t border-border px-6 py-6 text-center text-xs text-muted-foreground">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 md:flex-row">
           <p>© {new Date().getFullYear()} Finlist</p>
-          <Link to="/" className="hover:text-foreground">Voltar para o início</Link>
+          <div className="flex gap-4">
+            <Link to="/terms" className="hover:text-foreground">Termos</Link>
+            <Link to="/privacy" className="hover:text-foreground">Privacidade</Link>
+            <Link to="/" className="hover:text-foreground">Voltar para o início</Link>
+          </div>
         </div>
       </footer>
     </div>
