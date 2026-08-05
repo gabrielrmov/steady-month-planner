@@ -156,34 +156,39 @@ function SettingsPage() {
             <Sparkles className="h-4 w-4 text-muted-foreground" />
             <h2 className="font-semibold">Plano</h2>
           </div>
-          <Badge variant={isPro ? "default" : "secondary"}>
-            {isPro ? "Pro" : "Gratuito"}
+          <Badge variant={plan.plan === "expired" ? "secondary" : "default"}>
+            {PLAN_LABEL[plan.plan]}
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          {isPro
-            ? "Você está no plano Pro. Aproveite relatórios avançados, exportações e recursos ilimitados."
-            : "Você está no plano gratuito, com lançamentos, cartões e checklist mensal. O plano Pro adiciona relatórios avançados, exportações ilimitadas e histórico completo."}
+          {plan.isTrial
+            ? `Você está no teste grátis de 30 dias, com acesso total (incluindo o painel PJ). Faltam ${plan.trialDaysLeft} dia(s).`
+            : plan.plan === "pfpj"
+              ? "Plano Pessoal + PJ ativo: finanças pessoais, relatórios, exportações e precificação de serviços."
+              : plan.plan === "pf"
+                ? "Plano Pessoal ativo: relatórios, exportações e cartões ilimitados. O painel de precificação PJ é exclusivo do plano Pessoal + PJ."
+                : "Seu teste grátis terminou. Escolha um plano para voltar a usar relatórios, exportações e importações."}
         </p>
-        {isPro && subscription?.current_period_end && (
+        {plan.isTrial && plan.trialEndsAt && (
           <p className="mt-2 text-xs text-muted-foreground">
-            Próxima renovação: {new Date(subscription.current_period_end).toLocaleDateString("pt-BR")}
+            Teste termina em: {plan.trialEndsAt.toLocaleDateString("pt-BR")}
           </p>
         )}
         <div className="mt-4">
-          {isPro ? (
+          {plan.plan === "pfpj" ? (
             <Button variant="outline" asChild>
               <Link to="/pricing">Ver detalhes do plano</Link>
             </Button>
           ) : (
             <Button asChild>
               <Link to="/pricing">
-                Fazer upgrade para Pro
+                {plan.plan === "pf" ? "Adicionar módulo PJ" : "Escolher plano"}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           )}
         </div>
+
       </Card>
 
       <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
