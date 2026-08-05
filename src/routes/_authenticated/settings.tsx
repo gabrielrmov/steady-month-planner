@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePlan, PLAN_LABEL } from "@/lib/plan";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,36 +49,14 @@ function useProfile() {
   });
 }
 
-function useSubscription() {
-  return useQuery({
-    queryKey: ["subscription"],
-    queryFn: async () => {
-      const { data: userRes } = await supabase.auth.getUser();
-      const uid = userRes.user?.id;
-      if (!uid) return null;
-      const { data, error } = await supabase
-        .from("subscriptions")
-        .select("status, plan, current_period_end")
-        .eq("user_id", uid)
-        .maybeSingle();
-      if (error) throw error;
-      return (data ?? { status: "inactive", plan: "free", current_period_end: null }) as {
-        status: string;
-        plan: string;
-        current_period_end: string | null;
-      };
-    },
-  });
-}
-
 function SettingsPage() {
   const qc = useQueryClient();
   const [fullName, setFullName] = useState("");
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const { data: profile } = useProfile();
-  const { data: subscription } = useSubscription();
-  const isPro = subscription?.plan === "pro" && subscription?.status === "active";
+  const plan = usePlan();
+  const isPro = plan.hasAccess;
 
   useEffect(() => {
     if (profile?.full_name) setFullName(profile.full_name);
@@ -177,34 +156,39 @@ function SettingsPage() {
             <Sparkles className="h-4 w-4 text-muted-foreground" />
             <h2 className="font-semibold">Plano</h2>
           </div>
-          <Badge variant={isPro ? "default" : "secondary"}>
-            {isPro ? "Pro" : "Gratuito"}
+          <Badge variant={plan.plan === "expired" ? "secondary" : "default"}>
+            {PLAN_LABEL[plan.plan]}
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          {isPro
-            ? "Você está no plano Pro. Aproveite relatórios avançados, exportações e recursos ilimitados."
-            : "Você está no plano gratuito, com lançamentos, cartões e checklist mensal. O plano Pro adiciona relatórios avançados, exportações ilimitadas e histórico completo."}
+          {plan.isTrial
+            ? `Você está no teste grátis de 30 dias, com acesso total (incluindo o painel PJ). Faltam ${plan.trialDaysLeft} dia(s).`
+            : plan.plan === "pfpj"
+              ? "Plano Pessoal + PJ ativo: finanças pessoais, relatórios, exportações e precificação de serviços."
+              : plan.plan === "pf"
+                ? "Plano Pessoal ativo: relatórios, exportações e cartões ilimitados. O painel de precificação PJ é exclusivo do plano Pessoal + PJ."
+                : "Seu teste grátis terminou. Escolha um plano para voltar a usar relatórios, exportações e importações."}
         </p>
-        {isPro && subscription?.current_period_end && (
+        {plan.isTrial && plan.trialEndsAt && (
           <p className="mt-2 text-xs text-muted-foreground">
-            Próxima renovação: {new Date(subscription.current_period_end).toLocaleDateString("pt-BR")}
+            Teste termina em: {plan.trialEndsAt.toLocaleDateString("pt-BR")}
           </p>
         )}
         <div className="mt-4">
-          {isPro ? (
+          {plan.plan === "pfpj" ? (
             <Button variant="outline" asChild>
               <Link to="/pricing">Ver detalhes do plano</Link>
             </Button>
           ) : (
             <Button asChild>
               <Link to="/pricing">
-                Fazer upgrade para Pro
+                {plan.plan === "pf" ? "Adicionar módulo PJ" : "Escolher plano"}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           )}
         </div>
+
       </Card>
 
       <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
@@ -214,7 +198,7 @@ function SettingsPage() {
           {!isPro && (
             <Badge variant="outline" className="ml-auto gap-1 text-xs">
               <Lock className="h-3 w-3" />
-              Pro
+              Plano pago
             </Badge>
           )}
         </div>
@@ -222,7 +206,7 @@ function SettingsPage() {
           Baixe todos os seus lançamentos em CSV para abrir no Excel ou Google Sheets.
         </p>
         <Button className="mt-4" variant="outline" onClick={exportCsv} disabled={exporting || !isPro}>
-          {exporting ? "Gerando..." : isPro ? "Exportar CSV" : "Upgrade para exportar"}
+          {exporting ? "Gerando..." : isPro ? "Exportar CSV" : "Assinar para exportar"}
           {!isPro && <Crown className="ml-2 h-4 w-4" />}
         </Button>
       </Card>

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePlan, PLAN_LABEL } from "@/lib/plan";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,24 +30,6 @@ export const Route = createFileRoute("/_authenticated/import")({
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const FREE_IMPORT_LIMIT = 3;
 
-function useSubscription() {
-  return useQuery({
-    queryKey: ["subscription"],
-    queryFn: async () => {
-      const { data: userRes } = await supabase.auth.getUser();
-      const uid = userRes.user?.id;
-      if (!uid) return null;
-      const { data, error } = await supabase
-        .from("subscriptions")
-        .select("status, plan")
-        .eq("user_id", uid)
-        .maybeSingle();
-      if (error) throw error;
-      return data ?? { status: "inactive", plan: "free" };
-    },
-  });
-}
-
 function useImportCount() {
   return useQuery({
     queryKey: ["import-count"],
@@ -72,8 +55,8 @@ function ImportPage() {
   const [cardId, setCardId] = useState<string>("none");
   const [institution, setInstitution] = useState("");
 
-  const { data: subscription } = useSubscription();
-  const isPro = subscription?.plan === "pro" && subscription?.status === "active";
+  const plan = usePlan();
+  const isPro = plan.hasAccess;
   const { data: importCount = 0 } = useImportCount();
   const atImportLimit = !isPro && importCount >= FREE_IMPORT_LIMIT;
 
@@ -105,7 +88,7 @@ function ImportPage() {
   });
 
   const handleFile = async (file: File) => {
-    if (atImportLimit) return toast.error("Limite de importações do plano gratuito atingido. Faça upgrade para Pro.");
+    if (atImportLimit) return toast.error("Limite de importações atingido. Assine um plano para continuar.");
     const text = await file.text();
     const rows = parseStatement(file.name, text);
     setFileName(file.name);
@@ -116,7 +99,7 @@ function ImportPage() {
 
   const importAll = useMutation({
     mutationFn: async () => {
-      if (atImportLimit) throw new Error("Limite de importações do plano gratuito atingido. Faça upgrade para Pro.");
+      if (atImportLimit) throw new Error("Limite de importações atingido. Assine um plano para continuar.");
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Sessão expirada");
 
@@ -211,7 +194,7 @@ function ImportPage() {
         </div>
         {!isPro && (
           <Badge variant="secondary">
-            {importCount}/{FREE_IMPORT_LIMIT} importações no plano gratuito
+            {importCount}/{FREE_IMPORT_LIMIT} importações no plano atual
           </Badge>
         )}
       </div>
@@ -234,7 +217,7 @@ function ImportPage() {
                 <div>
                   <p className="font-medium">Limite de importações atingido</p>
                   <p className="text-sm text-muted-foreground">
-                    No plano gratuito você pode importar até {FREE_IMPORT_LIMIT} extratos. Faça upgrade para
+                    No plano atual você pode importar até {FREE_IMPORT_LIMIT} extratos. Faça upgrade para
                     importações ilimitadas.
                   </p>
                 </div>

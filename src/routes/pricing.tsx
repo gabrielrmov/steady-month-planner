@@ -28,59 +28,77 @@ export const Route = createFileRoute("/pricing")({
 
 const plans = [
   {
-    name: "Gratuito",
+    name: "Teste grátis",
     price: "R$ 0",
-    period: "para sempre",
-    desc: "Para organizar o mês sem complicação.",
+    period: "por 30 dias",
+    desc: "Acesso completo por um mês, sem cartão de crédito.",
     features: [
+      "Todos os recursos liberados",
       "Checklist mensal de contas",
-      "Entradas e saídas ilimitadas",
-      "Até 2 cartões",
-      "Calendário financeiro",
-      "Categorias personalizadas",
-      "Regras de categorização",
+      "Cartões, parcelas e calendário",
+      "Relatórios e exportação",
+      "Painel de precificação PJ",
+      "Após 30 dias, escolha um plano",
     ],
-    cta: "Começar grátis",
+    cta: "Começar teste grátis",
     href: "/auth",
     highlight: false,
   },
   {
-    name: "Pro",
+    name: "Pessoal (PF)",
     price: "R$ 19",
     period: "por mês",
-    desc: "Para quem quer enxergar o futuro das finanças.",
+    desc: "Para quem organiza apenas as finanças pessoais.",
     features: [
-      "Tudo do plano gratuito",
+      "Lançamentos e checklist ilimitados",
       "Cartões e parcelamentos ilimitados",
       "Relatórios avançados e comparativos",
       "Exportação em CSV",
+      "Importação de extratos (OFX/CSV)",
       "Histórico completo de meses",
+    ],
+    cta: "Assinar Pessoal",
+    href: "/auth?plan=pf",
+    highlight: true,
+  },
+  {
+    name: "Pessoal + PJ",
+    price: "R$ 39",
+    period: "por mês",
+    desc: "Para autônomos e PJ que também emitem serviços.",
+    features: [
+      "Tudo do plano Pessoal",
+      "Painel de precificação de serviços",
+      "Custo por hora e margem de lucro",
+      "Simulação de impostos por serviço",
+      "Separação de gastos pessoais e da empresa",
       "Suporte prioritário",
     ],
-    cta: "Assinar o Pro",
-    href: "/auth?plan=pro",
-    highlight: true,
+    cta: "Assinar Pessoal + PJ",
+    href: "/auth?plan=pfpj",
+    highlight: false,
   },
 ];
 
 const faqs = [
   {
+    q: "Como funciona o teste grátis?",
+    a: "Você tem 30 dias com todos os recursos liberados, incluindo o painel PJ. Ao fim do período, escolha entre o plano Pessoal ou Pessoal + PJ para continuar.",
+  },
+  {
     q: "Posso cancelar quando quiser?",
-    a: "Sim. O Pro é mensal e o cancelamento é imediato, sem multa.",
+    a: "Sim. Os planos são mensais e o cancelamento é imediato, sem multa.",
   },
   {
-    q: "Meus dados ficam salvos se eu voltar para o gratuito?",
-    a: "Ficam. Você continua com acesso aos lançamentos, apenas os recursos Pro são desativados.",
+    q: "Qual a diferença entre Pessoal e Pessoal + PJ?",
+    a: "O Pessoal cobre suas finanças do dia a dia. O Pessoal + PJ adiciona o painel de precificação de serviços, com custo por hora, impostos e margem de lucro.",
   },
   {
-    q: "Quais formas de pagamento são aceitas?",
-    a: "Aceitamos cartão de crédito e outros métodos disponíveis na plataforma de pagamentos.",
-  },
-  {
-    q: "O plano Pro é para uma pessoa só?",
-    a: "Sim, cada assinatura é vinculada a uma única conta. Em breve teremos planos para famílias.",
+    q: "Meus dados somem se o teste terminar?",
+    a: "Não. Seus lançamentos continuam salvos; apenas os recursos pagos ficam bloqueados até a assinatura.",
   },
 ];
+
 
 function PricingPage() {
   return (
@@ -102,7 +120,7 @@ function PricingPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-16">
+      <main className="mx-auto max-w-6xl px-6 py-16">
         <div className="mx-auto max-w-2xl text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
@@ -110,11 +128,11 @@ function PricingPage() {
           </div>
           <h1 className="text-3xl font-bold tracking-tight md:text-5xl">Escolha o plano ideal para você</h1>
           <p className="mt-4 text-muted-foreground">
-            Comece de graça hoje e migre para o Pro quando quiser relatórios mais profundos e recursos avançados.
+            Teste tudo por 30 dias. Depois, escolha entre o plano Pessoal (PF) ou Pessoal + PJ, com painel de precificação de serviços.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2">
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
           {plans.map((p) => (
             <Card
               key={p.name}
