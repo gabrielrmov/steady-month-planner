@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { usePlan, PLAN_LABEL } from "@/lib/plan";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -52,27 +53,9 @@ type Tx = {
   categories: { name: string; color: string } | null;
 };
 
-function useSubscription() {
-  return useQuery({
-    queryKey: ["subscription"],
-    queryFn: async () => {
-      const { data: userRes } = await supabase.auth.getUser();
-      const uid = userRes.user?.id;
-      if (!uid) return null;
-      const { data, error } = await supabase
-        .from("subscriptions")
-        .select("status, plan")
-        .eq("user_id", uid)
-        .maybeSingle();
-      if (error) throw error;
-      return data ?? { status: "inactive", plan: "free" };
-    },
-  });
-}
-
 function ReportsPage() {
-  const { data: subscription } = useSubscription();
-  const isPro = subscription?.plan === "pro" && subscription?.status === "active";
+  const plan = usePlan();
+  const isPro = plan.hasAccess;
 
   const monthsBack = 6;
   const start = format(startOfMonth(subMonths(new Date(), monthsBack - 1)), "yyyy-MM-dd");

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePlan, PLAN_LABEL } from "@/lib/plan";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,36 +49,14 @@ function useProfile() {
   });
 }
 
-function useSubscription() {
-  return useQuery({
-    queryKey: ["subscription"],
-    queryFn: async () => {
-      const { data: userRes } = await supabase.auth.getUser();
-      const uid = userRes.user?.id;
-      if (!uid) return null;
-      const { data, error } = await supabase
-        .from("subscriptions")
-        .select("status, plan, current_period_end")
-        .eq("user_id", uid)
-        .maybeSingle();
-      if (error) throw error;
-      return (data ?? { status: "inactive", plan: "free", current_period_end: null }) as {
-        status: string;
-        plan: string;
-        current_period_end: string | null;
-      };
-    },
-  });
-}
-
 function SettingsPage() {
   const qc = useQueryClient();
   const [fullName, setFullName] = useState("");
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const { data: profile } = useProfile();
-  const { data: subscription } = useSubscription();
-  const isPro = subscription?.plan === "pro" && subscription?.status === "active";
+  const plan = usePlan();
+  const isPro = plan.hasAccess;
 
   useEffect(() => {
     if (profile?.full_name) setFullName(profile.full_name);
