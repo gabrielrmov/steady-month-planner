@@ -95,7 +95,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const queryClient = useQueryClient();
   const { data: profile } = useProfile();
   const plan = usePlan();
-  const isPro = plan.plan === "pf" || plan.plan === "pfpj";
 
   const handleSignOut = async () => {
     await queryClient.cancelQueries();
