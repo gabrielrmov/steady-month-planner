@@ -28,59 +28,77 @@ export const Route = createFileRoute("/pricing")({
 
 const plans = [
   {
-    name: "Gratuito",
+    name: "Teste grátis",
     price: "R$ 0",
-    period: "para sempre",
-    desc: "Para organizar o mês sem complicação.",
+    period: "por 30 dias",
+    desc: "Acesso completo por um mês, sem cartão de crédito.",
     features: [
+      "Todos os recursos liberados",
       "Checklist mensal de contas",
-      "Entradas e saídas ilimitadas",
-      "Até 2 cartões",
-      "Calendário financeiro",
-      "Categorias personalizadas",
-      "Regras de categorização",
+      "Cartões, parcelas e calendário",
+      "Relatórios e exportação",
+      "Painel de precificação PJ",
+      "Após 30 dias, escolha um plano",
     ],
-    cta: "Começar grátis",
+    cta: "Começar teste grátis",
     href: "/auth",
     highlight: false,
   },
   {
-    name: "Pro",
+    name: "Pessoal (PF)",
     price: "R$ 19",
     period: "por mês",
-    desc: "Para quem quer enxergar o futuro das finanças.",
+    desc: "Para quem organiza apenas as finanças pessoais.",
     features: [
-      "Tudo do plano gratuito",
+      "Lançamentos e checklist ilimitados",
       "Cartões e parcelamentos ilimitados",
       "Relatórios avançados e comparativos",
       "Exportação em CSV",
+      "Importação de extratos (OFX/CSV)",
       "Histórico completo de meses",
+    ],
+    cta: "Assinar Pessoal",
+    href: "/auth?plan=pf",
+    highlight: true,
+  },
+  {
+    name: "Pessoal + PJ",
+    price: "R$ 39",
+    period: "por mês",
+    desc: "Para autônomos e PJ que também emitem serviços.",
+    features: [
+      "Tudo do plano Pessoal",
+      "Painel de precificação de serviços",
+      "Custo por hora e margem de lucro",
+      "Simulação de impostos por serviço",
+      "Separação de gastos pessoais e da empresa",
       "Suporte prioritário",
     ],
-    cta: "Assinar o Pro",
-    href: "/auth?plan=pro",
-    highlight: true,
+    cta: "Assinar Pessoal + PJ",
+    href: "/auth?plan=pfpj",
+    highlight: false,
   },
 ];
 
 const faqs = [
   {
+    q: "Como funciona o teste grátis?",
+    a: "Você tem 30 dias com todos os recursos liberados, incluindo o painel PJ. Ao fim do período, escolha entre o plano Pessoal ou Pessoal + PJ para continuar.",
+  },
+  {
     q: "Posso cancelar quando quiser?",
-    a: "Sim. O Pro é mensal e o cancelamento é imediato, sem multa.",
+    a: "Sim. Os planos são mensais e o cancelamento é imediato, sem multa.",
   },
   {
-    q: "Meus dados ficam salvos se eu voltar para o gratuito?",
-    a: "Ficam. Você continua com acesso aos lançamentos, apenas os recursos Pro são desativados.",
+    q: "Qual a diferença entre Pessoal e Pessoal + PJ?",
+    a: "O Pessoal cobre suas finanças do dia a dia. O Pessoal + PJ adiciona o painel de precificação de serviços, com custo por hora, impostos e margem de lucro.",
   },
   {
-    q: "Quais formas de pagamento são aceitas?",
-    a: "Aceitamos cartão de crédito e outros métodos disponíveis na plataforma de pagamentos.",
-  },
-  {
-    q: "O plano Pro é para uma pessoa só?",
-    a: "Sim, cada assinatura é vinculada a uma única conta. Em breve teremos planos para famílias.",
+    q: "Meus dados somem se o teste terminar?",
+    a: "Não. Seus lançamentos continuam salvos; apenas os recursos pagos ficam bloqueados até a assinatura.",
   },
 ];
+
 
 function PricingPage() {
   return (
