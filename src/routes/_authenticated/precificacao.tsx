@@ -3,7 +3,10 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calculator, Clock, Percent, TrendingUp } from "lucide-react";
+import { Calculator, Clock, Percent, TrendingUp, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "@tanstack/react-router";
+import { usePlan } from "@/lib/plan";
 
 export const Route = createFileRoute("/_authenticated/precificacao")({
   head: () => ({
@@ -67,6 +70,7 @@ function Pricing() {
   const [margin, setMargin] = useState(20);
   const [serviceHours, setServiceHours] = useState(20);
   const [directCosts, setDirectCosts] = useState(0);
+  const plan = usePlan();
 
   const n = (v: number) => (Number.isFinite(v) ? v : 0);
   const hourCost = n(hoursMonth) > 0 ? (n(fixedCosts) + n(proLabore)) / n(hoursMonth) : 0;
@@ -86,7 +90,24 @@ function Pricing() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
+      {!plan.hasPj && (
+        <Card className="flex flex-wrap items-center justify-between gap-4 border-primary/40 p-5">
+          <div className="flex items-start gap-3">
+            <Lock className="mt-0.5 h-4 w-4 text-primary" />
+            <div>
+              <p className="text-sm font-medium">Painel PJ disponível no plano Pessoal + PJ</p>
+              <p className="text-xs text-muted-foreground">
+                Você pode simular abaixo, mas os valores ficam bloqueados até assinar o módulo PJ.
+              </p>
+            </div>
+          </div>
+          <Button asChild size="sm">
+            <Link to="/pricing">Ver planos</Link>
+          </Button>
+        </Card>
+      )}
+
+      <div className={`grid gap-6 lg:grid-cols-[1.1fr_1fr] ${plan.hasPj ? "" : "pointer-events-none select-none opacity-60"}`}>
         <Card className="space-y-6 p-6">
           <section className="space-y-4">
             <h2 className="flex items-center gap-2 text-sm font-semibold">
