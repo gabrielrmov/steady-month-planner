@@ -225,24 +225,25 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
       {/* Footer */}
       <div className="mt-auto border-t border-slate-800 bg-slate-900/80 p-4 backdrop-blur-md">
-        <div className="mb-3 space-y-1">
-          <Link
-            to="/import"
-            onClick={onNavigate}
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-slate-500 transition-colors hover:text-white"
-          >
-            <FileUp className="h-4 w-4" />
-            Importar dados
-          </Link>
-          <Link
-            to="/settings"
-            onClick={onNavigate}
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-slate-500 transition-colors hover:text-white"
-          >
-            <Settings className="h-4 w-4" />
-            Configurações
-          </Link>
+        <div className="mb-3 grid grid-cols-2 gap-1">
+          {[
+            { to: "/categories", label: "Categorias", icon: Tag },
+            { to: "/rules", label: "Regras", icon: Wand2 },
+            { to: "/import", label: "Importar", icon: FileUp },
+            { to: "/settings", label: "Ajustes", icon: Settings },
+          ].map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              onClick={onNavigate}
+              className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-slate-500 transition-colors hover:text-white"
+            >
+              <l.icon className="h-3.5 w-3.5" />
+              {l.label}
+            </Link>
+          ))}
         </div>
+
 
         <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 p-2">
           <Avatar className="h-10 w-10 rounded-xl ring-2 ring-indigo-500/20">
