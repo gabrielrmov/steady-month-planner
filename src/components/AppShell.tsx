@@ -26,6 +26,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { usePlan, PLAN_LABEL } from "@/lib/plan";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -88,31 +89,13 @@ function useProfile() {
   });
 }
 
-function useSubscription() {
-  return useQuery({
-    queryKey: ["subscription"],
-    queryFn: async () => {
-      const { data: userRes } = await supabase.auth.getUser();
-      const uid = userRes.user?.id;
-      if (!uid) return null;
-      const { data, error } = await supabase
-        .from("subscriptions")
-        .select("status, plan")
-        .eq("user_id", uid)
-        .maybeSingle();
-      if (error) throw error;
-      return data ?? { status: "inactive", plan: "free" };
-    },
-  });
-}
-
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: profile } = useProfile();
-  const { data: subscription } = useSubscription();
-  const isPro = subscription?.plan === "pro" && subscription?.status === "active";
+  const plan = usePlan();
+  const isPro = plan.plan === "pf" || plan.plan === "pfpj";
 
   const handleSignOut = async () => {
     await queryClient.cancelQueries();
@@ -255,7 +238,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             <p className="truncate text-xs font-bold leading-tight text-white">{firstName}</p>
             <p className="flex items-center gap-1 text-[10px] text-slate-500">
               <Sparkles className="h-3 w-3" />
-              {isPro ? "Plano Pro" : "Plano Gratuito"}
+              {plan.isTrial ? `Teste · ${plan.trialDaysLeft}d` : PLAN_LABEL[plan.plan]}
             </p>
           </div>
           <Button
@@ -268,14 +251,14 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           </Button>
         </div>
 
-        {!isPro && (
+        {plan.plan !== "pfpj" && (
           <Link
             to="/pricing"
             onClick={onNavigate}
             className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-indigo-500/30 bg-gradient-to-r from-indigo-600/20 to-violet-600/20 px-3 py-2 text-xs font-semibold text-indigo-300 transition-colors hover:border-indigo-500/50 hover:text-indigo-200"
           >
             <Sparkles className="h-3.5 w-3.5" />
-            Fazer upgrade Pro
+            {plan.isTrial ? `Assinar (${plan.trialDaysLeft} dias restantes)` : plan.plan === "pf" ? "Adicionar módulo PJ" : "Escolher plano"}
           </Link>
         )}
       </div>
