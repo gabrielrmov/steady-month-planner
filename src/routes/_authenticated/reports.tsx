@@ -120,7 +120,7 @@ function ReportsPage() {
           <p className="text-sm text-muted-foreground">Últimos {monthsBack} meses</p>
         </div>
         <Badge variant={isPro ? "default" : "secondary"}>
-          {isPro ? "Pro" : "Gratuito"}
+          {PLAN_LABEL[plan.plan]}
         </Badge>
       </div>
 
@@ -134,7 +134,7 @@ function ReportsPage() {
               <div>
                 <h2 className="font-semibold">Relatórios avançados são um recurso Pro</h2>
                 <p className="text-sm text-muted-foreground">
-                  No plano gratuito você vê apenas o resumo do mês atual. Faça upgrade para desbloquear gráficos de
+                  Seu teste grátis terminou. Assine um plano para desbloquear gráficos de
                   evolução, gastos por categoria e exportação CSV.
                 </p>
               </div>

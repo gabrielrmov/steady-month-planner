@@ -198,7 +198,7 @@ function SettingsPage() {
           {!isPro && (
             <Badge variant="outline" className="ml-auto gap-1 text-xs">
               <Lock className="h-3 w-3" />
-              Pro
+              Plano pago
             </Badge>
           )}
         </div>
@@ -206,7 +206,7 @@ function SettingsPage() {
           Baixe todos os seus lançamentos em CSV para abrir no Excel ou Google Sheets.
         </p>
         <Button className="mt-4" variant="outline" onClick={exportCsv} disabled={exporting || !isPro}>
-          {exporting ? "Gerando..." : isPro ? "Exportar CSV" : "Upgrade para exportar"}
+          {exporting ? "Gerando..." : isPro ? "Exportar CSV" : "Assinar para exportar"}
           {!isPro && <Crown className="ml-2 h-4 w-4" />}
         </Button>
       </Card>

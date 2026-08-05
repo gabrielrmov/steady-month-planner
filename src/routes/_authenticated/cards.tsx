@@ -79,7 +79,7 @@ function CardsPage() {
 
   const add = useMutation({
     mutationFn: async () => {
-      if (atLimit) throw new Error("Limite do plano gratuito atingido. Faça upgrade para o Pro para adicionar mais cartões.");
+      if (atLimit) throw new Error("Limite do teste/plano atual atingido. Assine um plano para adicionar mais cartões.");
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("Sessão expirada");
       const { error } = await supabase.from("cards").insert({
@@ -121,7 +121,7 @@ function CardsPage() {
         </div>
         {!isPro && (
           <Badge variant="secondary" className="hidden sm:flex">
-            {cards.length}/{FREE_CARD_LIMIT} cartões no plano gratuito
+            {cards.length}/{FREE_CARD_LIMIT} cartões no plano atual
           </Badge>
         )}
       </div>
@@ -170,7 +170,7 @@ function CardsPage() {
           <div className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="font-medium text-foreground">Você atingiu o limite do plano gratuito</p>
+                <p className="font-medium text-foreground">Você atingiu o limite do plano atual</p>
                 <p className="text-sm text-muted-foreground">Faça upgrade para o Pro e cadastre cartões ilimitados.</p>
               </div>
               <Button size="sm" asChild>

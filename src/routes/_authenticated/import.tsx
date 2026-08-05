@@ -88,7 +88,7 @@ function ImportPage() {
   });
 
   const handleFile = async (file: File) => {
-    if (atImportLimit) return toast.error("Limite de importações do plano gratuito atingido. Faça upgrade para Pro.");
+    if (atImportLimit) return toast.error("Limite de importações atingido. Assine um plano para continuar.");
     const text = await file.text();
     const rows = parseStatement(file.name, text);
     setFileName(file.name);
@@ -99,7 +99,7 @@ function ImportPage() {
 
   const importAll = useMutation({
     mutationFn: async () => {
-      if (atImportLimit) throw new Error("Limite de importações do plano gratuito atingido. Faça upgrade para Pro.");
+      if (atImportLimit) throw new Error("Limite de importações atingido. Assine um plano para continuar.");
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Sessão expirada");
 
@@ -194,7 +194,7 @@ function ImportPage() {
         </div>
         {!isPro && (
           <Badge variant="secondary">
-            {importCount}/{FREE_IMPORT_LIMIT} importações no plano gratuito
+            {importCount}/{FREE_IMPORT_LIMIT} importações no plano atual
           </Badge>
         )}
       </div>
@@ -217,7 +217,7 @@ function ImportPage() {
                 <div>
                   <p className="font-medium">Limite de importações atingido</p>
                   <p className="text-sm text-muted-foreground">
-                    No plano gratuito você pode importar até {FREE_IMPORT_LIMIT} extratos. Faça upgrade para
+                    No plano atual você pode importar até {FREE_IMPORT_LIMIT} extratos. Faça upgrade para
                     importações ilimitadas.
                   </p>
                 </div>
