@@ -229,7 +229,9 @@ export type Database = {
           paddle_customer_id: string | null
           paddle_subscription_id: string | null
           plan: string
+          profile_type: string
           status: string
+          trial_ends_at: string | null
           updated_at: string
           user_id: string
         }
@@ -241,7 +243,9 @@ export type Database = {
           paddle_customer_id?: string | null
           paddle_subscription_id?: string | null
           plan?: string
+          profile_type?: string
           status?: string
+          trial_ends_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -253,7 +257,9 @@ export type Database = {
           paddle_customer_id?: string | null
           paddle_subscription_id?: string | null
           plan?: string
+          profile_type?: string
           status?: string
+          trial_ends_at?: string | null
           updated_at?: string
           user_id?: string
         }
