@@ -19,6 +19,8 @@ import {
   Menu,
   User,
   Sparkles,
+  Calculator,
+
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
