@@ -59,21 +59,14 @@ const groups = [
     ],
   },
   {
-    title: "Análise",
+    title: "Negócio",
     items: [
       { to: "/reports", label: "Relatórios", icon: BarChart3, tab: undefined },
-    ],
-  },
-  {
-    title: "Configuração",
-    items: [
-      { to: "/categories", label: "Categorias", icon: Tag, tab: undefined },
-      { to: "/rules", label: "Regras", icon: Wand2, tab: undefined },
-      { to: "/import", label: "Importar", icon: FileUp, tab: undefined },
-      { to: "/settings", label: "Configurações", icon: Settings, tab: undefined },
+      { to: "/precificacao", label: "Precificação", icon: Calculator, tab: undefined },
     ],
   },
 ] as const;
+
 
 function useProfile() {
   return useQuery({

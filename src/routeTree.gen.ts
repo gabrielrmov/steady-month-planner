@@ -19,6 +19,7 @@ import { Route as AuthenticatedTransactionsRouteImport } from './routes/_authent
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRulesRouteImport } from './routes/_authenticated/rules'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedPrecificacaoRouteImport } from './routes/_authenticated/precificacao'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedInstallmentsRouteImport } from './routes/_authenticated/installments'
 import { Route as AuthenticatedImportRouteImport } from './routes/_authenticated/import'
@@ -77,6 +78,12 @@ const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPrecificacaoRoute =
+  AuthenticatedPrecificacaoRouteImport.update({
+    id: '/precificacao',
+    path: '/precificacao',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -127,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/import': typeof AuthenticatedImportRoute
   '/installments': typeof AuthenticatedInstallmentsRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/precificacao': typeof AuthenticatedPrecificacaoRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/rules': typeof AuthenticatedRulesRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -145,6 +153,7 @@ export interface FileRoutesByTo {
   '/import': typeof AuthenticatedImportRoute
   '/installments': typeof AuthenticatedInstallmentsRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/precificacao': typeof AuthenticatedPrecificacaoRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/rules': typeof AuthenticatedRulesRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -165,6 +174,7 @@ export interface FileRoutesById {
   '/_authenticated/import': typeof AuthenticatedImportRoute
   '/_authenticated/installments': typeof AuthenticatedInstallmentsRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/precificacao': typeof AuthenticatedPrecificacaoRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/rules': typeof AuthenticatedRulesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
     | '/import'
     | '/installments'
     | '/onboarding'
+    | '/precificacao'
     | '/reports'
     | '/rules'
     | '/settings'
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '/import'
     | '/installments'
     | '/onboarding'
+    | '/precificacao'
     | '/reports'
     | '/rules'
     | '/settings'
@@ -222,6 +234,7 @@ export interface FileRouteTypes {
     | '/_authenticated/import'
     | '/_authenticated/installments'
     | '/_authenticated/onboarding'
+    | '/_authenticated/precificacao'
     | '/_authenticated/reports'
     | '/_authenticated/rules'
     | '/_authenticated/settings'
@@ -309,6 +322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/precificacao': {
+      id: '/_authenticated/precificacao'
+      path: '/precificacao'
+      fullPath: '/precificacao'
+      preLoaderRoute: typeof AuthenticatedPrecificacaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
@@ -369,6 +389,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedImportRoute: typeof AuthenticatedImportRoute
   AuthenticatedInstallmentsRoute: typeof AuthenticatedInstallmentsRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedPrecificacaoRoute: typeof AuthenticatedPrecificacaoRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedRulesRoute: typeof AuthenticatedRulesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -383,6 +404,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedImportRoute: AuthenticatedImportRoute,
   AuthenticatedInstallmentsRoute: AuthenticatedInstallmentsRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedPrecificacaoRoute: AuthenticatedPrecificacaoRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedRulesRoute: AuthenticatedRulesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
