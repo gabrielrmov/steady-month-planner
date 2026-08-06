@@ -41,7 +41,7 @@ import { useState, type ReactNode } from "react";
 const transactionSubItems = [
   { to: "/transactions", label: "Recorrentes", tab: undefined, icon: ListChecks },
   { to: "/transactions", label: "Esporádicos", tab: "sporadic", icon: Zap },
-  { to: "/transactions", label: "A receber", tab: "receivable", icon: ArrowDownCircle },
+  { to: "/transactions", label: "A receber", tab: "income", icon: ArrowDownCircle },
   { to: "/transactions", label: "Recebidos", tab: "received", icon: ArrowUpCircle },
 ] as const;
 
