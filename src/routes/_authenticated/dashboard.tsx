@@ -101,17 +101,17 @@ function Dashboard() {
 
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+    <div className="mx-auto max-w-6xl space-y-5">
+      <div className="space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
+        <div className="min-w-0">
+          <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">Dashboard</h1>
           <p className="text-sm text-muted-foreground">Visão geral do mês</p>
         </div>
-        <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-1">
+        <div className="flex items-center justify-between gap-1 rounded-lg border border-border bg-card p-1 sm:justify-start sm:gap-2">
           <Button variant="ghost" size="icon" onClick={() => setMonth(subMonths(month, 1))}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="min-w-32 text-center text-sm font-medium capitalize">
+          <span className="min-w-0 flex-1 truncate text-center text-sm font-medium capitalize sm:min-w-32 sm:flex-none">
             {format(month, "MMMM 'de' yyyy", { locale: ptBR })}
           </span>
           <Button variant="ghost" size="icon" onClick={() => setMonth(addMonths(month, 1))}>
@@ -120,7 +120,8 @@ function Dashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+
         <StatCard
           label="Entradas previstas"
           value={brl(incomeTotal)}
@@ -251,17 +252,18 @@ function StatCard({
     warning: "bg-warning/15 text-warning-foreground",
   }[tone];
   return (
-    <Card className="p-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-          <p className="mt-2 text-2xl font-bold tracking-tight">{value}</p>
+    <Card className="p-4 sm:p-5">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">{label}</p>
+          <p className="mt-1.5 truncate text-lg font-bold tracking-tight sm:mt-2 sm:text-2xl">{value}</p>
           {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
         </div>
-        <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${toneClass}`}>
+        <div className={`hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg sm:flex ${toneClass}`}>
           <Icon className="h-5 w-5" />
         </div>
       </div>
     </Card>
+
   );
 }

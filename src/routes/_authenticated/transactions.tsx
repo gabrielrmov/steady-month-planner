@@ -145,18 +145,18 @@ function TransactionsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Contas</h1>
+    <div className="mx-auto max-w-5xl space-y-5">
+      <div className="space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
+        <div className="min-w-0">
+          <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">Contas</h1>
           <p className="text-sm text-muted-foreground">Gerencie contas a pagar e receber</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1">
+          <div className="flex flex-1 items-center justify-between gap-1 rounded-lg border border-border bg-card p-1 sm:flex-none sm:justify-start">
             <Button variant="ghost" size="icon" onClick={() => setMonth(subMonths(month, 1))}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="min-w-32 text-center text-sm font-medium capitalize">
+            <span className="min-w-0 flex-1 truncate text-center text-sm font-medium capitalize sm:min-w-32 sm:flex-none">
               {format(month, "MMMM yyyy", { locale: ptBR })}
             </span>
             <Button variant="ghost" size="icon" onClick={() => setMonth(addMonths(month, 1))}>
@@ -171,8 +171,8 @@ function TransactionsPage() {
             }}
           >
             <DialogTrigger asChild>
-              <Button onClick={() => setEditing(null)}>
-                <Plus className="mr-2 h-4 w-4" /> Nova
+              <Button onClick={() => setEditing(null)} className="shrink-0">
+                <Plus className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Nova</span>
               </Button>
             </DialogTrigger>
             <TransactionForm
@@ -190,13 +190,16 @@ function TransactionsPage() {
       </div>
 
       <Tabs value={search.tab ?? "recurring"} onValueChange={(v) => navigate({ search: { tab: v as any }, replace: true })}>
-        <TabsList className="flex-wrap">
-          <TabsTrigger value="recurring">Recorrentes ({recurring.length})</TabsTrigger>
-          <TabsTrigger value="sporadic">Esporádicos ({sporadic.length})</TabsTrigger>
-          <TabsTrigger value="cards">Cartões ({cardExpenses.length})</TabsTrigger>
-          <TabsTrigger value="income">A receber ({incomes.length - received.length})</TabsTrigger>
-          <TabsTrigger value="received">Recebidos ({received.length})</TabsTrigger>
-        </TabsList>
+        <div className="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0">
+          <TabsList className="w-max sm:flex-wrap">
+            <TabsTrigger value="recurring">Recorrentes ({recurring.length})</TabsTrigger>
+            <TabsTrigger value="sporadic">Esporádicos ({sporadic.length})</TabsTrigger>
+            <TabsTrigger value="cards">Cartões ({cardExpenses.length})</TabsTrigger>
+            <TabsTrigger value="income">A receber ({incomes.length - received.length})</TabsTrigger>
+            <TabsTrigger value="received">Recebidos ({received.length})</TabsTrigger>
+          </TabsList>
+        </div>
+
         <TabsContent value="recurring" className="mt-4">
           <TxList items={recurring} loading={isLoading} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} onEdit={handleEdit} />
         </TabsContent>
@@ -266,12 +269,12 @@ function TxList({
         const isInstallment = !!(t.installment_total && t.installment_total > 1);
         const hasGroup = !!t.purchase_group_id;
         return (
-          <div key={t.id} className="flex items-center gap-3 p-4">
+          <div key={t.id} className="flex items-start gap-3 p-3 sm:items-center sm:p-4">
             <input
               type="checkbox"
               checked={paid}
               onChange={(e) => onToggle({ id: t.id, paid: e.target.checked })}
-              className="h-5 w-5 rounded border-border accent-[oklch(0.55_0.22_260)]"
+              className="mt-1 h-5 w-5 shrink-0 rounded border-border accent-[oklch(0.55_0.22_260)] sm:mt-0"
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -283,7 +286,7 @@ function TxList({
                     </span>
                   )}
                 </p>
-                {t.is_recurring && <Repeat2 className="h-3.5 w-3.5 text-muted-foreground" />}
+                {t.is_recurring && <Repeat2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <span>{format(new Date(t.due_date + "T00:00:00"), "dd/MM/yyyy")}</span>
@@ -296,32 +299,64 @@ function TxList({
                   </span>
                 )}
               </div>
+              {/* Ações e valor em linha própria no mobile */}
+              <div className="mt-2 flex items-center justify-between gap-2 sm:hidden">
+                <span className={`text-sm font-semibold ${incomeMode ? "text-success" : ""} ${paid ? "line-through text-muted-foreground" : ""}`}>
+                  {brl(Number(t.amount))}
+                </span>
+                <div className="flex items-center">
+                  <Button variant="ghost" size="icon" onClick={() => onEdit(t)} title="Editar">
+                    <Pencil className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => onDelete(t.id)} title="Excluir este">
+                    <Trash2 className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                  {hasGroup && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        const msg = isInstallment
+                          ? `Remover todas as ${t.installment_total} parcelas desta compra?`
+                          : "Remover esta conta de todos os meses?";
+                        if (confirm(msg)) onDeleteGroup(t.purchase_group_id!);
+                      }}
+                      title="Excluir de todos os meses"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  )}
+                </div>
+              </div>
             </div>
-            <span className={`text-sm font-semibold ${incomeMode ? "text-success" : ""} ${paid ? "line-through text-muted-foreground" : ""}`}>
+            <span className={`hidden text-sm font-semibold sm:inline ${incomeMode ? "text-success" : ""} ${paid ? "line-through text-muted-foreground" : ""}`}>
               {brl(Number(t.amount))}
             </span>
-            <Button variant="ghost" size="icon" onClick={() => onEdit(t)} title="Editar">
-              <Pencil className="h-4 w-4 text-muted-foreground" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => onDelete(t.id)} title="Excluir este">
-              <Trash2 className="h-4 w-4 text-muted-foreground" />
-            </Button>
-            {hasGroup && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  const msg = isInstallment
-                    ? `Remover todas as ${t.installment_total} parcelas desta compra?`
-                    : "Remover esta conta de todos os meses?";
-                  if (confirm(msg)) onDeleteGroup(t.purchase_group_id!);
-                }}
-                title="Excluir de todos os meses"
-              >
-                <Trash2 className="h-4 w-4 text-destructive" />
+            <div className="hidden items-center sm:flex">
+              <Button variant="ghost" size="icon" onClick={() => onEdit(t)} title="Editar">
+                <Pencil className="h-4 w-4 text-muted-foreground" />
               </Button>
-            )}
+              <Button variant="ghost" size="icon" onClick={() => onDelete(t.id)} title="Excluir este">
+                <Trash2 className="h-4 w-4 text-muted-foreground" />
+              </Button>
+              {hasGroup && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    const msg = isInstallment
+                      ? `Remover todas as ${t.installment_total} parcelas desta compra?`
+                      : "Remover esta conta de todos os meses?";
+                    if (confirm(msg)) onDeleteGroup(t.purchase_group_id!);
+                  }}
+                  title="Excluir de todos os meses"
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              )}
+            </div>
           </div>
+
         );
       })}
     </Card>

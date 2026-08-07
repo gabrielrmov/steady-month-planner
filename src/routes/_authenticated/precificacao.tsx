@@ -84,7 +84,7 @@ function Pricing() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Precificação de serviços</h1>
+        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Precificação de serviços</h1>
         <p className="text-sm text-muted-foreground">
           Descubra quanto cobrar por projeto cobrindo custos, impostos e lucro.
         </p>

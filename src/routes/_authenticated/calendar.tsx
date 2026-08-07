@@ -80,17 +80,17 @@ function CalendarPage() {
   const selectedItems = byDay.get(selectedKey) ?? [];
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Calendário</h1>
+    <div className="mx-auto max-w-6xl space-y-5">
+      <div className="space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
+        <div className="min-w-0">
+          <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">Calendário</h1>
           <p className="text-sm text-muted-foreground">Visualize entradas e saídas por dia</p>
         </div>
-        <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1">
+        <div className="flex items-center justify-between gap-1 rounded-lg border border-border bg-card p-1 sm:justify-start">
           <Button variant="ghost" size="icon" onClick={() => setMonth(subMonths(month, 1))}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="min-w-36 text-center text-sm font-medium capitalize">
+          <span className="min-w-0 flex-1 truncate text-center text-sm font-medium capitalize sm:min-w-36 sm:flex-none">
             {format(month, "MMMM yyyy", { locale: ptBR })}
           </span>
           <Button variant="ghost" size="icon" onClick={() => setMonth(addMonths(month, 1))}>
@@ -100,10 +100,10 @@ function CalendarPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
-        <Card className="p-3">
-          <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground">
+        <Card className="p-2 sm:p-3">
+          <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-medium text-muted-foreground sm:text-xs">
             {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((d) => (
-              <div key={d} className="py-2">{d}</div>
+              <div key={d} className="py-1.5 sm:py-2">{d}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1">
@@ -119,16 +119,21 @@ function CalendarPage() {
                 <button
                   key={key}
                   onClick={() => setSelected(day)}
-                  className={`min-h-20 rounded-md border p-1.5 text-left text-xs transition-colors ${
+                  className={`min-h-12 rounded-md border p-1 text-left text-xs transition-colors sm:min-h-20 sm:p-1.5 ${
                     isSel ? "border-primary bg-accent" : "border-border hover:bg-accent/40"
                   } ${isCurrent ? "" : "opacity-40"}`}
                 >
-                  <div className={`mb-1 flex items-center justify-between`}>
+                  <div className="flex items-center justify-between sm:mb-1">
                     <span className={`text-[11px] font-semibold ${isToday ? "text-primary" : ""}`}>
                       {format(day, "d")}
                     </span>
                   </div>
-                  <div className="space-y-0.5">
+                  {/* Mobile: apenas indicadores */}
+                  <div className="mt-1 flex items-center gap-1 sm:hidden">
+                    {income > 0 && <span className="h-1.5 w-1.5 rounded-full bg-success" />}
+                    {expense > 0 && <span className="h-1.5 w-1.5 rounded-full bg-destructive" />}
+                  </div>
+                  <div className="hidden space-y-0.5 sm:block">
                     {income > 0 && <div className="truncate text-[10px] font-medium text-success">+{brl(income)}</div>}
                     {expense > 0 && <div className="truncate text-[10px] font-medium text-destructive">-{brl(expense)}</div>}
                   </div>
@@ -137,6 +142,7 @@ function CalendarPage() {
             })}
           </div>
         </Card>
+
 
         <Card className="p-4">
           <p className="text-sm font-semibold capitalize">
