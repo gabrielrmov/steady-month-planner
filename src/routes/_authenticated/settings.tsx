@@ -126,7 +126,7 @@ function SettingsPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Configurações</h1>
+        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Configurações</h1>
         <p className="text-sm text-muted-foreground">Sua conta, plano e dados</p>
       </div>
 

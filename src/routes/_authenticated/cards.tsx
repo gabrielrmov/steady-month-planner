@@ -116,7 +116,7 @@ function CardsPage() {
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Cartões</h1>
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Cartões</h1>
           <p className="text-sm text-muted-foreground">Cadastre seus cartões para organizar as compras parceladas</p>
         </div>
         {!isPro && (

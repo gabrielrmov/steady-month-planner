@@ -116,7 +116,7 @@ function ReportsPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Relatórios</h1>
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Relatórios</h1>
           <p className="text-sm text-muted-foreground">Últimos {monthsBack} meses</p>
         </div>
         <Badge variant={isPro ? "default" : "secondary"}>
