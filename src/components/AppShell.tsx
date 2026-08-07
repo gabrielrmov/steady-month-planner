@@ -265,6 +265,39 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
+const mobileNav = [
+  { to: "/dashboard", label: "Início", icon: LayoutDashboard },
+  { to: "/transactions", label: "Contas", icon: ListChecks },
+  { to: "/calendar", label: "Agenda", icon: CalendarDays },
+  { to: "/cards", label: "Cartões", icon: CreditCard },
+] as const;
+
+function MobileTabBar() {
+  const location = useLocation();
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-800 bg-slate-900/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+      <div className="grid grid-cols-4">
+        {mobileNav.map((item) => {
+          const active = location.pathname.startsWith(item.to);
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={cn(
+                "flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
+                active ? "text-indigo-400" : "text-slate-500",
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              {item.label}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
@@ -277,15 +310,15 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobile header */}
       <div className="md:hidden">
-        <header className="flex h-16 items-center justify-between border-b border-border bg-slate-900 px-4">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-slate-900/95 px-4 backdrop-blur">
+          <div className="flex min-w-0 items-center gap-2.5">
             <div
-              className="flex h-8 w-8 items-center justify-center rounded-lg shadow-lg shadow-indigo-500/20"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-lg shadow-indigo-500/20"
               style={{ background: "var(--gradient-primary)" }}
             >
               <Wallet className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-bold tracking-tight text-white">Finlist</span>
+            <span className="truncate font-bold tracking-tight text-white">Finlist</span>
           </div>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -293,7 +326,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 border-slate-800 bg-slate-900 p-0">
+            <SheetContent side="left" className="w-[85vw] max-w-xs border-slate-800 bg-slate-900 p-0">
               <SheetHeader className="sr-only">
                 <SheetTitle>Menu</SheetTitle>
               </SheetHeader>
@@ -304,8 +337,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <div className="md:pl-64">
-        <main className="p-4 md:p-8">{children}</main>
+        <main className="px-4 pb-24 pt-5 md:p-8 md:pb-8">{children}</main>
       </div>
+
+      <MobileTabBar />
     </div>
   );
 }
+
