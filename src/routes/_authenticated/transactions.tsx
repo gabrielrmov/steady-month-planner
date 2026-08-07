@@ -145,18 +145,18 @@ function TransactionsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Contas</h1>
+    <div className="mx-auto max-w-5xl space-y-5">
+      <div className="space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
+        <div className="min-w-0">
+          <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">Contas</h1>
           <p className="text-sm text-muted-foreground">Gerencie contas a pagar e receber</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1">
+          <div className="flex flex-1 items-center justify-between gap-1 rounded-lg border border-border bg-card p-1 sm:flex-none sm:justify-start">
             <Button variant="ghost" size="icon" onClick={() => setMonth(subMonths(month, 1))}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="min-w-32 text-center text-sm font-medium capitalize">
+            <span className="min-w-0 flex-1 truncate text-center text-sm font-medium capitalize sm:min-w-32 sm:flex-none">
               {format(month, "MMMM yyyy", { locale: ptBR })}
             </span>
             <Button variant="ghost" size="icon" onClick={() => setMonth(addMonths(month, 1))}>
@@ -171,8 +171,8 @@ function TransactionsPage() {
             }}
           >
             <DialogTrigger asChild>
-              <Button onClick={() => setEditing(null)}>
-                <Plus className="mr-2 h-4 w-4" /> Nova
+              <Button onClick={() => setEditing(null)} className="shrink-0">
+                <Plus className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Nova</span>
               </Button>
             </DialogTrigger>
             <TransactionForm
@@ -190,13 +190,16 @@ function TransactionsPage() {
       </div>
 
       <Tabs value={search.tab ?? "recurring"} onValueChange={(v) => navigate({ search: { tab: v as any }, replace: true })}>
-        <TabsList className="flex-wrap">
-          <TabsTrigger value="recurring">Recorrentes ({recurring.length})</TabsTrigger>
-          <TabsTrigger value="sporadic">Esporádicos ({sporadic.length})</TabsTrigger>
-          <TabsTrigger value="cards">Cartões ({cardExpenses.length})</TabsTrigger>
-          <TabsTrigger value="income">A receber ({incomes.length - received.length})</TabsTrigger>
-          <TabsTrigger value="received">Recebidos ({received.length})</TabsTrigger>
-        </TabsList>
+        <div className="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0">
+          <TabsList className="w-max sm:flex-wrap">
+            <TabsTrigger value="recurring">Recorrentes ({recurring.length})</TabsTrigger>
+            <TabsTrigger value="sporadic">Esporádicos ({sporadic.length})</TabsTrigger>
+            <TabsTrigger value="cards">Cartões ({cardExpenses.length})</TabsTrigger>
+            <TabsTrigger value="income">A receber ({incomes.length - received.length})</TabsTrigger>
+            <TabsTrigger value="received">Recebidos ({received.length})</TabsTrigger>
+          </TabsList>
+        </div>
+
         <TabsContent value="recurring" className="mt-4">
           <TxList items={recurring} loading={isLoading} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} onEdit={handleEdit} />
         </TabsContent>
