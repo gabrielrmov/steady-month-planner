@@ -114,8 +114,8 @@ function CardsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
           <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Cartões</h1>
           <p className="text-sm text-muted-foreground">Cadastre seus cartões para organizar as compras parceladas</p>
         </div>
@@ -129,7 +129,7 @@ function CardsPage() {
       <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
         <form
           onSubmit={(e) => { e.preventDefault(); if (name) add.mutate(); }}
-          className="grid gap-3 sm:grid-cols-[1.5fr_repeat(3,1fr)_auto]"
+          className="grid grid-cols-2 gap-3 sm:grid-cols-[1.5fr_repeat(3,1fr)_auto]"
         >
           <div>
             <Label htmlFor="cn" className="text-xs">Nome</Label>
