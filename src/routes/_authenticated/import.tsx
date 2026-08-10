@@ -154,26 +154,51 @@ function ImportPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const addConnection = useMutation({
-    mutationFn: async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) throw new Error("Sessão expirada");
-      if (!institution.trim()) throw new Error("Informe o banco");
-      const { error } = await supabase.from("bank_connections").insert({
-        user_id: u.user.id,
-        institution_name: institution.trim(),
-        provider: "pluggy",
-        status: "pending",
+  const { data: ofStatus } = useQuery({
+    queryKey: ["openfinance-status"],
+    queryFn: () => openFinanceStatus(),
+  });
+
+  const connectBank = useMutation({
+    mutationFn: async (itemId?: string) => {
+      const { accessToken } = await createConnectToken({ data: { itemId: itemId ?? null } });
+      await openPluggyWidget({
+        connectToken: accessToken,
+        updateItem: itemId,
+        onSuccess: async (newItemId) => {
+          try {
+            const { id } = await saveBankItem({ data: { itemId: newItemId } });
+            qc.invalidateQueries({ queryKey: ["bank-connections"] });
+            toast.success("Banco conectado. Sincronizando lançamentos...");
+            syncBank.mutate(id);
+          } catch (e) {
+            toast.error(e instanceof Error ? e.message : "Falha ao salvar conexão");
+          }
+        },
+        onError: () => toast.error("Não foi possível concluir a conexão com o banco"),
       });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      setInstitution("");
-      qc.invalidateQueries({ queryKey: ["bank-connections"] });
-      toast.success("Banco registrado para conexão");
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const syncBank = useMutation({
+    mutationFn: async (connectionId: string) => {
+      setSyncing(connectionId);
+      return syncBankConnection({ data: { connectionId } });
+    },
+    onSuccess: ({ imported, skipped }) => {
+      qc.invalidateQueries({ queryKey: ["tx"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: ["bank-connections"] });
+      toast.success(`${imported} lançamentos sincronizados${skipped ? `, ${skipped} já existiam` : ""}`);
+    },
+    onError: (e: Error) => {
+      qc.invalidateQueries({ queryKey: ["bank-connections"] });
+      toast.error(e.message);
+    },
+    onSettled: () => setSyncing(null),
+  });
+
 
   const delConnection = useMutation({
     mutationFn: async (id: string) => {
