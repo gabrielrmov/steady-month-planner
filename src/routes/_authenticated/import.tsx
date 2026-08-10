@@ -153,59 +153,8 @@ function ImportPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const { data: ofStatus } = useQuery({
-    queryKey: ["openfinance-status"],
-    queryFn: () => openFinanceStatus(),
-  });
-
-  const connectBank = useMutation({
-    mutationFn: async (itemId?: string) => {
-      const { accessToken } = await createConnectToken({ data: { itemId: itemId ?? null } });
-      await openPluggyWidget({
-        connectToken: accessToken,
-        updateItem: itemId,
-        onSuccess: async (newItemId) => {
-          try {
-            const { id } = await saveBankItem({ data: { itemId: newItemId } });
-            qc.invalidateQueries({ queryKey: ["bank-connections"] });
-            toast.success("Banco conectado. Sincronizando lançamentos...");
-            syncBank.mutate(id);
-          } catch (e) {
-            toast.error(e instanceof Error ? e.message : "Falha ao salvar conexão");
-          }
-        },
-        onError: () => toast.error("Não foi possível concluir a conexão com o banco"),
-      });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const syncBank = useMutation({
-    mutationFn: async (connectionId: string) => {
-      setSyncing(connectionId);
-      return syncBankConnection({ data: { connectionId } });
-    },
-    onSuccess: ({ imported, skipped }) => {
-      qc.invalidateQueries({ queryKey: ["tx"] });
-      qc.invalidateQueries({ queryKey: ["dashboard"] });
-      qc.invalidateQueries({ queryKey: ["bank-connections"] });
-      toast.success(`${imported} lançamentos sincronizados${skipped ? `, ${skipped} já existiam` : ""}`);
-    },
-    onError: (e: Error) => {
-      qc.invalidateQueries({ queryKey: ["bank-connections"] });
-      toast.error(e.message);
-    },
-    onSettled: () => setSyncing(null),
-  });
 
 
-  const delConnection = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("bank_connections").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["bank-connections"] }),
-  });
 
   const totalIn = parsed.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
   const totalOut = parsed.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
