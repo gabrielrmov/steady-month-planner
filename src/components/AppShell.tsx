@@ -59,7 +59,9 @@ const groups = [
       { to: "/transactions", label: "Contas", icon: ListChecks, tab: undefined, sub: transactionSubItems },
       { to: "/cards", label: "Cartões", icon: CreditCard, tab: undefined },
       { to: "/installments", label: "Parcelas", icon: Hourglass, tab: undefined },
+      { to: "/open-finance", label: "Open Finance", icon: Landmark, tab: undefined },
     ],
+
   },
   {
     title: "Negócio",
