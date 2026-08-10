@@ -8,6 +8,7 @@ import {
   CreditCard,
   CalendarDays,
   Hourglass,
+  Landmark,
   ArrowDownCircle,
   ArrowUpCircle,
   Zap,
