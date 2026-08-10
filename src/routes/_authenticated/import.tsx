@@ -342,65 +342,18 @@ function ImportPage() {
           <h2 className="font-semibold">Open Finance (sincronização automática)</h2>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Conecte sua conta ou cartão pelo Open Finance e os lançamentos entram sozinhos, já categorizados pelas suas
-          regras e sem duplicar o que você já tem.
+          {connections.length > 0
+            ? `Você tem ${connections.length} conta(s) conectada(s).`
+            : "Conecte sua conta ou cartão e os lançamentos entram sozinhos."}
         </p>
-
-        {ofStatus && !ofStatus.configured && (
-          <div className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground">
-            A conexão com o agregador ainda não está ativa nesta conta. Assim que as credenciais forem cadastradas, o
-            botão abaixo abre a tela oficial do seu banco.
-          </div>
-        )}
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Button onClick={() => connectBank.mutate(undefined)} disabled={connectBank.isPending || !ofStatus?.configured}>
+        <Button className="mt-4" asChild>
+          <Link to="/open-finance">
             <Building2 className="mr-2 h-4 w-4" />
-            {connectBank.isPending ? "Abrindo..." : "Conectar banco"}
-          </Button>
-        </div>
-
-        <div className="mt-4 divide-y divide-border rounded-lg border border-border">
-          {connections.length === 0 && (
-            <p className="p-4 text-center text-sm text-muted-foreground">Nenhum banco conectado.</p>
-          )}
-          {connections.map((c: any) => (
-            <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 p-3">
-              <div>
-                <p className="text-sm font-medium">{c.institution_name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {c.status === "error"
-                    ? c.last_error || "Erro na última sincronização"
-                    : c.last_synced_at
-                      ? `Sincronizado em ${new Date(c.last_synced_at).toLocaleString("pt-BR")}`
-                      : c.status === "connected"
-                        ? "Conectado — sincronize para trazer os lançamentos"
-                        : "Aguardando autorização no banco"}
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={syncing === c.id || !c.external_item_id}
-                  onClick={() => syncBank.mutate(c.id)}
-                >
-                  <RefreshCw className={`mr-2 h-3.5 w-3.5 ${syncing === c.id ? "animate-spin" : ""}`} />
-                  {syncing === c.id ? "Sincronizando" : "Sincronizar"}
-                </Button>
-                {c.external_item_id && (
-                  <Button variant="ghost" size="sm" onClick={() => connectBank.mutate(c.external_item_id)}>
-                    Reconectar
-                  </Button>
-                )}
-                <Button variant="ghost" size="icon" onClick={() => delConnection.mutate(c.id)}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+            Gerenciar contas do Open Finance
+          </Link>
+        </Button>
       </Card>
+
 
     </div>
   );
