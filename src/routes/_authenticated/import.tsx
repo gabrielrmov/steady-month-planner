@@ -10,8 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Building2, FileUp, Landmark, Trash2, Upload, Crown, Lock } from "lucide-react";
+import { Building2, FileUp, Landmark, RefreshCw, Trash2, Upload, Crown, Lock } from "lucide-react";
 import { categoryForDescription, fingerprint, parseStatement, type CategoryRule, type ParsedTx } from "@/lib/automation";
+import { createConnectToken, openFinanceStatus, saveBankItem, syncBankConnection } from "@/lib/openfinance.functions";
+import { openPluggyWidget } from "@/lib/pluggy-widget";
+
 
 export const Route = createFileRoute("/_authenticated/import")({
   head: () => ({
@@ -53,7 +56,7 @@ function ImportPage() {
   const [parsed, setParsed] = useState<ParsedTx[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [cardId, setCardId] = useState<string>("none");
-  const [institution, setInstitution] = useState("");
+  const [syncing, setSyncing] = useState<string | null>(null);
 
   const plan = usePlan();
   const isPro = plan.hasAccess;
@@ -151,26 +154,51 @@ function ImportPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const addConnection = useMutation({
-    mutationFn: async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) throw new Error("Sessão expirada");
-      if (!institution.trim()) throw new Error("Informe o banco");
-      const { error } = await supabase.from("bank_connections").insert({
-        user_id: u.user.id,
-        institution_name: institution.trim(),
-        provider: "pluggy",
-        status: "pending",
+  const { data: ofStatus } = useQuery({
+    queryKey: ["openfinance-status"],
+    queryFn: () => openFinanceStatus(),
+  });
+
+  const connectBank = useMutation({
+    mutationFn: async (itemId?: string) => {
+      const { accessToken } = await createConnectToken({ data: { itemId: itemId ?? null } });
+      await openPluggyWidget({
+        connectToken: accessToken,
+        updateItem: itemId,
+        onSuccess: async (newItemId) => {
+          try {
+            const { id } = await saveBankItem({ data: { itemId: newItemId } });
+            qc.invalidateQueries({ queryKey: ["bank-connections"] });
+            toast.success("Banco conectado. Sincronizando lançamentos...");
+            syncBank.mutate(id);
+          } catch (e) {
+            toast.error(e instanceof Error ? e.message : "Falha ao salvar conexão");
+          }
+        },
+        onError: () => toast.error("Não foi possível concluir a conexão com o banco"),
       });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      setInstitution("");
-      qc.invalidateQueries({ queryKey: ["bank-connections"] });
-      toast.success("Banco registrado para conexão");
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const syncBank = useMutation({
+    mutationFn: async (connectionId: string) => {
+      setSyncing(connectionId);
+      return syncBankConnection({ data: { connectionId } });
+    },
+    onSuccess: ({ imported, skipped }) => {
+      qc.invalidateQueries({ queryKey: ["tx"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: ["bank-connections"] });
+      toast.success(`${imported} lançamentos sincronizados${skipped ? `, ${skipped} já existiam` : ""}`);
+    },
+    onError: (e: Error) => {
+      qc.invalidateQueries({ queryKey: ["bank-connections"] });
+      toast.error(e.message);
+    },
+    onSettled: () => setSyncing(null),
+  });
+
 
   const delConnection = useMutation({
     mutationFn: async (id: string) => {
@@ -314,43 +342,66 @@ function ImportPage() {
           <h2 className="font-semibold">Open Finance (sincronização automática)</h2>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          A sincronização direta com o banco depende de um agregador regulado (Pluggy, Belvo ou Klavi). A estrutura já
-          está pronta aqui: cadastre os bancos que quer conectar e, assim que as credenciais do agregador forem
-          adicionadas, a sincronização passa a rodar sozinha usando as mesmas regras de categorização e o mesmo
-          controle de duplicidade da importação.
+          Conecte sua conta ou cartão pelo Open Finance e os lançamentos entram sozinhos, já categorizados pelas suas
+          regras e sem duplicar o que você já tem.
         </p>
 
+        {ofStatus && !ofStatus.configured && (
+          <div className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground">
+            A conexão com o agregador ainda não está ativa nesta conta. Assim que as credenciais forem cadastradas, o
+            botão abaixo abre a tela oficial do seu banco.
+          </div>
+        )}
+
         <div className="mt-4 flex flex-wrap gap-2">
-          <Input
-            className="max-w-xs"
-            value={institution}
-            onChange={(e) => setInstitution(e.target.value)}
-            placeholder="Ex: Nubank, Itaú, Inter"
-          />
-          <Button variant="outline" onClick={() => addConnection.mutate()} disabled={addConnection.isPending}>
-            <Building2 className="mr-2 h-4 w-4" /> Adicionar banco
+          <Button onClick={() => connectBank.mutate(undefined)} disabled={connectBank.isPending || !ofStatus?.configured}>
+            <Building2 className="mr-2 h-4 w-4" />
+            {connectBank.isPending ? "Abrindo..." : "Conectar banco"}
           </Button>
         </div>
 
         <div className="mt-4 divide-y divide-border rounded-lg border border-border">
           {connections.length === 0 && (
-            <p className="p-4 text-center text-sm text-muted-foreground">Nenhum banco registrado.</p>
+            <p className="p-4 text-center text-sm text-muted-foreground">Nenhum banco conectado.</p>
           )}
           {connections.map((c: any) => (
-            <div key={c.id} className="flex items-center justify-between p-3">
+            <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 p-3">
               <div>
                 <p className="text-sm font-medium">{c.institution_name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {c.status === "pending" ? "Aguardando conexão do agregador" : c.status}
+                  {c.status === "error"
+                    ? c.last_error || "Erro na última sincronização"
+                    : c.last_synced_at
+                      ? `Sincronizado em ${new Date(c.last_synced_at).toLocaleString("pt-BR")}`
+                      : c.status === "connected"
+                        ? "Conectado — sincronize para trazer os lançamentos"
+                        : "Aguardando autorização no banco"}
                 </p>
               </div>
-              <Button variant="ghost" size="icon" onClick={() => delConnection.mutate(c.id)}>
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={syncing === c.id || !c.external_item_id}
+                  onClick={() => syncBank.mutate(c.id)}
+                >
+                  <RefreshCw className={`mr-2 h-3.5 w-3.5 ${syncing === c.id ? "animate-spin" : ""}`} />
+                  {syncing === c.id ? "Sincronizando" : "Sincronizar"}
+                </Button>
+                {c.external_item_id && (
+                  <Button variant="ghost" size="sm" onClick={() => connectBank.mutate(c.external_item_id)}>
+                    Reconectar
+                  </Button>
+                )}
+                <Button variant="ghost" size="icon" onClick={() => delConnection.mutate(c.id)}>
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>
       </Card>
+
     </div>
   );
 }
