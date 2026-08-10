@@ -20,6 +20,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedRulesRouteImport } from './routes/_authenticated/rules'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedPrecificacaoRouteImport } from './routes/_authenticated/precificacao'
+import { Route as AuthenticatedOpenFinanceRouteImport } from './routes/_authenticated/open-finance'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedInstallmentsRouteImport } from './routes/_authenticated/installments'
 import { Route as AuthenticatedImportRouteImport } from './routes/_authenticated/import'
@@ -84,6 +85,12 @@ const AuthenticatedPrecificacaoRoute =
     path: '/precificacao',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOpenFinanceRoute =
+  AuthenticatedOpenFinanceRouteImport.update({
+    id: '/open-finance',
+    path: '/open-finance',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -134,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/import': typeof AuthenticatedImportRoute
   '/installments': typeof AuthenticatedInstallmentsRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/open-finance': typeof AuthenticatedOpenFinanceRoute
   '/precificacao': typeof AuthenticatedPrecificacaoRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/rules': typeof AuthenticatedRulesRoute
@@ -153,6 +161,7 @@ export interface FileRoutesByTo {
   '/import': typeof AuthenticatedImportRoute
   '/installments': typeof AuthenticatedInstallmentsRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/open-finance': typeof AuthenticatedOpenFinanceRoute
   '/precificacao': typeof AuthenticatedPrecificacaoRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/rules': typeof AuthenticatedRulesRoute
@@ -174,6 +183,7 @@ export interface FileRoutesById {
   '/_authenticated/import': typeof AuthenticatedImportRoute
   '/_authenticated/installments': typeof AuthenticatedInstallmentsRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/open-finance': typeof AuthenticatedOpenFinanceRoute
   '/_authenticated/precificacao': typeof AuthenticatedPrecificacaoRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/rules': typeof AuthenticatedRulesRoute
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/import'
     | '/installments'
     | '/onboarding'
+    | '/open-finance'
     | '/precificacao'
     | '/reports'
     | '/rules'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/import'
     | '/installments'
     | '/onboarding'
+    | '/open-finance'
     | '/precificacao'
     | '/reports'
     | '/rules'
@@ -234,6 +246,7 @@ export interface FileRouteTypes {
     | '/_authenticated/import'
     | '/_authenticated/installments'
     | '/_authenticated/onboarding'
+    | '/_authenticated/open-finance'
     | '/_authenticated/precificacao'
     | '/_authenticated/reports'
     | '/_authenticated/rules'
@@ -329,6 +342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPrecificacaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/open-finance': {
+      id: '/_authenticated/open-finance'
+      path: '/open-finance'
+      fullPath: '/open-finance'
+      preLoaderRoute: typeof AuthenticatedOpenFinanceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
@@ -389,6 +409,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedImportRoute: typeof AuthenticatedImportRoute
   AuthenticatedInstallmentsRoute: typeof AuthenticatedInstallmentsRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedOpenFinanceRoute: typeof AuthenticatedOpenFinanceRoute
   AuthenticatedPrecificacaoRoute: typeof AuthenticatedPrecificacaoRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedRulesRoute: typeof AuthenticatedRulesRoute
@@ -404,6 +425,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedImportRoute: AuthenticatedImportRoute,
   AuthenticatedInstallmentsRoute: AuthenticatedInstallmentsRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedOpenFinanceRoute: AuthenticatedOpenFinanceRoute,
   AuthenticatedPrecificacaoRoute: AuthenticatedPrecificacaoRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedRulesRoute: AuthenticatedRulesRoute,
@@ -425,13 +447,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
