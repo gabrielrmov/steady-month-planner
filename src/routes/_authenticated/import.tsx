@@ -10,8 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Building2, FileUp, Landmark, Trash2, Upload, Crown, Lock } from "lucide-react";
+import { Building2, FileUp, Landmark, RefreshCw, Trash2, Upload, Crown, Lock } from "lucide-react";
 import { categoryForDescription, fingerprint, parseStatement, type CategoryRule, type ParsedTx } from "@/lib/automation";
+import { createConnectToken, openFinanceStatus, saveBankItem, syncBankConnection } from "@/lib/openfinance.functions";
+import { openPluggyWidget } from "@/lib/pluggy-widget";
+
 
 export const Route = createFileRoute("/_authenticated/import")({
   head: () => ({
