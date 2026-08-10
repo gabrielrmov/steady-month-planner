@@ -56,7 +56,7 @@ function ImportPage() {
   const [parsed, setParsed] = useState<ParsedTx[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [cardId, setCardId] = useState<string>("none");
-  const [institution, setInstitution] = useState("");
+  const [syncing, setSyncing] = useState<string | null>(null);
 
   const plan = usePlan();
   const isPro = plan.hasAccess;
