@@ -343,8 +343,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="px-4 pb-24 pt-5 md:p-8 md:pb-8">{children}</main>
       </div>
 
+      <QuickAdd />
       <MobileTabBar />
     </div>
   );
 }
+
 
