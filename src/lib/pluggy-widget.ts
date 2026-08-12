@@ -1,4 +1,4 @@
-const SCRIPT_SRC = "https://cdn.pluggy.ai/pluggy-connect/v2.9.1/pluggy-connect.js";
+const SCRIPT_SRC = "https://cdn.pluggy.ai/pluggy-connect/latest/pluggy-connect.js";
 
 type PluggyConnectCtor = new (opts: {
   connectToken: string;
