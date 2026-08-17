@@ -18,10 +18,10 @@ export const Route = createFileRoute("/pricing")({
         content: "Compare o plano gratuito e o Pro do Finlist e escolha o que cabe no seu mês.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://steady-month-planner.lovable.app/pricing" },
+      { property: "og:url", content: "https://seu-dominio.com/pricing" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://steady-month-planner.lovable.app/pricing" }],
+    links: [{ rel: "canonical", href: "https://seu-dominio.com/pricing" }],
   }),
   component: PricingPage,
 });
@@ -99,7 +99,6 @@ const faqs = [
   },
 ];
 
-
 function PricingPage() {
   return (
     <div className="min-h-screen bg-background">
@@ -126,9 +125,12 @@ function PricingPage() {
             <Sparkles className="h-3.5 w-3.5 text-primary" />
             Planos simples, sem surpresa
           </div>
-          <h1 className="text-3xl font-bold tracking-tight md:text-5xl">Escolha o plano ideal para você</h1>
+          <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
+            Escolha o plano ideal para você
+          </h1>
           <p className="mt-4 text-muted-foreground">
-            Teste tudo por 30 dias. Depois, escolha entre o plano Pessoal (PF) ou Pessoal + PJ, com painel de precificação de serviços.
+            Teste tudo por 30 dias. Depois, escolha entre o plano Pessoal (PF) ou Pessoal + PJ, com
+            painel de precificação de serviços.
           </p>
         </div>
 
@@ -137,7 +139,9 @@ function PricingPage() {
             <Card
               key={p.name}
               className={`relative p-6 shadow-[var(--shadow-card)] ${
-                p.highlight ? "border-primary/50 bg-card shadow-[var(--shadow-elegant)]" : "border-border/60 bg-card"
+                p.highlight
+                  ? "border-primary/50 bg-card shadow-[var(--shadow-elegant)]"
+                  : "border-border/60 bg-card"
               }`}
             >
               {p.highlight && (
@@ -170,7 +174,9 @@ function PricingPage() {
         </div>
 
         <section className="mt-16">
-          <h2 className="text-center text-2xl font-semibold text-foreground">Perguntas frequentes</h2>
+          <h2 className="text-center text-2xl font-semibold text-foreground">
+            Perguntas frequentes
+          </h2>
           <div className="mx-auto mt-6 max-w-2xl space-y-4">
             {faqs.map((f) => (
               <Card key={f.q} className="border-border/60 bg-card p-5">
@@ -195,9 +201,15 @@ function PricingPage() {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 md:flex-row">
           <p>© {new Date().getFullYear()} Finlist</p>
           <div className="flex gap-4">
-            <Link to="/terms" className="hover:text-foreground">Termos</Link>
-            <Link to="/privacy" className="hover:text-foreground">Privacidade</Link>
-            <Link to="/" className="hover:text-foreground">Voltar para o início</Link>
+            <Link to="/terms" className="hover:text-foreground">
+              Termos
+            </Link>
+            <Link to="/privacy" className="hover:text-foreground">
+              Privacidade
+            </Link>
+            <Link to="/" className="hover:text-foreground">
+              Voltar para o início
+            </Link>
           </div>
         </div>
       </footer>

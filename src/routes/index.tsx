@@ -35,10 +35,10 @@ export const Route = createFileRoute("/")({
           "Checklist mensal, cartões, parcelas, relatórios e precificação PJ. Teste grátis por 30 dias.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://steady-month-planner.lovable.app/" },
+      { property: "og:url", content: "https://seu-dominio.com/" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://steady-month-planner.lovable.app/" }],
+    links: [{ rel: "canonical", href: "https://seu-dominio.com/" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -48,7 +48,7 @@ export const Route = createFileRoute("/")({
           name: "Finlist",
           applicationCategory: "FinanceApplication",
           operatingSystem: "Web",
-          url: "https://steady-month-planner.lovable.app/",
+          url: "https://seu-dominio.com/",
           offers: [
             { "@type": "Offer", price: "19", priceCurrency: "BRL", name: "Pessoal (PF)" },
             { "@type": "Offer", price: "39", priceCurrency: "BRL", name: "Pessoal + PJ" },
@@ -219,14 +219,20 @@ function Landing() {
             >
               <Wallet className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="truncate text-lg font-bold tracking-tight text-foreground">Finlist</span>
+            <span className="truncate text-lg font-bold tracking-tight text-foreground">
+              Finlist
+            </span>
           </Link>
           <div className="flex shrink-0 items-center gap-1.5">
             <Link to="/pricing" className="hidden sm:block">
-              <Button variant="ghost" size="sm">Planos</Button>
+              <Button variant="ghost" size="sm">
+                Planos
+              </Button>
             </Link>
             <Link to="/auth">
-              <Button variant="ghost" size="sm">Entrar</Button>
+              <Button variant="ghost" size="sm">
+                Entrar
+              </Button>
             </Link>
             <Link to="/auth">
               <Button size="sm">
@@ -253,8 +259,7 @@ function Landing() {
                 30 dias grátis · sem cartão de crédito
               </div>
               <h1 className="text-4xl font-bold leading-[1.05] tracking-tight md:text-6xl">
-                Toda conta do mês,{" "}
-                <span className="text-gradient">sob controle.</span>
+                Toda conta do mês, <span className="text-gradient">sob controle.</span>
               </h1>
               <p className="mt-5 max-w-xl text-lg text-muted-foreground">
                 Checklist mês a mês de contas a pagar e receber, cartões, parcelas, relatórios e
@@ -268,7 +273,9 @@ function Landing() {
                   </Button>
                 </Link>
                 <Link to="/pricing">
-                  <Button size="lg" variant="outline">Ver planos</Button>
+                  <Button size="lg" variant="outline">
+                    Ver planos
+                  </Button>
                 </Link>
               </div>
               <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
@@ -292,7 +299,9 @@ function Landing() {
           <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 md:grid-cols-4">
             {stats.map((s) => (
               <div key={s.label} className="text-center">
-                <p className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">{s.value}</p>
+                <p className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+                  {s.value}
+                </p>
                 <p className="mt-1 text-xs text-muted-foreground">{s.label}</p>
               </div>
             ))}
@@ -303,7 +312,9 @@ function Landing() {
         <section className="px-6 py-20">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Recursos</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                Recursos
+              </p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
                 Tudo que você precisa para fechar o mês no azul
               </h2>
@@ -333,13 +344,15 @@ function Landing() {
         <section className="border-y border-border bg-card/30 px-6 py-20">
           <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Módulo PJ</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                Módulo PJ
+              </p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
                 Descubra quanto cobrar por serviço
               </h2>
               <p className="mt-4 text-muted-foreground">
-                A calculadora considera custos fixos, pró-labore, horas produtivas, impostos e margem
-                para chegar ao preço justo — por markup, e não por chute.
+                A calculadora considera custos fixos, pró-labore, horas produtivas, impostos e
+                margem para chegar ao preço justo — por markup, e não por chute.
               </p>
               <ul className="mt-6 space-y-2.5 text-sm">
                 {[
@@ -386,11 +399,16 @@ function Landing() {
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 text-center">
               <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Como funciona</h2>
-              <p className="mt-3 text-muted-foreground">Três passos para começar a organizar suas finanças.</p>
+              <p className="mt-3 text-muted-foreground">
+                Três passos para começar a organizar suas finanças.
+              </p>
             </div>
             <div className="grid gap-5 md:grid-cols-3">
               {steps.map((s) => (
-                <div key={s.step} className="relative overflow-hidden rounded-2xl border border-border bg-card p-6">
+                <div
+                  key={s.step}
+                  className="relative overflow-hidden rounded-2xl border border-border bg-card p-6"
+                >
                   <span className="text-5xl font-bold text-primary/15">{s.step}</span>
                   <h3 className="mt-4 font-semibold text-foreground">{s.title}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
@@ -409,11 +427,16 @@ function Landing() {
                   <Star key={i} className="h-4 w-4 fill-primary text-primary" />
                 ))}
               </div>
-              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Amado por quem organiza o mês</h2>
+              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                Amado por quem organiza o mês
+              </h2>
             </div>
             <div className="grid gap-5 md:grid-cols-3">
               {testimonials.map((t) => (
-                <Card key={t.author} className="border-border/60 bg-card p-6 shadow-[var(--shadow-card)]">
+                <Card
+                  key={t.author}
+                  className="border-border/60 bg-card p-6 shadow-[var(--shadow-card)]"
+                >
                   <p className="text-sm leading-relaxed text-muted-foreground">"{t.quote}"</p>
                   <div className="mt-5 flex items-center gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
@@ -437,7 +460,9 @@ function Landing() {
               <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Shield className="h-6 w-6" />
               </div>
-              <h2 className="text-2xl font-bold tracking-tight md:text-4xl">Teste 30 dias, depois escolha seu plano</h2>
+              <h2 className="text-2xl font-bold tracking-tight md:text-4xl">
+                Teste 30 dias, depois escolha seu plano
+              </h2>
               <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
                 Pessoal por R$ 19/mês para as finanças do dia a dia, ou Pessoal + PJ por R$ 39/mês
                 com precificação de serviços. Cancele quando quiser.
@@ -447,7 +472,9 @@ function Landing() {
                   <Button size="lg">Começar teste grátis</Button>
                 </Link>
                 <Link to="/pricing">
-                  <Button size="lg" variant="outline">Ver planos e preços</Button>
+                  <Button size="lg" variant="outline">
+                    Ver planos e preços
+                  </Button>
                 </Link>
               </div>
             </div>
@@ -458,7 +485,9 @@ function Landing() {
         <section className="border-t border-border bg-card/30 px-6 py-20">
           <div className="mx-auto max-w-3xl">
             <div className="mb-12 text-center">
-              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Perguntas frequentes</h2>
+              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                Perguntas frequentes
+              </h2>
             </div>
             <div className="space-y-4">
               {faqs.map((f) => (
@@ -505,10 +534,18 @@ function Landing() {
             <span className="font-semibold text-foreground">Finlist</span>
           </div>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/pricing" className="hover:text-foreground">Planos</Link>
-            <Link to="/auth" className="hover:text-foreground">Entrar</Link>
-            <Link to="/terms" className="hover:text-foreground">Termos</Link>
-            <Link to="/privacy" className="hover:text-foreground">Privacidade</Link>
+            <Link to="/pricing" className="hover:text-foreground">
+              Planos
+            </Link>
+            <Link to="/auth" className="hover:text-foreground">
+              Entrar
+            </Link>
+            <Link to="/terms" className="hover:text-foreground">
+              Termos
+            </Link>
+            <Link to="/privacy" className="hover:text-foreground">
+              Privacidade
+            </Link>
           </div>
           <p>© {new Date().getFullYear()} Finlist. Todos os direitos reservados.</p>
         </div>
