@@ -12,4 +12,4 @@ Disallow: /reports
 Disallow: /settings
 Disallow: /onboarding
 
-Sitemap: https://steady-month-planner.lovable.app/sitemap.xml
+Sitemap: https://seu-dominio.com/sitemap.xml
