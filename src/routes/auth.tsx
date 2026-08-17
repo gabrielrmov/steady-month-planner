@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,14 +13,18 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Entrar ou criar conta | Finlist" },
-      { name: "description", content: "Acesse o Finlist para organizar contas a pagar, receber, cartões e parcelas do mês." },
+      {
+        name: "description",
+        content:
+          "Acesse o Finlist para organizar contas a pagar, receber, cartões e parcelas do mês.",
+      },
       { property: "og:title", content: "Entrar ou criar conta | Finlist" },
       { property: "og:description", content: "Acesse o Finlist e organize suas contas do mês." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://steady-month-planner.lovable.app/auth" },
+      { property: "og:url", content: "https://seu-dominio.com/auth" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://steady-month-planner.lovable.app/auth" }],
+    links: [{ rel: "canonical", href: "https://seu-dominio.com/auth" }],
   }),
   component: AuthPage,
 });
@@ -34,7 +37,6 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -80,12 +82,14 @@ function AuthPage() {
   };
 
   const handleGoogle = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    // Direct Supabase OAuth (no third-party proxy). Configure the Google
+    // provider (Client ID/Secret + redirect URL) in your Supabase project's
+    // Authentication > Providers settings for this to work.
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin },
     });
-    if (result.error) return toast.error(result.error.message ?? "Falha no login");
-    if (result.redirected) return;
-    navigate({ to: "/onboarding", search: isProIntent ? { plan: "pro" } : {} });
+    if (error) return toast.error(error.message ?? "Falha no login");
   };
 
   return (
@@ -128,11 +132,23 @@ function AuthPage() {
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div>
                   <Label htmlFor="email-in">Email</Label>
-                  <Input id="email-in" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <Input
+                    id="email-in"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                 </div>
                 <div>
                   <Label htmlFor="pw-in">Senha</Label>
-                  <Input id="pw-in" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <Input
+                    id="pw-in"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Entrando..." : "Entrar"}
@@ -145,15 +161,33 @@ function AuthPage() {
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div>
                   <Label htmlFor="name-up">Nome</Label>
-                  <Input id="name-up" value={name} onChange={(e) => setName(e.target.value)} required />
+                  <Input
+                    id="name-up"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
                 </div>
                 <div>
                   <Label htmlFor="email-up">Email</Label>
-                  <Input id="email-up" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <Input
+                    id="email-up"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                 </div>
                 <div>
                   <Label htmlFor="pw-up">Senha</Label>
-                  <Input id="pw-up" type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <Input
+                    id="pw-up"
+                    type="password"
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Criando..." : "Criar conta grátis"}

@@ -10,7 +10,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -39,17 +38,11 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold">Algo deu errado</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Não foi possível carregar esta página.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">Não foi possível carregar esta página.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -80,14 +73,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Finlist — Organizador financeiro mensal" },
       {
         property: "og:description",
-        content: "Organize suas contas a pagar e receber com checklist mensal, categorias e dashboard de fluxo de caixa.",
+        content:
+          "Organize suas contas a pagar e receber com checklist mensal, categorias e dashboard de fluxo de caixa.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Finlist — Organizador financeiro mensal" },
-      { name: "twitter:description", content: "Organize suas contas a pagar e receber com checklist mensal, categorias e dashboard de fluxo de caixa." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/bed0bb0a-6ef7-4897-8b47-8eab5e05b821/id-preview-aa3bc50d--78c5557e-c2db-4ab4-88f8-e302c686e737.lovable.app-1784814410757.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/bed0bb0a-6ef7-4897-8b47-8eab5e05b821/id-preview-aa3bc50d--78c5557e-c2db-4ab4-88f8-e302c686e737.lovable.app-1784814410757.png" },
+      {
+        name: "twitter:description",
+        content:
+          "Organize suas contas a pagar e receber com checklist mensal, categorias e dashboard de fluxo de caixa.",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
