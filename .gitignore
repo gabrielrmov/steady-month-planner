@@ -30,3 +30,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables (contains Supabase project keys)
+.env
+.env.*
+!.env.example
+_to_delete/
