@@ -36,8 +36,8 @@ function useImportCount() {
   return useQuery({
     queryKey: ["import-count"],
     queryFn: async () => {
-      const { data: userRes } = await supabase.auth.getUser();
-      const uid = userRes.user?.id;
+      const { data: userRes } = await supabase.auth.getSession();
+      const uid = userRes.session?.user.id;
       if (!uid) return 0;
       const { count, error } = await supabase
         .from("import_batches")
@@ -101,18 +101,18 @@ function ImportPage() {
   const importAll = useMutation({
     mutationFn: async () => {
       if (atImportLimit) throw new Error("Limite de importações atingido. Assine um plano para continuar.");
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) throw new Error("Sessão expirada");
+      const { data: u } = await supabase.auth.getSession();
+      if (!u.session) throw new Error("Sessão expirada");
 
       const { data: batch, error: be } = await supabase
         .from("import_batches")
-        .insert({ user_id: u.user.id, source: "file", file_name: fileName })
+        .insert({ user_id: u.session.user.id, source: "file", file_name: fileName })
         .select()
         .single();
       if (be) throw be;
 
       const rows = parsed.map((t) => ({
-        user_id: u.user!.id,
+        user_id: u.session.user.id,
         description: t.description,
         amount: t.amount,
         type: t.type,
