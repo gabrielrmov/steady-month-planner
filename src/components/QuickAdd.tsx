@@ -58,13 +58,13 @@ export function QuickAdd() {
     const value = Number(String(amount).replace(",", "."));
     if (!description.trim() || !value) return toast.error("Informe descrição e valor");
     setSaving(true);
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) {
+    const { data: userData } = await supabase.auth.getSession();
+    if (!userData.session) {
       setSaving(false);
       return toast.error("Sessão expirada");
     }
     const { error } = await supabase.from("transactions").insert({
-      user_id: userData.user.id,
+      user_id: userData.session.user.id,
       description: description.trim(),
       amount: value,
       type,
