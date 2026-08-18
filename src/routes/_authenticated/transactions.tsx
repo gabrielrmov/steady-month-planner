@@ -414,8 +414,8 @@ function TransactionForm({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) {
+    const { data: userData } = await supabase.auth.getSession();
+    if (!userData.session) {
       setSaving(false);
       return toast.error("Sessão expirada");
     }
@@ -449,7 +449,7 @@ function TransactionForm({
 
     const totalAmount = Number(amount);
     const base = {
-      user_id: userData.user.id,
+      user_id: userData.session.user.id,
       description,
       type,
       category_id: categoryId ?? null,
