@@ -53,8 +53,8 @@ function OnboardingPage() {
   const [categories, setCategories] = useState(defaultCategories);
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: userRes }) => {
-      const uid = userRes.user?.id;
+    supabase.auth.getSession().then(async ({ data: userRes }) => {
+      const uid = userRes.session?.user.id;
       if (!uid) return;
       const { data } = await supabase.from("profiles").select("onboarding_completed, full_name").eq("id", uid).maybeSingle();
       if (data?.onboarding_completed) {
@@ -70,8 +70,8 @@ function OnboardingPage() {
 
   const finishOnboarding = async () => {
     setLoading(true);
-    const { data: userRes } = await supabase.auth.getUser();
-    const uid = userRes.user?.id;
+    const { data: userRes } = await supabase.auth.getSession();
+    const uid = userRes.session?.user.id;
     if (!uid) return;
 
     const { error: profileError } = await supabase
