@@ -81,9 +81,9 @@ function useProfile() {
   return useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
-      const { data: userRes } = await supabase.auth.getUser();
-      const uid = userRes.user?.id;
-      if (!uid) return null;
+            const { data: sessionRes } = await supabase.auth.getSession();
+      const uid = sessionRes.session?.user.id;
+            if (!uid) return null;
       const { data, error } = await supabase
         .from("profiles")
         .select("id, full_name, email")
