@@ -43,10 +43,10 @@ function CategoriesPage() {
 
   const add = useMutation({
     mutationFn: async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("Sessão expirada");
+      const { data: userData } = await supabase.auth.getSession();
+      if (!userData.session) throw new Error("Sessão expirada");
       const { error } = await supabase.from("categories").insert({
-        user_id: userData.user.id,
+        user_id: userData.session.user.id,
         name,
         color,
         kind,
