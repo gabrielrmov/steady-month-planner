@@ -21,6 +21,7 @@ import {
   User,
   Sparkles,
   Calculator,
+    PieChart,
 
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,6 +71,7 @@ const groups = [
     items: [
       { to: "/reports", label: "Relatórios", icon: BarChart3, tab: undefined },
       { to: "/precificacao", label: "Precificação", icon: Calculator, tab: undefined },
+      { to: "/divisao-ganhos", label: "Divisão de Ganhos", icon: PieChart, tab: undefined },
     ],
   },
 ] as const;
