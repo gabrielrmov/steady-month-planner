@@ -39,8 +39,8 @@ export function usePlan() {
   const query = useQuery({
     queryKey: ["subscription"],
     queryFn: async (): Promise<PlanState> => {
-      const { data: userRes } = await supabase.auth.getUser();
-      const uid = userRes.user?.id;
+            const { data: sessionRes } = await supabase.auth.getSession();
+            const uid = sessionRes.session?.user.id;
       if (!uid) return FREE_STATE;
 
       const { data, error } = await supabase
@@ -50,7 +50,7 @@ export function usePlan() {
         .maybeSingle();
       if (error) throw error;
 
-      const createdAt = userRes.user?.created_at ? new Date(userRes.user.created_at) : new Date();
+            const createdAt = sessionRes.session?.user.created_at ? new Date(sessionRes.session.user.created_at) : new Date();
       const trialEndsAt = data?.trial_ends_at
         ? new Date(data.trial_ends_at)
         : new Date(createdAt.getTime() + 30 * 86400000);
