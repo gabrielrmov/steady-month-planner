@@ -62,11 +62,11 @@ function RulesPage() {
 
   const add = useMutation({
     mutationFn: async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) throw new Error("Sessão expirada");
+      const { data: u } = await supabase.auth.getSession();
+      if (!u.session) throw new Error("Sessão expirada");
       if (!pattern.trim() || !categoryId) throw new Error("Preencha o texto e a categoria");
       const { error } = await supabase.from("category_rules").insert({
-        user_id: u.user.id,
+        user_id: u.session.user.id,
         pattern: pattern.trim(),
         match_type: matchType,
         category_id: categoryId,
