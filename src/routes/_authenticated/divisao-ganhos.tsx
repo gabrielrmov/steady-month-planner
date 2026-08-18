@@ -67,10 +67,10 @@ function IncomeSplitPage() {
 
   const seed = useMutation({
         mutationFn: async () => {
-                const { data: userData } = await supabase.auth.getUser();
-                if (!userData.user) throw new Error("Sessão expirada");
+                const { data: userData } = await supabase.auth.getSession();
+                if (!userData.session) throw new Error("Sessão expirada");
                 const { error } = await supabase.from("income_split_categories").insert(
-                          DEFAULT_CATEGORIES.map((c) => ({ ...c, user_id: userData.user!.id }))
+                          DEFAULT_CATEGORIES.map((c) => ({ ...c, user_id: userData.session!.user.id }))
                         );
                 if (error) throw error;
         },
@@ -108,10 +108,10 @@ function IncomeSplitPage() {
 
   const addRow = useMutation({
         mutationFn: async () => {
-                const { data: userData } = await supabase.auth.getUser();
-                if (!userData.user) throw new Error("Sessão expirada");
+                const { data: userData } = await supabase.auth.getSession();
+                if (!userData.session) throw new Error("Sessão expirada");
                 const { error } = await supabase.from("income_split_categories").insert({
-                          user_id: userData.user.id,
+                          user_id: userData.session.user.id,
                           name: newName,
                           percentage: newPct,
                           position: rows.length,
