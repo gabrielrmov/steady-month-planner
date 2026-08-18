@@ -38,6 +38,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useState, type ReactNode } from "react";
+import { QuickAdd } from "@/components/QuickAdd";
 
 const transactionSubItems = [
   { to: "/transactions", label: "Recorrentes", tab: undefined, icon: ListChecks },
