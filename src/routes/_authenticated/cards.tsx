@@ -80,10 +80,10 @@ function CardsPage() {
   const add = useMutation({
     mutationFn: async () => {
       if (atLimit) throw new Error("Limite do teste/plano atual atingido. Assine um plano para adicionar mais cartões.");
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("Sessão expirada");
+      const { data: userData } = await supabase.auth.getSession();
+      if (!userData.session) throw new Error("Sessão expirada");
       const { error } = await supabase.from("cards").insert({
-        user_id: userData.user.id,
+        user_id: userData.session.user.id,
         name,
         color,
         closing_day: closingDay ? Number(closingDay) : null,
