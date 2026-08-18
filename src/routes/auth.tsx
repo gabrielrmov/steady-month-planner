@@ -39,12 +39,12 @@ function AuthPage() {
   const [name, setName] = useState("");
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) return;
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!data.session) return;
       const { data: profile } = await supabase
         .from("profiles")
         .select("onboarding_completed")
-        .eq("id", data.user.id)
+        .eq("id", data.session.user.id)
         .maybeSingle();
       if (profile?.onboarding_completed) {
         navigate({ to: "/dashboard" });
