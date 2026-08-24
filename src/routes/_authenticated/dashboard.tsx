@@ -484,7 +484,7 @@ function StatCard({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">{label}</p>
-          <p className="mt-1.5 truncate text-lg font-bold tracking-tight sm:mt-2 sm:text-2xl">{value}</p>
+          <p className="mt-1.5 truncate text-lg font-bold tracking-tight sm:mt-2 sm:text-2xl lg:text-xl xl:text-2xl">{value}</p>
           {delta !== null && delta !== undefined && delta !== 0 && (
             <p className={`mt-1 flex items-center gap-1 text-xs ${good ? "text-success" : "text-destructive"}`}>
               {up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
@@ -493,7 +493,7 @@ function StatCard({
           )}
           {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
         </div>
-        <div className={`hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg sm:flex ${toneClass}`}>
+        <div className={`hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg sm:flex lg:hidden xl:flex ${toneClass}`}>
           <Icon className="h-5 w-5" />
         </div>
       </div>
