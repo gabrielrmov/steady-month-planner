@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Plus, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
@@ -34,7 +34,10 @@ export function QuickAdd() {
   const [dueDate, setDueDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const [categoryId, setCategoryId] = useState<string | undefined>();
   const [saving, setSaving] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
   const qc = useQueryClient();
+  /* No mobile, esconde o botao flutuante ao rolar para baixo (evita cobrir conteudo/acoes); reaparece ao rolar para cima, ao parar de rolar, ou perto do topo da pagina. No desktop fica sempre visivel. */ useEffect(() => { if (typeof window === "undefined") return; lastY.current = window.scrollY; let idleTimer: ReturnType<typeof setTimeout>; const onScroll = () => { if (window.matchMedia("(min-width: 768px)").matches) { setHidden(false); return; } const y = window.scrollY; const delta = y - lastY.current; if (y < 24) { setHidden(false); } else if (delta > 6) { setHidden(true); } else if (delta < -6) { setHidden(false); } lastY.current = y; clearTimeout(idleTimer); idleTimer = setTimeout(() => setHidden(false), 500); }; window.addEventListener("scroll", onScroll, { passive: true }); return () => { window.removeEventListener("scroll", onScroll); clearTimeout(idleTimer); }; }, []);
 
   const { data: cats = [] } = useQuery({
     queryKey: ["categories"],
@@ -90,7 +93,7 @@ export function QuickAdd() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Novo lançamento"
-        className="fixed bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-2xl text-primary-foreground shadow-[var(--shadow-elegant)] transition-transform hover:scale-105 active:scale-95 md:bottom-8 md:right-8"
+        className={cn("fixed bottom-20 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-2xl text-primary-foreground shadow-[var(--shadow-elegant)] ring-4 ring-background transition-all duration-200 hover:scale-105 active:scale-95 sm:h-14 sm:w-14 md:bottom-8 md:right-8", hidden && "pointer-events-none translate-y-24 opacity-0")}
         style={{ background: "var(--gradient-primary)" }}
       >
         <Plus className="h-6 w-6" />
