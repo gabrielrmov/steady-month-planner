@@ -343,7 +343,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <div className="md:pl-64">
-        <main className="px-4 pb-24 pt-5 md:p-8 md:pb-8">{children}</main>
+        <main className="px-4 pb-36 pt-5 md:p-8 md:pb-8">{children}</main>
       </div>
 
       <QuickAdd />
