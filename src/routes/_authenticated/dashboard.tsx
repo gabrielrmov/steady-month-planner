@@ -26,6 +26,7 @@ import {
   TrendingDown,
   PiggyBank,
   Sparkles,
+  Clock,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { ensureRecurringForMonth } from "@/lib/automation";
@@ -125,6 +126,8 @@ function Dashboard() {
   const expenseTotal = expense.reduce((s, t) => s + Number(t.amount), 0);
   const expensePaid = expense.filter((t) => t.status === "paid").reduce((s, t) => s + Number(t.amount), 0);
   const expensePending = expenseTotal - expensePaid;
+  const incomePaid = income.filter((t) => t.status === "paid").reduce((s, t) => s + Number(t.amount), 0);
+  const incomePending = incomeTotal - incomePaid;
   const balance = incomeTotal - expenseTotal;
   const paidRatio = expenseTotal > 0 ? Math.round((expensePaid / expenseTotal) * 100) : 0;
   const savingRate = incomeTotal > 0 ? Math.round((balance / incomeTotal) * 100) : 0;
@@ -212,7 +215,7 @@ function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
         <StatCard
           label="Entradas previstas"
           value={brl(incomeTotal)}
@@ -241,6 +244,19 @@ function Dashboard() {
           icon={AlertCircle}
           tone="warning"
           subtitle={overdue > 0 ? `${overdue} em atraso` : "em dia"}
+        />
+        <StatCard
+          label="Ainda a receber"
+          value={brl(incomePending)}
+          icon={Clock}
+          tone="warning"
+          subtitle={
+            incomeTotal > 0
+              ? incomePending > 0
+                ? `${Math.round((incomePending / incomeTotal) * 100)}% do previsto`
+                : "tudo recebido"
+              : undefined
+          }
         />
       </div>
 
