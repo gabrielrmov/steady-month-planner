@@ -35,6 +35,9 @@ const FREE_STATE: PlanState = {
   trialEndsAt: null,
 };
 
+/* Estado otimista enquanto a assinatura ainda esta carregando: evita mostrar o paywall "teste expirado" por engano antes da consulta terminar. */
+const LOADING_STATE: PlanState = { plan: "trial", hasAccess: true, hasPj: true, isTrial: true, trialDaysLeft: 0, trialEndsAt: null };
+
 export function usePlan() {
   const query = useQuery({
     queryKey: ["subscription"],
@@ -73,5 +76,5 @@ export function usePlan() {
     },
   });
 
-  return query.data ?? FREE_STATE;
+  return query.data ?? LOADING_STATE;
 }
