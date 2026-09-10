@@ -12,4 +12,4 @@ Disallow: /reports
 Disallow: /settings
 Disallow: /onboarding
 
-Sitemap: https://seu-dominio.com/sitemap.xml
+Sitemap: https://steady-month-planner.dsggabriel7.workers.dev/sitemap.xml
