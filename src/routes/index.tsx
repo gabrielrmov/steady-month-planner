@@ -35,10 +35,10 @@ export const Route = createFileRoute("/")({
           "Checklist mensal, cartões, parcelas, relatórios e precificação PJ. Teste grátis por 30 dias.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://seu-dominio.com/" },
+      { property: "og:url", content: "https://steady-month-planner.dsggabriel7.workers.dev/" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://seu-dominio.com/" }],
+    links: [{ rel: "canonical", href: "https://steady-month-planner.dsggabriel7.workers.dev/" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -48,7 +48,7 @@ export const Route = createFileRoute("/")({
           name: "Finlist",
           applicationCategory: "FinanceApplication",
           operatingSystem: "Web",
-          url: "https://seu-dominio.com/",
+          url: "https://steady-month-planner.dsggabriel7.workers.dev/",
           offers: [
             { "@type": "Offer", price: "19", priceCurrency: "BRL", name: "Pessoal (PF)" },
             { "@type": "Offer", price: "39", priceCurrency: "BRL", name: "Pessoal + PJ" },
