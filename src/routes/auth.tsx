@@ -21,10 +21,10 @@ export const Route = createFileRoute("/auth")({
       { property: "og:title", content: "Entrar ou criar conta | Finlist" },
       { property: "og:description", content: "Acesse o Finlist e organize suas contas do mês." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://seu-dominio.com/auth" },
+      { property: "og:url", content: "https://steady-month-planner.dsggabriel7.workers.dev/auth" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://seu-dominio.com/auth" }],
+    links: [{ rel: "canonical", href: "https://steady-month-planner.dsggabriel7.workers.dev/auth" }],
   }),
   component: AuthPage,
 });
