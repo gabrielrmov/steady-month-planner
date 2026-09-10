@@ -12,10 +12,10 @@ export const Route = createFileRoute("/terms")({
       { property: "og:title", content: "Termos de uso | Finlist" },
       { property: "og:description", content: "Termos de uso do Finlist." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://seu-dominio.com/terms" },
+      { property: "og:url", content: "https://steady-month-planner.dsggabriel7.workers.dev/terms" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://seu-dominio.com/terms" }],
+        links: [{ rel: "canonical", href: "https://steady-month-planner.dsggabriel7.workers.dev/terms" }],
   }),
   component: TermsPage,
 });
