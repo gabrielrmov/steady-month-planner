@@ -18,10 +18,10 @@ export const Route = createFileRoute("/pricing")({
         content: "Compare o plano gratuito e o Pro do Finlist e escolha o que cabe no seu mês.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://seu-dominio.com/pricing" },
+      { property: "og:url", content: "https://steady-month-planner.dsggabriel7.workers.dev/pricing" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://seu-dominio.com/pricing" }],
+    links: [{ rel: "canonical", href: "https://steady-month-planner.dsggabriel7.workers.dev/pricing" }],
   }),
   component: PricingPage,
 });
