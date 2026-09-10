@@ -77,7 +77,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Organize suas contas a pagar e receber com checklist mensal, categorias e dashboard de fluxo de caixa.",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "https://steady-month-planner.dsggabriel7.workers.dev/og-image.png" }, { name: "twitter:card", content: "summary_large_image" }, { name: "twitter:image", content: "https://steady-month-planner.dsggabriel7.workers.dev/og-image.png" }, { name: "theme-color", content: "#04070F" },
       { name: "twitter:title", content: "Finlist — Organizador financeiro mensal" },
       {
         name: "twitter:description",
@@ -86,7 +86,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
     links: [
-      { rel: "stylesheet", href: appCss },
+      { rel: "stylesheet", href: appCss }, { rel: "icon", type: "image/svg+xml", href: "/icon.svg" }, { rel: "icon", href: "/favicon.ico", sizes: "any" }, { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
       {
