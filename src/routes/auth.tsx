@@ -98,7 +98,7 @@ function AuthPage() {
           <span className="text-xl font-semibold tracking-tight text-foreground">Finlist</span>
         </Link>
 
-        <Card className="border-border/60 bg-card p-6 shadow-[var(--shadow-card)]">
+        <Card className="border-border/60 bg-card p-6">
           <div className="mb-6 text-center">
             <h1 className="text-lg font-semibold text-foreground">
               {isProIntent ? "Criar conta e assinar o Pro" : "Entrar no Finlist"}
