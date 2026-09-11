@@ -163,7 +163,7 @@ function ProductPreview() {
     { name: "Notebook 4/10", tag: "Parcela", value: "R$ 420,00", done: false },
   ];
   return (
-    <div className="rounded-2xl border border-border bg-card">
+    <div className="glow-ring rounded-2xl border border-border bg-card">
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
         <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
         <span className="h-2.5 w-2.5 rounded-full bg-warning/70" />
@@ -233,7 +233,7 @@ function Landing() {
               </Button>
             </Link>
             <Link to="/auth">
-              <Button size="sm">
+              <Button size="sm" className="hover-glow">
                 Testar grátis
                 <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Button>
@@ -244,29 +244,33 @@ function Landing() {
 
       <main>
         {/* Hero */}
-        <section className="px-6 pt-16 pb-20 md:pt-24 md:pb-28">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.05fr_1fr]">
+        <section className="relative overflow-hidden px-6 pt-16 pb-20 md:pt-24 md:pb-28">
+          <div className="ambient-glow" aria-hidden="true" />
+          <div className="bg-grid absolute inset-0" aria-hidden="true" />
+          <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.05fr_1fr]">
             <div>
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
+              <div className="hover-glow mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-background/60 px-3.5 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur-sm">
                 <Sparkles className="h-3.5 w-3.5 text-primary" />
                 30 dias grátis · sem cartão de crédito
               </div>
-              <h1 className="text-4xl font-bold leading-[1.05] tracking-tight md:text-6xl">
-                Toda conta do mês, <span className="text-primary">sob controle.</span>
+              <h1 className="text-5xl font-extrabold leading-[1.02] tracking-tighter md:text-7xl">
+                Toda conta do mês,
+                <br />
+                <span className="text-gradient">sob controle.</span>
               </h1>
-              <p className="mt-5 max-w-xl text-lg text-muted-foreground">
+              <p className="mt-6 max-w-xl text-lg text-muted-foreground">
                 Checklist mês a mês de contas a pagar e receber, cartões, parcelas, relatórios e
                 precificação de serviços para quem também é PJ.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link to="/auth">
-                  <Button size="lg">
+                  <Button size="lg" className="hover-glow glow-ring">
                     Começar teste de 30 dias
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
                 <Link to="/pricing">
-                  <Button size="lg" variant="outline">
+                  <Button size="lg" variant="outline" className="hover-glow">
                     Ver planos
                   </Button>
                 </Link>
@@ -308,7 +312,7 @@ function Landing() {
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                 Recursos
               </p>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
+              <h2 className="mt-3 text-3xl font-extrabold tracking-tighter md:text-4xl">
                 Tudo que você precisa para fechar o mês no azul
               </h2>
               <p className="mt-3 text-muted-foreground">
@@ -340,7 +344,7 @@ function Landing() {
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                 Módulo PJ
               </p>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
+              <h2 className="mt-3 text-3xl font-extrabold tracking-tighter md:text-4xl">
                 Descubra quanto cobrar por serviço
               </h2>
               <p className="mt-4 text-muted-foreground">
@@ -391,15 +395,15 @@ function Landing() {
         <section className="px-6 py-20">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 text-center">
-              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Como funciona</h2>
+              <h2 className="text-3xl font-extrabold tracking-tighter md:text-4xl">Como funciona</h2>
               <p className="mt-3 text-muted-foreground">
                 Três passos para começar a organizar suas finanças.
               </p>
             </div>
             <div className="grid gap-5 md:grid-cols-3">
               {steps.map((s) => (
-                <div key={s.step} className="rounded-2xl border border-border bg-card p-6">
-                  <span className="text-5xl font-bold text-primary/15">{s.step}</span>
+                <div key={s.step} className="hover-lift rounded-2xl border border-border bg-card p-6">
+                  <span className="text-gradient text-5xl font-extrabold opacity-30">{s.step}</span>
                   <h3 className="mt-4 font-semibold text-foreground">{s.title}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
                 </div>
@@ -417,7 +421,7 @@ function Landing() {
                   <Star key={i} className="h-4 w-4 fill-primary text-primary" />
                 ))}
               </div>
-              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+              <h2 className="text-3xl font-extrabold tracking-tighter md:text-4xl">
                 Amado por quem organiza o mês
               </h2>
             </div>
@@ -447,7 +451,7 @@ function Landing() {
               <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Shield className="h-6 w-6" />
               </div>
-              <h2 className="text-2xl font-bold tracking-tight md:text-4xl">
+              <h2 className="text-2xl font-extrabold tracking-tighter md:text-4xl">
                 Teste 30 dias, depois escolha seu plano
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
@@ -456,10 +460,12 @@ function Landing() {
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <Link to="/auth">
-                  <Button size="lg">Começar teste grátis</Button>
+                  <Button size="lg" className="hover-glow glow-ring">
+                    Começar teste grátis
+                  </Button>
                 </Link>
                 <Link to="/pricing">
-                  <Button size="lg" variant="outline">
+                  <Button size="lg" variant="outline" className="hover-glow">
                     Ver planos e preços
                   </Button>
                 </Link>
@@ -472,7 +478,7 @@ function Landing() {
         <section className="border-t border-border px-6 py-20">
           <div className="mx-auto max-w-3xl">
             <div className="mb-12 text-center">
-              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+              <h2 className="text-3xl font-extrabold tracking-tighter md:text-4xl">
                 Perguntas frequentes
               </h2>
             </div>
@@ -488,16 +494,17 @@ function Landing() {
         </section>
 
         {/* Final CTA */}
-        <section className="px-6 py-24">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-5xl">
+        <section className="relative overflow-hidden px-6 py-24">
+          <div className="ambient-glow" aria-hidden="true" />
+          <div className="relative mx-auto max-w-3xl text-center">
+            <h2 className="text-4xl font-extrabold tracking-tighter md:text-5xl">
               Pronto para organizar suas contas?
             </h2>
             <p className="mt-4 text-muted-foreground">
               Crie sua conta em menos de um minuto e comece com 30 dias de acesso completo.
             </p>
             <Link to="/auth" className="mt-8 inline-block">
-              <Button size="lg">
+              <Button size="lg" className="hover-glow glow-ring">
                 Começar grátis agora
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
