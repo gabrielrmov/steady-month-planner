@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Wallet, ArrowRight, Target, Banknote, Tag, Receipt, Sparkles } from "lucide-react";
 
@@ -66,7 +65,6 @@ function OnboardingPage() {
   }, [navigate]);
 
   const totalSteps = 4;
-  const progress = ((step + 1) / totalSteps) * 100;
 
   const finishOnboarding = async () => {
     setLoading(true);
@@ -142,7 +140,7 @@ function OnboardingPage() {
               <button
                 key={g.id}
                 onClick={() => setGoal(g.id)}
-                className={`flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${
+                className={`flex flex-col items-center gap-2 rounded-xl border p-4 transition-colors ${
                   selected
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground"
@@ -250,15 +248,19 @@ function OnboardingPage() {
         >
           <Wallet className="h-5 w-5 text-primary-foreground" />
         </div>
-        <span className="text-xl font-bold tracking-tight text-foreground">Finlist</span>
+        <span className="text-xl font-semibold tracking-tight text-foreground">Finlist</span>
       </Link>
 
-      <Card className="w-full max-w-lg border-border/60 bg-card p-6 shadow-[var(--shadow-card)]">
-        <div className="mb-6">
-          <Progress value={progress} className="h-2" />
-          <p className="mt-2 text-xs text-muted-foreground">
-            Passo {step + 1} de {totalSteps}
-          </p>
+      <Card className="w-full max-w-lg border-border/60 bg-card p-6">
+        <div className="mb-6 flex items-center justify-center gap-2">
+          {stepContent.map((_, i) => (
+            <span
+              key={i}
+              className={`h-1.5 rounded-full transition-all ${
+                i === step ? "w-6 bg-primary" : i < step ? "w-1.5 bg-primary/50" : "w-1.5 bg-border"
+              }`}
+            />
+          ))}
         </div>
 
         <div className="mb-6 text-center">

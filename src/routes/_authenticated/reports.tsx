@@ -198,7 +198,7 @@ function ReportsPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-3">
           {cards.map((c) => (
-            <Card key={c.label} className="hover-lift border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
+            <Card key={c.label} className="hover-lift border-border/60 bg-card p-5">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">{c.label}</span>
                 <c.icon className={`h-4 w-4 ${c.tone}`} />
@@ -209,7 +209,7 @@ function ReportsPage() {
         </div>
       )}
 
-      <Card className={`border-border/60 bg-card p-5 shadow-[var(--shadow-card)] ${!isPro ? "opacity-60" : ""}`}>
+      <Card className={`border-border/60 bg-card p-5 ${!isPro ? "opacity-60" : ""}`}>
         <h2 className="mb-4 font-semibold">Evolução mensal</h2>
         {isLoading ? (
           <Skeleton className="h-72 w-full" />
@@ -245,7 +245,7 @@ function ReportsPage() {
         )}
       </Card>
 
-      <Card className={`border-border/60 bg-card p-5 shadow-[var(--shadow-card)] ${!isPro ? "opacity-60" : ""}`}>
+      <Card className={`border-border/60 bg-card p-5 ${!isPro ? "opacity-60" : ""}`}>
         <h2 className="mb-4 font-semibold">Gastos por categoria</h2>
         {isLoading ? (
           <div className="grid gap-6 md:grid-cols-2">

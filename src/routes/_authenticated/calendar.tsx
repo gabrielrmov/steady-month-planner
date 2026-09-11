@@ -15,7 +15,6 @@ import {
   endOfWeek,
   isSameMonth,
   isSameDay,
-  parseISO,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -120,11 +119,17 @@ function CalendarPage() {
                   key={key}
                   onClick={() => setSelected(day)}
                   className={`min-h-12 rounded-md border p-1 text-left text-xs transition-colors sm:min-h-20 sm:p-1.5 ${
-                    isSel ? "border-primary bg-accent" : "border-border hover:bg-accent/40"
+                    isSel ? "border-primary bg-primary/5" : "border-border hover:bg-muted/40"
                   } ${isCurrent ? "" : "opacity-40"}`}
                 >
                   <div className="flex items-center justify-between sm:mb-1">
-                    <span className={`text-[11px] font-semibold ${isToday ? "text-primary" : ""}`}>
+                    <span
+                      className={`text-[11px] font-semibold ${
+                        isToday
+                          ? "flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground"
+                          : ""
+                      }`}
+                    >
                       {format(day, "d")}
                     </span>
                   </div>
@@ -143,7 +148,6 @@ function CalendarPage() {
           </div>
         </Card>
 
-
         <Card className="p-4">
           <p className="text-sm font-semibold capitalize">
             {format(selected, "EEEE, dd 'de' MMMM", { locale: ptBR })}
@@ -155,10 +159,10 @@ function CalendarPage() {
             {selectedItems.map((t) => (
               <div key={t.id} className="flex items-center gap-2 rounded-md border border-border p-2">
                 <div
-                  className="h-2 w-2 rounded-full"
+                  className="h-2 w-2 shrink-0 rounded-full"
                   style={{ backgroundColor: t.cards?.color ?? t.categories?.color ?? "#888" }}
                 />
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-medium">{t.description}</p>
                   <p className="text-[10px] text-muted-foreground">
                     {t.payment_method === "card" ? t.cards?.name ?? "Cartão" : t.payment_method.toUpperCase()}

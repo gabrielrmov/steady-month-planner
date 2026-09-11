@@ -328,7 +328,7 @@ function IncomeSplitPage() {
             </ChartContainer>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
               <span
-                className={`text-lg font-bold ${totalPct !== 100 ? "text-amber-500" : "text-emerald-500"}`}
+                className={`text-lg font-bold ${totalPct !== 100 ? "text-warning" : "text-success"}`}
               >
                 {totalPct}%
               </span>
@@ -479,9 +479,9 @@ function IncomeSplitPage() {
         </form>
       </Card>
 
-      <Card className={`flex items-center justify-between p-4 ${totalPct !== 100 ? "border-amber-500/50" : "border-emerald-500/50"}`}>
+      <Card className={`flex items-center justify-between p-4 ${totalPct !== 100 ? "border-warning/50" : "border-success/50"}`}>
         <span className="text-sm text-muted-foreground">Total distribuído</span>
-        <span className={`text-sm font-bold ${totalPct !== 100 ? "text-amber-600" : "text-emerald-600"}`}>
+        <span className={`text-sm font-bold ${totalPct !== 100 ? "text-warning" : "text-success"}`}>
           {totalPct}%
         </span>
       </Card>

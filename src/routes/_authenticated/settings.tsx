@@ -132,7 +132,7 @@ function SettingsPage() {
         <p className="text-sm text-muted-foreground">Sua conta, plano e dados</p>
       </div>
 
-      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
+      <Card className="border-border/60 bg-card p-5">
         <div className="mb-4 flex items-center gap-2">
           <User className="h-4 w-4 text-muted-foreground" />
           <h2 className="font-semibold">Perfil</h2>
@@ -152,7 +152,7 @@ function SettingsPage() {
         </Button>
       </Card>
 
-      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
+      <Card className="border-border/60 bg-card p-5">
         <div className="mb-4 flex items-center gap-2">
           {theme === "dark" ? (
             <Moon className="h-4 w-4 text-muted-foreground" />
@@ -186,7 +186,7 @@ function SettingsPage() {
         </div>
       </Card>
 
-      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
+      <Card className="border-border/60 bg-card p-5">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-muted-foreground" />
@@ -227,7 +227,7 @@ function SettingsPage() {
 
       </Card>
 
-      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
+      <Card className="border-border/60 bg-card p-5">
         <div className="mb-4 flex items-center gap-2">
           <Download className="h-4 w-4 text-muted-foreground" />
           <h2 className="font-semibold">Seus dados</h2>

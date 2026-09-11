@@ -13,8 +13,6 @@ import { toast } from "sonner";
 import { Building2, FileUp, Landmark, Upload, Crown, Lock } from "lucide-react";
 import { categoryForDescription, fingerprint, parseStatement, type CategoryRule, type ParsedTx } from "@/lib/automation";
 
-
-
 export const Route = createFileRoute("/_authenticated/import")({
   head: () => ({
     meta: [
@@ -152,9 +150,6 @@ function ImportPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-
-
-
   const totalIn = parsed.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
   const totalOut = parsed.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
 
@@ -174,7 +169,7 @@ function ImportPage() {
         )}
       </div>
 
-      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
+      <Card className="border-border/60 bg-card p-5">
         <div className="flex items-center gap-2">
           <FileUp className="h-4 w-4 text-primary" />
           <h2 className="font-semibold">Importar extrato (OFX ou CSV)</h2>
@@ -272,7 +267,7 @@ function ImportPage() {
                     <span className="text-muted-foreground">{t.date.split("-").reverse().join("/")}</span>{" "}
                     {t.description}
                   </span>
-                  <span className={t.type === "income" ? "text-emerald-600" : "text-destructive"}>
+                  <span className={t.type === "income" ? "text-success" : "text-destructive"}>
                     {t.type === "income" ? "+" : "-"}
                     {brl(t.amount)}
                   </span>
@@ -283,7 +278,7 @@ function ImportPage() {
         )}
       </Card>
 
-      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
+      <Card className="border-border/60 bg-card p-5">
         <div className="flex items-center gap-2">
           <Landmark className="h-4 w-4 text-primary" />
           <h2 className="font-semibold">Open Finance (sincronização automática)</h2>
@@ -300,8 +295,6 @@ function ImportPage() {
           </Link>
         </Button>
       </Card>
-
-
     </div>
   );
 }

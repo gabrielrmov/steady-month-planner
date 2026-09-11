@@ -135,7 +135,7 @@ function RulesPage() {
         </p>
       </div>
 
-      <Card className="p-5 shadow-[var(--shadow-card)]">
+      <Card className="p-5">
         <div className="grid gap-3 md:grid-cols-5">
           <div className="md:col-span-2">
             <Label>Quando a descrição</Label>
@@ -196,7 +196,7 @@ function RulesPage() {
         </Button>
       </div>
 
-      <Card className="divide-y divide-border shadow-[var(--shadow-card)]">
+      <Card className="divide-y divide-border">
         {rules.length === 0 && (
           <p className="p-6 text-center text-sm text-muted-foreground">Nenhuma regra criada ainda.</p>
         )}

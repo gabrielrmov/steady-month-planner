@@ -108,7 +108,7 @@ function OpenFinancePage() {
         </Badge>
       </div>
 
-      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
+      <Card className="border-border/60 bg-card p-5">
         <div className="flex items-center gap-2">
           <Landmark className="h-4 w-4 text-primary" />
           <h2 className="font-semibold">Adicionar conta</h2>
@@ -138,7 +138,7 @@ function OpenFinancePage() {
         </Button>
       </Card>
 
-      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
+      <Card className="border-border/60 bg-card p-5">
         <div className="flex items-center gap-2">
           <Building2 className="h-4 w-4 text-primary" />
           <h2 className="font-semibold">Contas conectadas</h2>

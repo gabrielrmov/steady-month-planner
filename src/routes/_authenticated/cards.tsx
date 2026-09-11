@@ -139,7 +139,7 @@ function CardsPage() {
       </div>
 
       {formOpen && (
-        <Card className="animate-rise border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
+        <Card className="animate-rise border-border/60 bg-card p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold">Novo cartão</h2>
             <Button type="button" variant="ghost" size="icon" onClick={() => setFormOpen(false)}>
