@@ -134,9 +134,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     <>
       {/* Brand */}
       <div className="flex h-16 items-center justify-between px-5">
-        <Link to="/dashboard" className="flex items-center gap-3">
+        <Link to="/dashboard" className="group flex items-center gap-3">
           <div
-            className="glow-ring flex h-8 w-8 items-center justify-center rounded-lg"
+            className="animate-glow-pulse flex h-8 w-8 items-center justify-center rounded-lg transition-transform duration-300 group-hover:scale-105"
             style={{ background: "var(--gradient-primary)" }}
           >
             <Wallet className="h-4 w-4 text-primary-foreground" />
@@ -147,81 +147,93 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           type="button"
           onClick={toggleTheme}
           title={theme === "dark" ? "Mudar para tema claro" : "Mudar para tema escuro"}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-sidebar-foreground/45 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          className="group flex h-8 w-8 items-center justify-center rounded-lg text-sidebar-foreground/45 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
         >
-          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          {theme === "dark" ? (
+            <Sun className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+          ) : (
+            <Moon className="h-4 w-4 transition-transform duration-300 group-hover:-rotate-12" />
+          )}
         </button>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-2">
-        {groups.map((group) => (
-          <div key={group.title} className="space-y-1">
-            <h3 className="px-3 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/35">
-              {group.title}
-            </h3>
-            {group.items.map((item) => {
-              if ("sub" in item) {
-                const anySubActive = item.sub.some((s) => isActive(s.to, s.tab));
-                return (
-                  <Collapsible key={item.label} defaultOpen={anySubActive}>
-                    <CollapsibleTrigger asChild>
-                      <button className="group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground">
-                        <div className="flex items-center gap-3">
-                          <item.icon className="h-[18px] w-[18px]" />
-                          {item.label}
+        {(() => {
+          let itemIndex = 0;
+          return groups.map((group) => (
+            <div key={group.title} className="space-y-1">
+              <h3 className="px-3 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/35">
+                {group.title}
+              </h3>
+              {group.items.map((item) => {
+                const delay = `${itemIndex++ * 45}ms`;
+                if ("sub" in item) {
+                  const anySubActive = item.sub.some((s) => isActive(s.to, s.tab));
+                  return (
+                    <Collapsible key={item.label} defaultOpen={anySubActive}>
+                      <CollapsibleTrigger asChild>
+                        <button
+                          className="animate-rise group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          style={{ animationDelay: delay }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <item.icon className="h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-110" />
+                            {item.label}
+                          </div>
+                          <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                        </button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="mt-1 ml-5 border-l border-sidebar-border">
+                          {item.sub.map((sub) => {
+                            const subActive = isActive(sub.to, sub.tab);
+                            return (
+                              <Link
+                                key={sub.label}
+                                to={sub.to}
+                                search={sub.tab ? { tab: sub.tab } : {}}
+                                onClick={onNavigate}
+                                className={cn(
+                                  "relative block py-2 pl-6 text-sm transition-colors before:absolute before:left-0 before:top-1/2 before:h-px before:w-2 before:-translate-y-1/2 before:bg-sidebar-border",
+                                  subActive
+                                    ? "font-medium text-primary"
+                                    : "text-sidebar-foreground/45 hover:text-primary",
+                                )}
+                              >
+                                {sub.label}
+                              </Link>
+                            );
+                          })}
                         </div>
-                        <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                      </button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="mt-1 ml-5 border-l border-sidebar-border">
-                        {item.sub.map((sub) => {
-                          const subActive = isActive(sub.to, sub.tab);
-                          return (
-                            <Link
-                              key={sub.label}
-                              to={sub.to}
-                              search={sub.tab ? { tab: sub.tab } : {}}
-                              onClick={onNavigate}
-                              className={cn(
-                                "relative block py-2 pl-6 text-sm transition-colors before:absolute before:left-0 before:top-1/2 before:h-px before:w-2 before:-translate-y-1/2 before:bg-sidebar-border",
-                                subActive
-                                  ? "font-medium text-primary"
-                                  : "text-sidebar-foreground/45 hover:text-primary",
-                              )}
-                            >
-                              {sub.label}
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                );
-              }
+                      </CollapsibleContent>
+                    </Collapsible>
+                  );
+                }
 
-              const active = isActive(item.to, item.tab);
-              return (
-                <Link
-                  key={item.label}
-                  to={item.to}
-                  search={item.tab ? { tab: item.tab } : {}}
-                  onClick={onNavigate}
-                  className={cn(
-                    "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                    active
-                      ? "bg-primary/10 text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:rounded-full before:bg-primary before:shadow-[0_0_10px_color-mix(in_oklab,var(--primary)_70%,transparent)]"
-                      : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                  )}
-                >
-                  <item.icon className="h-[18px] w-[18px]" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-        ))}
+                const active = isActive(item.to, item.tab);
+                return (
+                  <Link
+                    key={item.label}
+                    to={item.to}
+                    search={item.tab ? { tab: item.tab } : {}}
+                    onClick={onNavigate}
+                    style={{ animationDelay: delay }}
+                    className={cn(
+                      "animate-rise group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                      active
+                        ? "bg-primary/10 text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:animate-bar-in before:rounded-full before:bg-primary before:shadow-[0_0_10px_color-mix(in_oklab,var(--primary)_70%,transparent)]"
+                        : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                    )}
+                  >
+                    <item.icon className="h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-110" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          ));
+        })()}
       </nav>
 
       {/* Footer */}
@@ -237,7 +249,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               key={l.to}
               to={l.to}
               onClick={onNavigate}
-              className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-sidebar-foreground/45 transition-colors hover:text-sidebar-foreground"
+              className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-sidebar-foreground/45 transition-all duration-200 hover:translate-x-0.5 hover:text-sidebar-foreground"
             >
               <l.icon className="h-3.5 w-3.5" />
               {l.label}
@@ -306,7 +318,12 @@ function MobileTabBar() {
                 active ? "text-primary" : "text-sidebar-foreground/45",
               )}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon
+                className={cn(
+                  "h-5 w-5 transition-transform duration-200",
+                  active && "scale-110",
+                )}
+              />
               {item.label}
             </Link>
           );
