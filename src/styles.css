@@ -44,47 +44,49 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Flat, neutral, minimal token set. One accent color (primary) does all the
-   work; everything else is grayscale. No decorative gradients or glows —
-   --gradient-* stay valid `background`/`background-image` values (a
-   same-color linear-gradient) purely so existing `style={{ background:
-   "var(--gradient-primary)" }}` call sites keep working, but they now
-   render as a single flat color. */
+/* Linear/Vercel-style token set: near-black surfaces, a single vivid
+   indigo-violet accent, hairline borders that gain a soft accent glow on
+   hover/focus. Still one accent color does all the work — no rainbow
+   gradients — but the accent itself is bolder and paired with real (if
+   restrained) glow shadows instead of flat ones. --gradient-* stay valid
+   `background`/`background-image` values for existing call sites; some are
+   now genuine two-stop gradients (used for the CTA/logo mark and gradient
+   text), not flattened to one color. */
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.13 0.004 260);
-  --foreground: oklch(0.96 0.002 260);
-  --card: oklch(0.16 0.006 260);
-  --card-foreground: oklch(0.96 0.002 260);
-  --popover: oklch(0.16 0.006 260);
-  --popover-foreground: oklch(0.96 0.002 260);
-  --primary: oklch(0.64 0.16 258);
-  --primary-foreground: oklch(0.13 0.01 258);
-  --secondary: oklch(0.21 0.006 260);
-  --secondary-foreground: oklch(0.96 0.002 260);
-  --muted: oklch(0.19 0.006 260);
-  --muted-foreground: oklch(0.65 0.012 260);
-  --accent: oklch(0.23 0.008 260);
-  --accent-foreground: oklch(0.96 0.002 260);
+  --background: oklch(0.1 0.003 264);
+  --foreground: oklch(0.97 0.002 260);
+  --card: oklch(0.135 0.006 264);
+  --card-foreground: oklch(0.97 0.002 260);
+  --popover: oklch(0.135 0.006 264);
+  --popover-foreground: oklch(0.97 0.002 260);
+  --primary: oklch(0.62 0.19 276);
+  --primary-foreground: oklch(0.99 0.003 260);
+  --secondary: oklch(0.19 0.007 264);
+  --secondary-foreground: oklch(0.97 0.002 260);
+  --muted: oklch(0.17 0.006 264);
+  --muted-foreground: oklch(0.63 0.014 260);
+  --accent: oklch(0.21 0.009 264);
+  --accent-foreground: oklch(0.97 0.002 260);
   --destructive: oklch(0.62 0.19 25);
   --destructive-foreground: oklch(0.98 0.005 250);
   --success: oklch(0.68 0.15 152);
   --success-foreground: oklch(0.13 0.03 152);
   --warning: oklch(0.76 0.14 75);
   --warning-foreground: oklch(0.16 0.03 75);
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 11%);
-  --ring: oklch(0.64 0.16 258);
-  --sidebar: oklch(0.11 0.004 260);
-  --sidebar-foreground: oklch(0.96 0.002 260);
-  --sidebar-primary: oklch(0.64 0.16 258);
-  --sidebar-primary-foreground: oklch(0.13 0.01 258);
-  --sidebar-accent: oklch(0.19 0.006 260);
-  --sidebar-accent-foreground: oklch(0.96 0.002 260);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.62 0.19 276);
+  --sidebar: oklch(0.085 0.003 264);
+  --sidebar-foreground: oklch(0.97 0.002 260);
+  --sidebar-primary: oklch(0.62 0.19 276);
+  --sidebar-primary-foreground: oklch(0.99 0.003 260);
+  --sidebar-accent: oklch(0.17 0.006 264);
+  --sidebar-accent-foreground: oklch(0.97 0.002 260);
   --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.64 0.16 258);
+  --sidebar-ring: oklch(0.62 0.19 276);
 
-  --chart-1: oklch(0.64 0.16 258);
+  --chart-1: oklch(0.62 0.19 276);
   --chart-2: oklch(0.7 0.11 195);
   --chart-3: oklch(0.68 0.14 148);
   --chart-4: oklch(0.76 0.13 78);
@@ -94,49 +96,51 @@
   --success-subtle: oklch(0.68 0.15 152 / 0.14);
   --warning-subtle: oklch(0.76 0.14 75 / 0.14);
   --destructive-subtle: oklch(0.62 0.19 25 / 0.14);
-  --primary-subtle: oklch(0.64 0.16 258 / 0.12);
+  --primary-subtle: oklch(0.62 0.19 276 / 0.12);
 
-  --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary));
+  --gradient-primary: linear-gradient(135deg, oklch(0.68 0.18 285), oklch(0.58 0.19 266));
   --gradient-subtle: linear-gradient(180deg, var(--card), var(--card));
   --gradient-success: linear-gradient(135deg, var(--success), var(--success));
-  --shadow-card: 0 1px 2px 0 oklch(0 0 0 / 0.18);
-  --shadow-elegant: 0 1px 2px 0 oklch(0 0 0 / 0.18);
+  --shadow-card: 0 1px 2px 0 oklch(0 0 0 / 0.24);
+  --shadow-elegant: 0 1px 2px 0 oklch(0 0 0 / 0.24);
   --shadow-glow: 0 0 0 1px var(--border);
+  --shadow-glow-accent: 0 0 0 1px color-mix(in oklab, var(--primary) 45%, var(--border)),
+    0 8px 28px -6px color-mix(in oklab, var(--primary) 45%, transparent);
   --shimmer-highlight: oklch(1 0 0 / 0.05);
 }
 
 .dark {
-  --background: oklch(0.13 0.004 260);
-  --foreground: oklch(0.96 0.002 260);
-  --card: oklch(0.16 0.006 260);
-  --card-foreground: oklch(0.96 0.002 260);
-  --popover: oklch(0.16 0.006 260);
-  --popover-foreground: oklch(0.96 0.002 260);
-  --primary: oklch(0.64 0.16 258);
-  --primary-foreground: oklch(0.13 0.01 258);
-  --secondary: oklch(0.21 0.006 260);
-  --secondary-foreground: oklch(0.96 0.002 260);
-  --muted: oklch(0.19 0.006 260);
-  --muted-foreground: oklch(0.65 0.012 260);
-  --accent: oklch(0.23 0.008 260);
-  --accent-foreground: oklch(0.96 0.002 260);
+  --background: oklch(0.1 0.003 264);
+  --foreground: oklch(0.97 0.002 260);
+  --card: oklch(0.135 0.006 264);
+  --card-foreground: oklch(0.97 0.002 260);
+  --popover: oklch(0.135 0.006 264);
+  --popover-foreground: oklch(0.97 0.002 260);
+  --primary: oklch(0.62 0.19 276);
+  --primary-foreground: oklch(0.99 0.003 260);
+  --secondary: oklch(0.19 0.007 264);
+  --secondary-foreground: oklch(0.97 0.002 260);
+  --muted: oklch(0.17 0.006 264);
+  --muted-foreground: oklch(0.63 0.014 260);
+  --accent: oklch(0.21 0.009 264);
+  --accent-foreground: oklch(0.97 0.002 260);
   --destructive: oklch(0.62 0.19 25);
   --destructive-foreground: oklch(0.98 0.005 250);
   --success: oklch(0.68 0.15 152);
   --success-foreground: oklch(0.13 0.03 152);
   --warning: oklch(0.76 0.14 75);
   --warning-foreground: oklch(0.16 0.03 75);
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 11%);
-  --ring: oklch(0.64 0.16 258);
-  --sidebar: oklch(0.11 0.004 260);
-  --sidebar-foreground: oklch(0.96 0.002 260);
-  --sidebar-primary: oklch(0.64 0.16 258);
-  --sidebar-primary-foreground: oklch(0.13 0.01 258);
-  --sidebar-accent: oklch(0.19 0.006 260);
-  --sidebar-accent-foreground: oklch(0.96 0.002 260);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.62 0.19 276);
+  --sidebar: oklch(0.085 0.003 264);
+  --sidebar-foreground: oklch(0.97 0.002 260);
+  --sidebar-primary: oklch(0.62 0.19 276);
+  --sidebar-primary-foreground: oklch(0.99 0.003 260);
+  --sidebar-accent: oklch(0.17 0.006 264);
+  --sidebar-accent-foreground: oklch(0.97 0.002 260);
   --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.64 0.16 258);
+  --sidebar-ring: oklch(0.62 0.19 276);
 }
 
 /* Light theme — scoped to the authenticated app surface (AppShell root), not the
@@ -149,7 +153,7 @@
   --card-foreground: oklch(0.16 0.006 260);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.16 0.006 260);
-  --primary: oklch(0.48 0.17 258);
+  --primary: oklch(0.5 0.19 273);
   --primary-foreground: oklch(0.99 0.002 260);
   --secondary: oklch(0.965 0.002 260);
   --secondary-foreground: oklch(0.25 0.01 260);
@@ -165,9 +169,9 @@
   --warning-foreground: oklch(0.18 0.04 75);
   --border: oklch(0 0 0 / 8%);
   --input: oklch(0 0 0 / 12%);
-  --ring: oklch(0.48 0.17 258);
+  --ring: oklch(0.5 0.19 273);
 
-  --chart-1: oklch(0.48 0.17 258);
+  --chart-1: oklch(0.5 0.19 273);
   --chart-2: oklch(0.5 0.1 195);
   --chart-3: oklch(0.46 0.13 148);
   --chart-4: oklch(0.58 0.13 78);
@@ -177,22 +181,25 @@
   --success-subtle: oklch(0.44 0.13 152 / 0.1);
   --warning-subtle: oklch(0.58 0.14 75 / 0.12);
   --destructive-subtle: oklch(0.5 0.19 25 / 0.08);
-  --primary-subtle: oklch(0.48 0.17 258 / 0.08);
+  --primary-subtle: oklch(0.5 0.19 273 / 0.08);
 
-  --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary));
+  --gradient-primary: linear-gradient(135deg, oklch(0.56 0.18 282), oklch(0.46 0.19 264));
   --gradient-subtle: linear-gradient(180deg, var(--card), var(--card));
   --gradient-success: linear-gradient(135deg, var(--success), var(--success));
   --shadow-card: 0 1px 2px 0 oklch(0 0 0 / 0.04);
   --shadow-elegant: 0 1px 2px 0 oklch(0 0 0 / 0.04);
   --shadow-glow: 0 0 0 1px var(--border);
+  --shadow-glow-accent: 0 0 0 1px color-mix(in oklab, var(--primary) 35%, var(--border)),
+    0 8px 24px -8px color-mix(in oklab, var(--primary) 30%, transparent);
   --shimmer-highlight: oklch(0 0 0 / 0.04);
 }
 
 @utility bg-grid {
   background-image:
-    linear-gradient(to right, oklch(1 0 0 / 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(1 0 0 / 0.04) 1px, transparent 1px);
+    linear-gradient(to right, oklch(1 0 0 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.05) 1px, transparent 1px);
   background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 40%, transparent 100%);
 }
 
 @utility text-gradient {
@@ -206,7 +213,7 @@
   border: 1px solid var(--border);
 }
 
-/* Flat hover feedback: a subtle border tint only — no lift, no glow. */
+/* Subtle hover feedback: a border tint, no movement. */
 @utility hover-lift {
   transition:
     border-color 0.2s ease,
@@ -214,6 +221,33 @@
   &:hover {
     border-color: color-mix(in oklab, var(--primary) 28%, var(--border));
   }
+}
+
+/* One restrained accent glow — used on the primary CTA and a couple of
+   hero surfaces, never on ordinary cards or buttons. */
+@utility glow-ring {
+  box-shadow: var(--shadow-glow-accent);
+}
+
+@utility hover-glow {
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  &:hover {
+    box-shadow: var(--shadow-glow-accent);
+    border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+  }
+}
+
+/* Single soft ambient blob for a hero section — one restrained light
+   source, not a scattering of colored gradients. */
+@utility ambient-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    ellipse 60% 50% at 50% 0%,
+    color-mix(in oklab, var(--primary) 20%, transparent),
+    transparent 70%
+  );
 }
 
 @utility animate-rise {
