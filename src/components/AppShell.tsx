@@ -136,12 +136,12 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="flex h-16 items-center justify-between px-5">
         <Link to="/dashboard" className="flex items-center gap-3">
           <div
-            className="flex h-8 w-8 items-center justify-center rounded-lg shadow-lg shadow-indigo-500/20"
+            className="flex h-8 w-8 items-center justify-center rounded-lg"
             style={{ background: "var(--gradient-primary)" }}
           >
             <Wallet className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="text-lg font-bold tracking-tight text-white">Finlist</span>
+          <span className="text-lg font-semibold tracking-tight text-white">Finlist</span>
         </Link>
         <button
           type="button"
@@ -209,9 +209,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   search={item.tab ? { tab: item.tab } : {}}
                   onClick={onNavigate}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                     active
-                      ? "border border-indigo-500/20 bg-indigo-500/10 text-indigo-400"
+                      ? "bg-indigo-500/10 text-indigo-400"
                       : "text-slate-400 hover:bg-slate-800/50 hover:text-white",
                   )}
                 >
@@ -246,7 +246,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         </div>
 
         <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 p-2">
-          <Avatar className="h-10 w-10 rounded-xl ring-2 ring-indigo-500/20">
+          <Avatar className="h-10 w-10 rounded-xl">
             <AvatarFallback className="bg-slate-800 text-xs font-semibold text-slate-200">
               {initials || <User className="h-4 w-4" />}
             </AvatarFallback>
@@ -272,7 +272,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <Link
             to="/pricing"
             onClick={onNavigate}
-            className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-indigo-500/30 bg-gradient-to-r from-indigo-600/20 to-violet-600/20 px-3 py-2 text-xs font-semibold text-indigo-300 transition-colors hover:border-indigo-500/50 hover:text-indigo-200"
+            className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-indigo-500/20 bg-indigo-500/10 px-3 py-2 text-xs font-semibold text-indigo-300 transition-colors hover:border-indigo-500/40 hover:text-indigo-200"
           >
             <Sparkles className="h-3.5 w-3.5" />
             {plan.isTrial ? `Assinar (${plan.trialDaysLeft} dias restantes)` : plan.plan === "pf" ? "Adicionar módulo PJ" : "Escolher plano"}
@@ -332,12 +332,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-slate-900/95 px-4 backdrop-blur">
           <div className="flex min-w-0 items-center gap-2.5">
             <div
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-lg shadow-indigo-500/20"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
               style={{ background: "var(--gradient-primary)" }}
             >
               <Wallet className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="truncate font-bold tracking-tight text-white">Finlist</span>
+            <span className="truncate font-semibold tracking-tight text-white">Finlist</span>
           </div>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
