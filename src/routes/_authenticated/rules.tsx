@@ -60,6 +60,27 @@ function RulesPage() {
     },
   });
 
+  const { data: allTx = [] } = useQuery({
+    queryKey: ["all-tx-for-rules"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("transactions").select("id, description, type, category_id");
+      if (error) throw error;
+      return (data ?? []) as { id: string; description: string; type: string; category_id: string | null }[];
+    },
+  });
+
+  const matchesRule = (r: any, description: string, type: string) => {
+    if (r.applies_to !== "both" && r.applies_to !== type) return false;
+    const desc = description.toLowerCase();
+    const pat = String(r.pattern ?? "").toLowerCase();
+    if (!pat) return false;
+    if (r.match_type === "starts_with") return desc.startsWith(pat);
+    if (r.match_type === "equals") return desc === pat;
+    return desc.includes(pat);
+  };
+
+  const uncategorizedCount = allTx.filter((t) => !t.category_id).length;
+
   const add = useMutation({
     mutationFn: async () => {
       const { data: u } = await supabase.auth.getSession();
@@ -127,15 +148,15 @@ function RulesPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Regras de categorização</h1>
+      <div className="animate-rise">
+        <h1 className="text-2xl font-extrabold tracking-tighter sm:text-3xl">Regras de categorização</h1>
         <p className="text-sm text-muted-foreground">
           Categorize lançamentos automaticamente pela descrição — vale para importações, Open Finance e novos
           lançamentos.
         </p>
       </div>
 
-      <Card className="p-5">
+      <Card className="animate-rise p-5" style={{ animationDelay: "60ms" }}>
         <div className="grid gap-3 md:grid-cols-5">
           <div className="md:col-span-2">
             <Label>Quando a descrição</Label>
@@ -182,43 +203,69 @@ function RulesPage() {
             </Select>
           </div>
           <div className="flex items-end">
-            <Button className="w-full" onClick={() => add.mutate()} disabled={add.isPending}>
+            <Button className="hover-glow w-full" onClick={() => add.mutate()} disabled={add.isPending}>
               <Plus className="mr-2 h-4 w-4" /> Criar
             </Button>
           </div>
         </div>
       </Card>
 
-      <div className="flex justify-end">
-        <Button variant="outline" onClick={() => applyToExisting.mutate()} disabled={applyToExisting.isPending}>
+      <div className="animate-rise flex flex-wrap items-center justify-end gap-2" style={{ animationDelay: "100ms" }}>
+        {uncategorizedCount > 0 && (
+          <span className="text-xs text-muted-foreground">
+            {uncategorizedCount} lançamento(s) sem categoria
+          </span>
+        )}
+        <Button
+          variant="outline"
+          className="hover-glow"
+          onClick={() => applyToExisting.mutate()}
+          disabled={applyToExisting.isPending || uncategorizedCount === 0}
+        >
           <Wand2 className="mr-2 h-4 w-4" />
-          {applyToExisting.isPending ? "Aplicando..." : "Aplicar nos lançamentos sem categoria"}
+          {applyToExisting.isPending
+            ? "Aplicando..."
+            : uncategorizedCount > 0
+              ? `Aplicar nos lançamentos sem categoria (${uncategorizedCount})`
+              : "Nenhum lançamento sem categoria"}
         </Button>
       </div>
 
-      <Card className="divide-y divide-border">
+      <Card className="animate-rise divide-y divide-border" style={{ animationDelay: "140ms" }}>
         {rules.length === 0 && (
           <p className="p-6 text-center text-sm text-muted-foreground">Nenhuma regra criada ainda.</p>
         )}
-        {rules.map((r: any) => (
-          <div key={r.id} className="flex items-center gap-3 p-4">
-            <Switch checked={r.is_active} onCheckedChange={(v) => toggle.mutate({ id: r.id, active: v })} />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm">
-                Descrição {MATCH_LABEL[r.match_type] ?? r.match_type}{" "}
-                <span className="font-medium">"{r.pattern}"</span>
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {r.applies_to === "both" ? "Entradas e saídas" : r.applies_to === "income" ? "Entradas" : "Saídas"} →{" "}
-                {r.categories?.name ?? "sem categoria"}
-              </p>
+        {rules.map((r: any, i: number) => {
+          const matchCount = allTx.filter((t) => matchesRule(r, t.description, t.type)).length;
+          return (
+            <div
+              key={r.id}
+              className="animate-rise group flex items-center gap-3 p-4 transition-colors hover:bg-muted/40"
+              style={{ animationDelay: `${180 + Math.min(i, 10) * 40}ms` }}
+            >
+              <Switch checked={r.is_active} onCheckedChange={(v) => toggle.mutate({ id: r.id, active: v })} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm">
+                  Descrição {MATCH_LABEL[r.match_type] ?? r.match_type}{" "}
+                  <span className="font-medium">"{r.pattern}"</span>
+                </p>
+                <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+                  <span>
+                    {r.applies_to === "both" ? "Entradas e saídas" : r.applies_to === "income" ? "Entradas" : "Saídas"} →{" "}
+                    {r.categories?.name ?? "sem categoria"}
+                  </span>
+                  <span className="rounded-full bg-[var(--primary-subtle)] px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                    {matchCount} lançamento{matchCount === 1 ? "" : "s"}
+                  </span>
+                </p>
+              </div>
+              <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: r.categories?.color ?? "#999" }} />
+              <Button variant="ghost" size="icon" className="group" onClick={() => del.mutate(r.id)}>
+                <Trash2 className="h-4 w-4 text-destructive transition-transform duration-150 group-hover:scale-110" />
+              </Button>
             </div>
-            <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: r.categories?.color ?? "#999" }} />
-            <Button variant="ghost" size="icon" onClick={() => del.mutate(r.id)}>
-              <Trash2 className="h-4 w-4 text-destructive" />
-            </Button>
-          </div>
-        ))}
+          );
+        })}
       </Card>
     </div>
   );

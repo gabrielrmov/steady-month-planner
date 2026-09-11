@@ -127,15 +127,15 @@ function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Configurações</h1>
+      <div className="animate-rise">
+        <h1 className="text-2xl font-extrabold tracking-tighter sm:text-3xl">Configurações</h1>
         <p className="text-sm text-muted-foreground">Sua conta, plano e dados</p>
       </div>
 
-      <Card className="border-border/60 bg-card p-5">
+      <Card className="animate-rise border-border/60 bg-card p-5" style={{ animationDelay: "0ms" }}>
         <div className="mb-4 flex items-center gap-2">
           <User className="h-4 w-4 text-muted-foreground" />
-          <h2 className="font-semibold">Perfil</h2>
+          <h2 className="font-bold tracking-tight">Perfil</h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -147,19 +147,19 @@ function SettingsPage() {
             <Input id="email" value={profile?.email ?? ""} disabled />
           </div>
         </div>
-        <Button className="mt-4" onClick={saveProfile} disabled={saving}>
+        <Button className="hover-glow mt-4" onClick={saveProfile} disabled={saving}>
           {saving ? "Salvando..." : "Salvar alterações"}
         </Button>
       </Card>
 
-      <Card className="border-border/60 bg-card p-5">
+      <Card className="animate-rise border-border/60 bg-card p-5" style={{ animationDelay: "60ms" }}>
         <div className="mb-4 flex items-center gap-2">
           {theme === "dark" ? (
             <Moon className="h-4 w-4 text-muted-foreground" />
           ) : (
             <Sun className="h-4 w-4 text-muted-foreground" />
           )}
-          <h2 className="font-semibold">Aparência</h2>
+          <h2 className="font-bold tracking-tight">Aparência</h2>
         </div>
         <p className="mb-4 text-sm text-muted-foreground">
           Escolha como o Finlist aparece para você. O menu lateral continua escuro nos dois modos.
@@ -186,11 +186,11 @@ function SettingsPage() {
         </div>
       </Card>
 
-      <Card className="border-border/60 bg-card p-5">
+      <Card className="animate-rise border-border/60 bg-card p-5" style={{ animationDelay: "120ms" }}>
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-muted-foreground" />
-            <h2 className="font-semibold">Plano</h2>
+            <h2 className="font-bold tracking-tight">Plano</h2>
           </div>
           <Badge variant={plan.plan === "expired" ? "secondary" : "default"}>
             {PLAN_LABEL[plan.plan]}
@@ -216,7 +216,7 @@ function SettingsPage() {
               <Link to="/pricing">Ver detalhes do plano</Link>
             </Button>
           ) : (
-            <Button asChild>
+            <Button className="hover-glow" asChild>
               <Link to="/pricing">
                 {plan.plan === "pf" ? "Adicionar módulo PJ" : "Escolher plano"}
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -227,10 +227,10 @@ function SettingsPage() {
 
       </Card>
 
-      <Card className="border-border/60 bg-card p-5">
+      <Card className="animate-rise border-border/60 bg-card p-5" style={{ animationDelay: "180ms" }}>
         <div className="mb-4 flex items-center gap-2">
           <Download className="h-4 w-4 text-muted-foreground" />
-          <h2 className="font-semibold">Seus dados</h2>
+          <h2 className="font-bold tracking-tight">Seus dados</h2>
           {!isPro && (
             <Badge variant="outline" className="ml-auto gap-1 text-xs">
               <Lock className="h-3 w-3" />

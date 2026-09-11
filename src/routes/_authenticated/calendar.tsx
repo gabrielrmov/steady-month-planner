@@ -80,9 +80,9 @@ function CalendarPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-5">
-      <div className="space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
+      <div className="animate-rise space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
         <div className="min-w-0">
-          <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">Calendário</h1>
+          <h1 className="truncate text-2xl font-extrabold tracking-tighter sm:text-3xl">Calendário</h1>
           <p className="text-sm text-muted-foreground">Visualize entradas e saídas por dia</p>
         </div>
         <div className="flex items-center justify-between gap-1 rounded-lg border border-border bg-card p-1 sm:justify-start">
@@ -99,13 +99,13 @@ function CalendarPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
-        <Card className="p-2 sm:p-3">
+        <Card className="animate-rise p-2 sm:p-3" style={{ animationDelay: "60ms" }}>
           <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-medium text-muted-foreground sm:text-xs">
             {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((d) => (
               <div key={d} className="py-1.5 sm:py-2">{d}</div>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-1">
+          <div className="animate-rise grid grid-cols-7 gap-1">
             {days.map((day) => {
               const key = format(day, "yyyy-MM-dd");
               const items = byDay.get(key) ?? [];
@@ -148,7 +148,7 @@ function CalendarPage() {
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="animate-rise p-4" style={{ animationDelay: "120ms" }}>
           <p className="text-sm font-semibold capitalize">
             {format(selected, "EEEE, dd 'de' MMMM", { locale: ptBR })}
           </p>
@@ -156,8 +156,12 @@ function CalendarPage() {
             {selectedItems.length === 0 && (
               <p className="text-xs text-muted-foreground">Nenhum lançamento neste dia.</p>
             )}
-            {selectedItems.map((t) => (
-              <div key={t.id} className="flex items-center gap-2 rounded-md border border-border p-2">
+            {selectedItems.map((t, i) => (
+              <div
+                key={t.id}
+                className="animate-rise flex items-center gap-2 rounded-md border border-border p-2"
+                style={{ animationDelay: `${Math.min(i, 10) * 40}ms` }}
+              >
                 <div
                   className="h-2 w-2 shrink-0 rounded-full"
                   style={{ backgroundColor: t.cards?.color ?? t.categories?.color ?? "#888" }}

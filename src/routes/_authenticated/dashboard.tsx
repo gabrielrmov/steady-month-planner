@@ -212,20 +212,72 @@ function Dashboard() {
   const alerts = [...overdueList, ...upcoming];
 
   const biggest = [...expense].sort((a, b) => Number(b.amount) - Number(a.amount))[0];
-  const insight =
-    overdue > 0
-      ? `Você tem ${overdue} conta(s) em atraso somando ${brl(
-          overdueList.reduce((s, t) => s + Number(t.amount), 0),
-        )}.`
-      : overBudget.length > 0
-        ? `${overBudget[0].name} já passou do orçamento mensal (${brl(overBudget[0].total)} de ${brl(overBudget[0].budget!)}).`
-        : expenseTotal > incomeTotal
-          ? `As saídas superam as entradas em ${brl(expenseTotal - incomeTotal)} neste mês.`
-          : topCategories[0]
-            ? `${topCategories[0].name} é seu maior gasto do mês (${brl(topCategories[0].total)}${
-                expenseTotal ? `, ${Math.round((topCategories[0].total / expenseTotal) * 100)}% do total` : ""
-              }).`
-            : "Cadastre suas contas do mês para ver insights personalizados.";
+
+  const prevSavingRate = prevIncome > 0 ? Math.round(((prevIncome - prevExpense) / prevIncome) * 100) : null;
+  const savingRateDelta = prevSavingRate !== null && incomeTotal > 0 ? savingRate - prevSavingRate : null;
+
+  type Insight = { text: string; tone: "destructive" | "warning" | "success" | "primary" };
+  const insights: Insight[] = [];
+
+  if (overdue > 0) {
+    insights.push({
+      text: `Você tem ${overdue} conta(s) em atraso somando ${brl(
+        overdueList.reduce((s, t) => s + Number(t.amount), 0),
+      )}.`,
+      tone: "destructive",
+    });
+  }
+  for (const c of overBudget.slice(0, 2)) {
+    insights.push({
+      text: `${c.name} já passou do orçamento mensal (${brl(c.total)} de ${brl(c.budget!)}).`,
+      tone: "warning",
+    });
+  }
+  if (expenseTotal > incomeTotal && incomeTotal > 0) {
+    insights.push({
+      text: `As saídas superam as entradas em ${brl(expenseTotal - incomeTotal)} neste mês.`,
+      tone: "warning",
+    });
+  }
+  if (incomePending > 0 && incomeTotal > 0) {
+    insights.push({
+      text: `Você ainda tem ${brl(incomePending)} a receber neste mês (${Math.round((incomePending / incomeTotal) * 100)}% do previsto).`,
+      tone: "primary",
+    });
+  }
+  if (savingRateDelta !== null && Math.abs(savingRateDelta) >= 3) {
+    insights.push({
+      text:
+        savingRateDelta > 0
+          ? `Sua taxa de economia subiu para ${savingRate}%, ${savingRateDelta} pontos acima do mês passado.`
+          : `Sua taxa de economia caiu para ${savingRate}%, ${Math.abs(savingRateDelta)} pontos abaixo do mês passado.`,
+      tone: savingRateDelta > 0 ? "success" : "warning",
+    });
+  }
+  if (topCategories[0]) {
+    insights.push({
+      text: `${topCategories[0].name} é seu maior gasto do mês (${brl(topCategories[0].total)}${
+        expenseTotal ? `, ${Math.round((topCategories[0].total / expenseTotal) * 100)}% do total` : ""
+      }).`,
+      tone: "primary",
+    });
+  }
+  if (biggest) {
+    insights.push({
+      text: `Maior despesa individual: ${biggest.description} (${brl(Number(biggest.amount))}).`,
+      tone: "primary",
+    });
+  }
+  if (insights.length === 0) {
+    insights.push({ text: "Cadastre suas contas do mês para ver insights personalizados.", tone: "primary" });
+  }
+  const topInsights = insights.slice(0, 3);
+  const insightToneDot: Record<Insight["tone"], string> = {
+    destructive: "bg-destructive",
+    warning: "bg-warning",
+    success: "bg-success",
+    primary: "bg-primary",
+  };
 
   return (
     <div className="mx-auto max-w-6xl space-y-5">
@@ -306,13 +358,22 @@ function Dashboard() {
           >
             <Sparkles className="h-4 w-4" />
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Insight do mês
-            </p>
-            <p className="mt-0.5 text-sm text-foreground">{insight}</p>
-          </div>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Insights do mês
+          </p>
         </div>
+        <ul className="mt-3 space-y-2">
+          {topInsights.map((ins, i) => (
+            <li
+              key={i}
+              className="animate-rise flex items-start gap-2.5 text-sm text-foreground"
+              style={{ animationDelay: `${360 + i * 60}ms` }}
+            >
+              <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${insightToneDot[ins.tone]}`} />
+              <span className="min-w-0">{ins.text}</span>
+            </li>
+          ))}
+        </ul>
         <div className="mt-4 space-y-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Progresso de pagamento</span>

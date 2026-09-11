@@ -267,14 +267,14 @@ function IncomeSplitPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Divisão de ganhos</h1>
+      <div className="animate-rise">
+        <h1 className="text-2xl font-extrabold tracking-tighter sm:text-3xl">Divisão de ganhos</h1>
         <p className="text-sm text-muted-foreground">
           Informe quanto você ganhou e veja como distribuir entre suas categorias.
         </p>
       </div>
 
-      <Card className="p-5">
+      <Card className="animate-rise p-5" style={{ animationDelay: "60ms" }}>
         <Label className="text-xs text-muted-foreground">Quanto você ganhou este mês?</Label>
         <Input
           type="number"
@@ -286,7 +286,7 @@ function IncomeSplitPage() {
         />
       </Card>
 
-      <Card className="p-5">
+      <Card className="animate-rise glow-ring p-5" style={{ animationDelay: "120ms" }}>
         <p className="mb-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Como fica dividido
         </p>
@@ -342,12 +342,16 @@ function IncomeSplitPage() {
         )}
       </Card>
 
-      <Card className="divide-y divide-border">
+      <Card className="animate-rise divide-y divide-border" style={{ animationDelay: "180ms" }}>
         {rows.map((r, i) => {
           const RowIcon = iconFor(r);
           const rowColor = colorFor(r, i);
           return (
-            <div key={r.id} className="flex flex-wrap items-center gap-3 p-4">
+            <div
+              key={r.id}
+              className="animate-rise flex flex-wrap items-center gap-3 p-4"
+              style={{ animationDelay: `${Math.min(i, 10) * 40}ms` }}
+            >
               <div className="flex shrink-0 flex-col">
                 <button
                   type="button"
@@ -439,8 +443,8 @@ function IncomeSplitPage() {
               <span className="w-28 text-right text-sm font-semibold">
                 {brl((amount * Number(r.percentage || 0)) / 100)}
               </span>
-              <Button variant="ghost" size="icon" onClick={() => del.mutate(r.id)}>
-                <Trash2 className="h-4 w-4 text-muted-foreground" />
+              <Button variant="ghost" size="icon" className="group" onClick={() => del.mutate(r.id)}>
+                <Trash2 className="h-4 w-4 text-muted-foreground transition-transform duration-150 group-hover:scale-110" />
               </Button>
             </div>
           );
@@ -450,7 +454,7 @@ function IncomeSplitPage() {
         )}
       </Card>
 
-      <Card className="p-5">
+      <Card className="animate-rise p-5" style={{ animationDelay: "240ms" }}>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -472,14 +476,17 @@ function IncomeSplitPage() {
               onChange={(e) => setNewPct(parseFloat(e.target.value))}
             />
           </div>
-          <Button type="submit">
+          <Button type="submit" className="hover-glow">
             <Plus className="mr-1 h-4 w-4" />
             Adicionar
           </Button>
         </form>
       </Card>
 
-      <Card className={`flex items-center justify-between p-4 ${totalPct !== 100 ? "border-warning/50" : "border-success/50"}`}>
+      <Card
+        className={`animate-rise flex items-center justify-between p-4 ${totalPct !== 100 ? "border-warning/50" : "border-success/50"}`}
+        style={{ animationDelay: "300ms" }}
+      >
         <span className="text-sm text-muted-foreground">Total distribuído</span>
         <span className={`text-sm font-bold ${totalPct !== 100 ? "text-warning" : "text-success"}`}>
           {totalPct}%

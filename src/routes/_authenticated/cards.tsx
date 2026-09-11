@@ -119,9 +119,9 @@ function CardsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="animate-rise flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Cartões</h1>
+          <h1 className="text-2xl font-extrabold tracking-tighter sm:text-3xl">Cartões</h1>
           <p className="text-sm text-muted-foreground">Cadastre seus cartões para organizar as compras parceladas</p>
         </div>
         <div className="flex items-center gap-2">
@@ -131,7 +131,7 @@ function CardsPage() {
             </Badge>
           )}
           {!formOpen && (
-            <Button onClick={() => setFormOpen(true)} disabled={atLimit}>
+            <Button onClick={() => setFormOpen(true)} disabled={atLimit} className="hover-glow">
               <Plus className="mr-1 h-4 w-4" /> Novo cartão
             </Button>
           )}
@@ -141,7 +141,7 @@ function CardsPage() {
       {formOpen && (
         <Card className="animate-rise border-border/60 bg-card p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold">Novo cartão</h2>
+            <h2 className="text-sm font-bold tracking-tight">Novo cartão</h2>
             <Button type="button" variant="ghost" size="icon" onClick={() => setFormOpen(false)}>
               <X className="h-4 w-4" />
             </Button>
@@ -219,13 +219,17 @@ function CardsPage() {
             </Button>
           </Card>
         )}
-        {cards.map((c) => {
+        {cards.map((c, i) => {
           const total = invoiceTotal(c);
           const limitValue = c.credit_limit ? Number(c.credit_limit) : null;
           const usagePct = limitValue ? Math.min(100, (total / limitValue) * 100) : null;
           const isHigh = usagePct !== null && usagePct >= 80;
           return (
-            <Card key={c.id} className="hover-lift border-border/60 bg-card p-4">
+            <Card
+              key={c.id}
+              className="animate-rise hover-lift border-border/60 bg-card p-4"
+              style={{ animationDelay: `${Math.min(i, 10) * 40}ms` }}
+            >
               <div className="flex items-center gap-4">
                 <div
                   className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
@@ -240,8 +244,8 @@ function CardsPage() {
                     {c.due_day ? ` · Vence dia ${c.due_day}` : ""}
                   </p>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => del.mutate(c.id)} className="shrink-0">
-                  <Trash2 className="h-4 w-4 text-muted-foreground" />
+                <Button variant="ghost" size="icon" onClick={() => del.mutate(c.id)} className="group shrink-0">
+                  <Trash2 className="h-4 w-4 text-muted-foreground transition-transform duration-150 group-hover:scale-110" />
                 </Button>
               </div>
 

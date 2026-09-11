@@ -95,9 +95,9 @@ function OpenFinancePage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="animate-rise flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Open Finance</h1>
+          <h1 className="text-2xl font-extrabold tracking-tighter sm:text-3xl">Open Finance</h1>
           <p className="text-sm text-muted-foreground">
             Adicione suas contas e cartões para os lançamentos entrarem sozinhos, já categorizados.
           </p>
@@ -108,10 +108,10 @@ function OpenFinancePage() {
         </Badge>
       </div>
 
-      <Card className="border-border/60 bg-card p-5">
+      <Card className="animate-rise border-border/60 bg-card p-5" style={{ animationDelay: "0ms" }}>
         <div className="flex items-center gap-2">
           <Landmark className="h-4 w-4 text-primary" />
-          <h2 className="font-semibold">Adicionar conta</h2>
+          <h2 className="font-bold tracking-tight">Adicionar conta</h2>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           Você autoriza na tela oficial do seu banco. Nós nunca vemos sua senha e as{" "}
@@ -129,7 +129,7 @@ function OpenFinancePage() {
         )}
 
         <Button
-          className="mt-4"
+          className="hover-glow mt-4"
           onClick={() => connectBank.mutate(undefined)}
           disabled={connectBank.isPending || !ofStatus?.configured}
         >
@@ -138,10 +138,10 @@ function OpenFinancePage() {
         </Button>
       </Card>
 
-      <Card className="border-border/60 bg-card p-5">
+      <Card className="animate-rise border-border/60 bg-card p-5" style={{ animationDelay: "60ms" }}>
         <div className="flex items-center gap-2">
           <Building2 className="h-4 w-4 text-primary" />
-          <h2 className="font-semibold">Contas conectadas</h2>
+          <h2 className="font-bold tracking-tight">Contas conectadas</h2>
         </div>
 
         <div className="mt-4 divide-y divide-border rounded-lg border border-border">
@@ -150,8 +150,12 @@ function OpenFinancePage() {
               Nenhuma conta conectada ainda. Adicione a primeira acima.
             </p>
           )}
-          {connections.map((c: any) => (
-            <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 p-3">
+          {connections.map((c: any, i: number) => (
+            <div
+              key={c.id}
+              className="animate-rise flex flex-wrap items-center justify-between gap-2 p-3"
+              style={{ animationDelay: `${Math.min(i, 10) * 40}ms` }}
+            >
               <div>
                 <p className="text-sm font-medium">{c.institution_name}</p>
                 <p className="text-xs text-muted-foreground">
@@ -179,8 +183,8 @@ function OpenFinancePage() {
                     Reconectar
                   </Button>
                 )}
-                <Button variant="ghost" size="icon" onClick={() => delConnection.mutate(c.id)}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
+                <Button variant="ghost" size="icon" className="group" onClick={() => delConnection.mutate(c.id)}>
+                  <Trash2 className="h-4 w-4 text-destructive transition-transform duration-150 group-hover:scale-110" />
                 </Button>
               </div>
             </div>

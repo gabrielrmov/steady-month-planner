@@ -83,15 +83,15 @@ function Pricing() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Precificação de serviços</h1>
+      <div className="animate-rise">
+        <h1 className="text-2xl font-extrabold tracking-tighter sm:text-3xl">Precificação de serviços</h1>
         <p className="text-sm text-muted-foreground">
           Descubra quanto cobrar por projeto cobrindo custos, impostos e lucro.
         </p>
       </div>
 
       {!plan.hasPj && (
-        <Card className="flex flex-wrap items-center justify-between gap-4 border-primary/40 p-5">
+        <Card className="animate-rise flex flex-wrap items-center justify-between gap-4 border-primary/40 p-5" style={{ animationDelay: "60ms" }}>
           <div className="flex items-start gap-3">
             <Lock className="mt-0.5 h-4 w-4 text-primary" />
             <div>
@@ -101,16 +101,16 @@ function Pricing() {
               </p>
             </div>
           </div>
-          <Button asChild size="sm">
+          <Button asChild size="sm" className="hover-glow">
             <Link to="/pricing">Ver planos</Link>
           </Button>
         </Card>
       )}
 
       <div className={`grid gap-6 lg:grid-cols-[1.1fr_1fr] ${plan.hasPj ? "" : "pointer-events-none select-none opacity-60"}`}>
-        <Card className="space-y-6 p-6">
+        <Card className="animate-rise space-y-6 p-6" style={{ animationDelay: "120ms" }}>
           <section className="space-y-4">
-            <h2 className="flex items-center gap-2 text-sm font-semibold">
+            <h2 className="flex items-center gap-2 text-sm font-bold tracking-tight">
               <Calculator className="h-4 w-4 text-muted-foreground" />
               Estrutura da empresa
             </h2>
@@ -122,7 +122,7 @@ function Pricing() {
           </section>
 
           <section className="space-y-4 border-t border-border pt-6">
-            <h2 className="flex items-center gap-2 text-sm font-semibold">
+            <h2 className="flex items-center gap-2 text-sm font-bold tracking-tight">
               <Percent className="h-4 w-4 text-muted-foreground" />
               Impostos e margem
             </h2>
@@ -133,7 +133,7 @@ function Pricing() {
           </section>
 
           <section className="space-y-4 border-t border-border pt-6">
-            <h2 className="flex items-center gap-2 text-sm font-semibold">
+            <h2 className="flex items-center gap-2 text-sm font-bold tracking-tight">
               <Clock className="h-4 w-4 text-muted-foreground" />
               Este serviço
             </h2>
@@ -145,7 +145,7 @@ function Pricing() {
         </Card>
 
         <div className="space-y-4">
-          <Card className="p-6">
+          <Card className="animate-rise glow-ring p-6" style={{ animationDelay: "180ms" }}>
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Preço sugerido do serviço
             </p>
@@ -153,14 +153,14 @@ function Pricing() {
             <p className="mt-1 text-xs text-muted-foreground">{brl(pricePerHour)} por hora trabalhada</p>
           </Card>
 
-          <Card className="divide-y divide-border p-6">
+          <Card className="animate-rise divide-y divide-border p-6" style={{ animationDelay: "240ms" }}>
             <Row label="Custo por hora da empresa" value={brl(hourCost)} />
             <Row label="Custo total do serviço" value={brl(base)} />
             <Row label="Impostos estimados" value={brl(taxes)} />
             <Row label="Lucro estimado" value={brl(profit)} strong />
           </Card>
 
-          <Card className="p-5">
+          <Card className="animate-rise p-5" style={{ animationDelay: "300ms" }}>
             <div className="flex gap-3">
               <TrendingUp className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
               <p className="text-xs leading-relaxed text-muted-foreground">

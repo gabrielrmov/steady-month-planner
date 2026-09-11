@@ -108,20 +108,20 @@ function SavingsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="animate-rise flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Metas de economia</h1>
+          <h1 className="text-2xl font-extrabold tracking-tighter sm:text-3xl">Metas de economia</h1>
           <p className="text-sm text-muted-foreground">Defina objetivos e acompanhe quanto falta para alcançá-los</p>
         </div>
         {!formOpen && (
-          <Button onClick={() => setFormOpen(true)}>
+          <Button onClick={() => setFormOpen(true)} className="hover-glow">
             <Plus className="mr-1 h-4 w-4" /> Nova meta
           </Button>
         )}
       </div>
 
       {goals.length > 0 && (
-        <Card className="p-5">
+        <Card className="animate-rise p-5" style={{ animationDelay: "60ms" }}>
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Total guardado em {goals.length} meta(s)</span>
             <span className="font-semibold">
@@ -198,10 +198,11 @@ function SavingsPage() {
         </Card>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
-          {goals.map((g) => (
+          {goals.map((g, i) => (
             <GoalCard
               key={g.id}
               goal={g}
+              delayMs={i * 70}
               onDelete={() => del.mutate(g.id)}
               onContribute={(newAmount) => contribute.mutate({ id: g.id, newAmount })}
             />
@@ -216,10 +217,12 @@ function GoalCard({
   goal,
   onDelete,
   onContribute,
+  delayMs,
 }: {
   goal: Goal;
   onDelete: () => void;
   onContribute: (newAmount: number) => void;
+  delayMs?: number;
 }) {
   const [adding, setAdding] = useState(false);
   const [amount, setAmount] = useState("");
@@ -229,6 +232,9 @@ function GoalCard({
   const pct = target > 0 ? Math.min(100, (current / target) * 100) : 0;
   const done = current >= target;
   const daysLeft = goal.target_date ? differenceInCalendarDays(new Date(goal.target_date + "T00:00:00"), new Date()) : null;
+  const remaining = Math.max(0, target - current);
+  const monthsLeft = daysLeft !== null && daysLeft > 0 ? Math.max(1, Math.ceil(daysLeft / 30)) : null;
+  const neededPerMonth = !done && monthsLeft !== null && remaining > 0 ? remaining / monthsLeft : null;
 
   const submitContribution = () => {
     const value = Number(amount);
@@ -239,7 +245,7 @@ function GoalCard({
   };
 
   return (
-    <Card className="hover-lift space-y-3 p-4">
+    <Card className="animate-rise hover-lift space-y-3 p-4" style={{ animationDelay: `${delayMs ?? 0}ms` }}>
       <div className="flex items-start gap-3">
         <div
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
@@ -270,6 +276,12 @@ function GoalCard({
           className={done ? "[&>div]:bg-[image:none] [&>div]:bg-success [&>div]:shadow-none" : ""}
         />
         <p className="text-[11px] text-muted-foreground">{pct.toFixed(0)}% concluído</p>
+        {neededPerMonth !== null && (
+          <p className="flex items-center gap-1 text-[11px] font-medium text-primary">
+            <PiggyBank className="h-3 w-3 shrink-0" />
+            Guarde ~{brl(neededPerMonth)}/mês para bater a meta a tempo
+          </p>
+        )}
       </div>
 
       {adding ? (

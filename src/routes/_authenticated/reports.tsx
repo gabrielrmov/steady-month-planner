@@ -109,6 +109,71 @@ function ReportsPage() {
   const totalIn = series.reduce((s, r) => s + r.entrada, 0);
   const totalOut = series.reduce((s, r) => s + r.saida, 0);
   const avgBalance = series.length ? (totalIn - totalOut) / series.length : 0;
+  const avgSavingRate = totalIn > 0 ? Math.round(((totalIn - totalOut) / totalIn) * 100) : null;
+
+  type Insight = { text: string; tone: "destructive" | "warning" | "success" | "primary" };
+  const reportInsights: Insight[] = [];
+
+  const monthsWithData = series.filter((s) => s.entrada > 0 || s.saida > 0);
+  if (monthsWithData.length > 0) {
+    const best = [...monthsWithData].sort((a, b) => b.saldo - a.saldo)[0];
+    const worst = [...monthsWithData].sort((a, b) => a.saldo - b.saldo)[0];
+    if (best && best.saldo > 0) {
+      reportInsights.push({ text: `${best.mesCompleto} foi o melhor mês, com saldo de ${brl(best.saldo)}.`, tone: "success" });
+    }
+    if (worst && worst.saldo < 0 && worst !== best) {
+      reportInsights.push({ text: `${worst.mesCompleto} teve o pior saldo do período (${brl(worst.saldo)}).`, tone: "destructive" });
+    }
+  }
+
+  if (series.length >= 6) {
+    const last3 = series.slice(-3);
+    const prev3 = series.slice(-6, -3);
+    const last3Out = last3.reduce((s, r) => s + r.saida, 0);
+    const prev3Out = prev3.reduce((s, r) => s + r.saida, 0);
+    if (prev3Out > 0) {
+      const pct = Math.round(((last3Out - prev3Out) / prev3Out) * 100);
+      if (Math.abs(pct) >= 5) {
+        reportInsights.push({
+          text:
+            pct > 0
+              ? `Seus gastos subiram ${pct}% nos últimos 3 meses em relação aos 3 anteriores.`
+              : `Seus gastos caíram ${Math.abs(pct)}% nos últimos 3 meses em relação aos 3 anteriores.`,
+          tone: pct > 0 ? "warning" : "success",
+        });
+      }
+    }
+  }
+
+  if (avgSavingRate !== null) {
+    reportInsights.push({
+      text:
+        avgSavingRate >= 0
+          ? `Sua taxa média de economia no período foi ${avgSavingRate}% da renda.`
+          : `No período, você gastou ${Math.abs(avgSavingRate)}% a mais do que ganhou, em média.`,
+      tone: avgSavingRate >= 15 ? "success" : avgSavingRate >= 0 ? "primary" : "destructive",
+    });
+  }
+
+  if (categoryData.length > 0 && totalOut > 0) {
+    const top = categoryData[0];
+    const pct = Math.round((top.value / totalOut) * 100);
+    reportInsights.push({
+      text:
+        pct >= 30
+          ? `${top.name} concentra ${pct}% de tudo que você gastou no período (${brl(top.value)}).`
+          : `Sua categoria de maior gasto no período foi ${top.name} (${brl(top.value)}, ${pct}% do total).`,
+      tone: pct >= 30 ? "warning" : "primary",
+    });
+  }
+
+  const topReportInsights = reportInsights.slice(0, 4);
+  const insightToneDot: Record<Insight["tone"], string> = {
+    destructive: "bg-destructive",
+    warning: "bg-warning",
+    success: "bg-success",
+    primary: "bg-primary",
+  };
 
   const cards = [
     { label: "Entradas (6 meses)", value: totalIn, icon: TrendingUp, tone: "text-success" },
@@ -144,9 +209,9 @@ function ReportsPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="animate-rise flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Relatórios</h1>
+          <h1 className="text-2xl font-extrabold tracking-tighter sm:text-3xl">Relatórios</h1>
           <p className="text-sm text-muted-foreground">Últimos {monthsBack} meses</p>
         </div>
         <div className="flex items-center gap-2">
@@ -154,7 +219,7 @@ function ReportsPage() {
             {PLAN_LABEL[plan.plan]}
           </Badge>
           {isPro && (
-            <Button variant="outline" size="sm" onClick={exportCsv} disabled={isLoading || txs.length === 0}>
+            <Button variant="outline" size="sm" onClick={exportCsv} disabled={isLoading || txs.length === 0} className="hover-glow">
               <Download className="mr-1.5 h-3.5 w-3.5" /> Exportar CSV
             </Button>
           )}
@@ -162,21 +227,21 @@ function ReportsPage() {
       </div>
 
       {!isPro && (
-        <Card className="border-primary/20 bg-[var(--primary-subtle)] p-5">
+        <Card className="animate-rise border-primary/20 bg-[var(--primary-subtle)] p-5">
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-start gap-3">
               <div className="rounded-full bg-[var(--primary-subtle)] p-2 text-primary">
                 <Lock className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="font-semibold">Relatórios avançados são um recurso Pro</h2>
+                <h2 className="font-bold tracking-tight">Relatórios avançados são um recurso Pro</h2>
                 <p className="text-sm text-muted-foreground">
                   Seu teste grátis terminou. Assine um plano para desbloquear gráficos de
                   evolução, gastos por categoria e exportação CSV.
                 </p>
               </div>
             </div>
-            <Button asChild>
+            <Button asChild className="hover-glow">
               <Link to="/pricing">
                 Fazer upgrade
                 <Crown className="ml-2 h-4 w-4" />
@@ -197,20 +262,52 @@ function ReportsPage() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-3">
-          {cards.map((c) => (
-            <Card key={c.label} className="hover-lift border-border/60 bg-card p-5">
+          {cards.map((c, i) => (
+            <Card
+              key={c.label}
+              className="animate-rise hover-lift border-border/60 bg-card p-5"
+              style={{ animationDelay: `${i * 60}ms` }}
+            >
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">{c.label}</span>
                 <c.icon className={`h-4 w-4 ${c.tone}`} />
               </div>
-              <p className="mt-2 text-2xl font-bold">{brl(c.value)}</p>
+              <p className="mt-2 text-2xl font-extrabold tracking-tighter">{brl(c.value)}</p>
             </Card>
           ))}
         </div>
       )}
 
-      <Card className={`border-border/60 bg-card p-5 ${!isPro ? "opacity-60" : ""}`}>
-        <h2 className="mb-4 font-semibold">Evolução mensal</h2>
+      {!isLoading && topReportInsights.length > 0 && (
+        <Card className="animate-rise glow-ring p-5" style={{ animationDelay: "180ms" }}>
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-primary-foreground"
+              style={{ background: "var(--gradient-primary)" }}
+            >
+              <TrendingUp className="h-4 w-4" />
+            </div>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Insights automáticos
+            </p>
+          </div>
+          <ul className="mt-3 space-y-2">
+            {topReportInsights.map((ins, i) => (
+              <li
+                key={i}
+                className="animate-rise flex items-start gap-2.5 text-sm text-foreground"
+                style={{ animationDelay: `${240 + i * 60}ms` }}
+              >
+                <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${insightToneDot[ins.tone]}`} />
+                <span className="min-w-0">{ins.text}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      <Card className={`animate-rise border-border/60 bg-card p-5 ${!isPro ? "opacity-60" : ""}`} style={{ animationDelay: "240ms" }}>
+        <h2 className="mb-4 font-bold tracking-tight">Evolução mensal</h2>
         {isLoading ? (
           <Skeleton className="h-72 w-full" />
         ) : (
@@ -245,8 +342,8 @@ function ReportsPage() {
         )}
       </Card>
 
-      <Card className={`border-border/60 bg-card p-5 ${!isPro ? "opacity-60" : ""}`}>
-        <h2 className="mb-4 font-semibold">Gastos por categoria</h2>
+      <Card className={`animate-rise border-border/60 bg-card p-5 ${!isPro ? "opacity-60" : ""}`} style={{ animationDelay: "300ms" }}>
+        <h2 className="mb-4 font-bold tracking-tight">Gastos por categoria</h2>
         {isLoading ? (
           <div className="grid gap-6 md:grid-cols-2">
             <Skeleton className="h-64 w-full rounded-full" />
@@ -298,7 +395,7 @@ function ReportsPage() {
 
       {!isPro && (
         <div className="text-center">
-          <Button size="lg" asChild>
+          <Button size="lg" asChild className="hover-glow">
             <Link to="/pricing">
               Desbloquear relatórios completos
               <ArrowRight className="ml-2 h-4 w-4" />

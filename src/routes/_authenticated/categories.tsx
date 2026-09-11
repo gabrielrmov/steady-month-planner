@@ -110,14 +110,14 @@ function CategoriesPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Categorias</h1>
+      <div className="animate-rise">
+        <h1 className="text-2xl font-extrabold tracking-tighter sm:text-3xl">Categorias</h1>
         <p className="text-sm text-muted-foreground">
           Organize suas contas por tipo e defina orçamentos mensais para acompanhar gastos
         </p>
       </div>
 
-      <Card className="p-5">
+      <Card className="animate-rise p-5" style={{ animationDelay: "60ms" }}>
         <form
           onSubmit={(e) => { e.preventDefault(); if (name) add.mutate(); }}
           className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto_auto]"
@@ -159,13 +159,17 @@ function CategoriesPage() {
               />
             ))}
           </div>
-          <Button type="submit"><Plus className="mr-1 h-4 w-4" />Adicionar</Button>
+          <Button type="submit" className="hover-glow"><Plus className="mr-1 h-4 w-4" />Adicionar</Button>
         </form>
       </Card>
 
-      <Card className="divide-y divide-border">
-        {cats.map((c) => (
-          <div key={c.id} className="flex flex-wrap items-center gap-3 p-4">
+      <Card className="animate-rise divide-y divide-border" style={{ animationDelay: "120ms" }}>
+        {cats.map((c, i) => (
+          <div
+            key={c.id}
+            className="animate-rise flex flex-wrap items-center gap-3 p-4"
+            style={{ animationDelay: `${Math.min(i, 10) * 40}ms` }}
+          >
             <span className="h-4 w-4 shrink-0 rounded-full" style={{ backgroundColor: c.color }} />
             <span className="min-w-0 flex-1 text-sm font-medium">{c.name}</span>
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -186,8 +190,8 @@ function CategoriesPage() {
                 />
               </div>
             )}
-            <Button variant="ghost" size="icon" onClick={() => del.mutate(c.id)}>
-              <Trash2 className="h-4 w-4 text-muted-foreground" />
+            <Button variant="ghost" size="icon" className="group" onClick={() => del.mutate(c.id)}>
+              <Trash2 className="h-4 w-4 text-muted-foreground transition-transform duration-150 group-hover:scale-110" />
             </Button>
           </div>
         ))}
