@@ -136,18 +136,18 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="flex h-16 items-center justify-between px-5">
         <Link to="/dashboard" className="flex items-center gap-3">
           <div
-            className="flex h-8 w-8 items-center justify-center rounded-lg"
+            className="glow-ring flex h-8 w-8 items-center justify-center rounded-lg"
             style={{ background: "var(--gradient-primary)" }}
           >
             <Wallet className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="text-lg font-semibold tracking-tight text-white">Finlist</span>
+          <span className="text-lg font-bold tracking-tighter text-sidebar-foreground">Finlist</span>
         </Link>
         <button
           type="button"
           onClick={toggleTheme}
           title={theme === "dark" ? "Mudar para tema claro" : "Mudar para tema escuro"}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800/50 hover:text-white"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-sidebar-foreground/45 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
         >
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
@@ -157,7 +157,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-2">
         {groups.map((group) => (
           <div key={group.title} className="space-y-1">
-            <h3 className="px-3 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+            <h3 className="px-3 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/35">
               {group.title}
             </h3>
             {group.items.map((item) => {
@@ -166,7 +166,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 return (
                   <Collapsible key={item.label} defaultOpen={anySubActive}>
                     <CollapsibleTrigger asChild>
-                      <button className="group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800/50 hover:text-white">
+                      <button className="group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground">
                         <div className="flex items-center gap-3">
                           <item.icon className="h-[18px] w-[18px]" />
                           {item.label}
@@ -175,7 +175,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                       </button>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <div className="mt-1 ml-5 border-l border-slate-800">
+                      <div className="mt-1 ml-5 border-l border-sidebar-border">
                         {item.sub.map((sub) => {
                           const subActive = isActive(sub.to, sub.tab);
                           return (
@@ -185,10 +185,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                               search={sub.tab ? { tab: sub.tab } : {}}
                               onClick={onNavigate}
                               className={cn(
-                                "relative block py-2 pl-6 text-sm transition-colors before:absolute before:left-0 before:top-1/2 before:h-px before:w-2 before:-translate-y-1/2 before:bg-slate-800",
+                                "relative block py-2 pl-6 text-sm transition-colors before:absolute before:left-0 before:top-1/2 before:h-px before:w-2 before:-translate-y-1/2 before:bg-sidebar-border",
                                 subActive
-                                  ? "font-medium text-indigo-400"
-                                  : "text-slate-500 hover:text-indigo-400",
+                                  ? "font-medium text-primary"
+                                  : "text-sidebar-foreground/45 hover:text-primary",
                               )}
                             >
                               {sub.label}
@@ -209,10 +209,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   search={item.tab ? { tab: item.tab } : {}}
                   onClick={onNavigate}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                    "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                     active
-                      ? "bg-indigo-500/10 text-indigo-400"
-                      : "text-slate-400 hover:bg-slate-800/50 hover:text-white",
+                      ? "bg-primary/10 text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:rounded-full before:bg-primary before:shadow-[0_0_10px_color-mix(in_oklab,var(--primary)_70%,transparent)]"
+                      : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground",
                   )}
                 >
                   <item.icon className="h-[18px] w-[18px]" />
@@ -225,7 +225,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
 
       {/* Footer */}
-      <div className="mt-auto border-t border-slate-800 bg-slate-900/80 p-4 backdrop-blur-md">
+      <div className="mt-auto border-t border-sidebar-border bg-sidebar/80 p-4 backdrop-blur-md">
         <div className="mb-3 grid grid-cols-2 gap-1">
           {[
             { to: "/categories", label: "Categorias", icon: Tag },
@@ -237,7 +237,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               key={l.to}
               to={l.to}
               onClick={onNavigate}
-              className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-slate-500 transition-colors hover:text-white"
+              className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-sidebar-foreground/45 transition-colors hover:text-sidebar-foreground"
             >
               <l.icon className="h-3.5 w-3.5" />
               {l.label}
@@ -245,15 +245,15 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           ))}
         </div>
 
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 p-2">
+        <div className="flex items-center gap-3 rounded-2xl border border-sidebar-border bg-background/40 p-2">
           <Avatar className="h-10 w-10 rounded-xl">
-            <AvatarFallback className="bg-slate-800 text-xs font-semibold text-slate-200">
+            <AvatarFallback className="bg-sidebar-accent text-xs font-semibold text-sidebar-foreground">
               {initials || <User className="h-4 w-4" />}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-bold leading-tight text-white">{firstName}</p>
-            <p className="flex items-center gap-1 text-[10px] text-slate-500">
+            <p className="truncate text-xs font-bold leading-tight text-sidebar-foreground">{firstName}</p>
+            <p className="flex items-center gap-1 text-[10px] text-sidebar-foreground/45">
               <Sparkles className="h-3 w-3" />
               {plan.isTrial ? `Teste · ${plan.trialDaysLeft}d` : PLAN_LABEL[plan.plan]}
             </p>
@@ -262,7 +262,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             variant="ghost"
             size="icon"
             onClick={handleSignOut}
-            className="h-8 w-8 text-slate-500 hover:bg-red-400/10 hover:text-red-400"
+            className="h-8 w-8 text-sidebar-foreground/45 hover:bg-destructive/10 hover:text-destructive"
           >
             <LogOut className="h-4 w-4" />
           </Button>
@@ -272,7 +272,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <Link
             to="/pricing"
             onClick={onNavigate}
-            className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-indigo-500/20 bg-indigo-500/10 px-3 py-2 text-xs font-semibold text-indigo-300 transition-colors hover:border-indigo-500/40 hover:text-indigo-200"
+            className="hover-glow mt-3 flex items-center justify-center gap-2 rounded-xl border border-primary/25 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary transition-colors hover:border-primary/50"
           >
             <Sparkles className="h-3.5 w-3.5" />
             {plan.isTrial ? `Assinar (${plan.trialDaysLeft} dias restantes)` : plan.plan === "pf" ? "Adicionar módulo PJ" : "Escolher plano"}
@@ -293,7 +293,7 @@ const mobileNav = [
 function MobileTabBar() {
   const location = useLocation();
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-800 bg-slate-900/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-sidebar-border bg-sidebar/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
       <div className="grid grid-cols-4">
         {mobileNav.map((item) => {
           const active = location.pathname.startsWith(item.to);
@@ -303,7 +303,7 @@ function MobileTabBar() {
               to={item.to}
               className={cn(
                 "flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
-                active ? "text-indigo-400" : "text-slate-500",
+                active ? "text-primary" : "text-sidebar-foreground/45",
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -323,13 +323,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className={cn("min-h-screen bg-background text-foreground", theme === "light" && "light")}>
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-slate-800 bg-slate-900 md:flex">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-sidebar-border bg-sidebar md:flex">
         <SidebarContent />
       </aside>
 
       {/* Mobile header */}
       <div className="md:hidden">
-        <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-slate-900/95 px-4 backdrop-blur">
+        <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-sidebar-border bg-sidebar/95 px-4 backdrop-blur">
           <div className="flex min-w-0 items-center gap-2.5">
             <div
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
@@ -337,15 +337,15 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <Wallet className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="truncate font-semibold tracking-tight text-white">Finlist</span>
+            <span className="truncate font-bold tracking-tighter text-sidebar-foreground">Finlist</span>
           </div>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white">
+              <Button variant="ghost" size="icon" className="text-sidebar-foreground/60 hover:text-sidebar-foreground">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[85vw] max-w-xs border-slate-800 bg-slate-900 p-0">
+            <SheetContent side="left" className="w-[85vw] max-w-xs border-sidebar-border bg-sidebar p-0">
               <SheetHeader className="sr-only">
                 <SheetTitle>Menu</SheetTitle>
               </SheetHeader>
