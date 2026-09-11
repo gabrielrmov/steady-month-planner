@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Repeat2, CreditCard, Pencil, Inbox } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, Repeat2, CreditCard, Pencil, Inbox, Search, X } from "lucide-react";
 
 const tabSchema = z.object({
   tab: z.enum(["recurring", "sporadic", "cards", "income", "received"]).optional(),
@@ -62,6 +62,7 @@ function TransactionsPage() {
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Tx | null>(null);
+  const [query, setQuery] = useState("");
   const from = format(month, "yyyy-MM-dd");
   const to = format(endOfMonth(month), "yyyy-MM-dd");
   const qc = useQueryClient();
@@ -120,11 +121,21 @@ function TransactionsPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tx"] }),
   });
 
-  const pixExpenses = txs.filter((t) => t.type === "expense" && t.payment_method !== "card");
+  const q = query.trim().toLowerCase();
+  const searchedTxs = q
+    ? txs.filter(
+        (t) =>
+          t.description.toLowerCase().includes(q) ||
+          t.categories?.name.toLowerCase().includes(q) ||
+          t.cards?.name.toLowerCase().includes(q),
+      )
+    : txs;
+
+  const pixExpenses = searchedTxs.filter((t) => t.type === "expense" && t.payment_method !== "card");
   const recurring = pixExpenses.filter((t) => t.is_recurring);
   const sporadic = pixExpenses.filter((t) => !t.is_recurring);
-  const cardExpenses = txs.filter((t) => t.type === "expense" && t.payment_method === "card");
-  const incomes = txs.filter((t) => t.type === "income");
+  const cardExpenses = searchedTxs.filter((t) => t.type === "expense" && t.payment_method === "card");
+  const incomes = searchedTxs.filter((t) => t.type === "income");
   const received = incomes.filter((t) => t.status === "paid");
 
   const cardsGrouped = new Map<string, { name: string; color: string; items: Tx[] }>();
@@ -188,6 +199,25 @@ function TransactionsPage() {
             />
           </Dialog>
         </div>
+      </div>
+
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar por descrição, categoria ou cartão..."
+          className="pl-9 pr-9"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       <Tabs value={search.tab ?? "recurring"} onValueChange={(v) => navigate({ search: { tab: v as any }, replace: true })}>

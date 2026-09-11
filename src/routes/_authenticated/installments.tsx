@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CreditCard, Hourglass } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CreditCard, Hourglass, Search, X, Layers } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -37,6 +40,7 @@ type Row = {
 };
 
 function InstallmentsPage() {
+  const [query, setQuery] = useState("");
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["installments"],
     queryFn: async () => {
@@ -52,9 +56,14 @@ function InstallmentsPage() {
     },
   });
 
+  const q = query.trim().toLowerCase();
+  const filteredRows = q
+    ? rows.filter((r) => r.description.toLowerCase().includes(q) || r.cards?.name.toLowerCase().includes(q))
+    : rows;
+
   // group by card -> purchase_group_id
   const byCard = new Map<string, { card: Row["cards"]; groups: Map<string, Row[]> }>();
-  for (const r of rows) {
+  for (const r of filteredRows) {
     const cardKey = r.card_id ?? "none";
     if (!byCard.has(cardKey)) byCard.set(cardKey, { card: r.cards, groups: new Map() });
     const bucket = byCard.get(cardKey)!;
@@ -66,16 +75,60 @@ function InstallmentsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Parcelas em aberto</h1>
-        <p className="text-sm text-muted-foreground">Acompanhe quanto falta para quitar cada compra parcelada</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Parcelas em aberto</h1>
+          <p className="text-sm text-muted-foreground">Acompanhe quanto falta para quitar cada compra parcelada</p>
+        </div>
       </div>
 
-      {isLoading && <Card className="p-8 text-center text-sm text-muted-foreground">Carregando...</Card>}
-      {!isLoading && byCard.size === 0 && (
-        <Card className="p-10 text-center text-sm text-muted-foreground">
-          Nenhuma compra parcelada no cartão registrada.
+      {rows.length > 0 && (
+        <div className="relative max-w-sm">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por descrição ou cartão..."
+            className="pl-9 pr-9"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="space-y-3">
+          <Skeleton className="h-6 w-40" />
+          <div className="grid gap-3 sm:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="space-y-3 p-4">
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-2 w-full" />
+                <Skeleton className="h-3 w-1/2" />
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!isLoading && rows.length === 0 && (
+        <Card className="flex flex-col items-center gap-2 p-10 text-center">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primary-subtle)] text-primary">
+            <Layers className="h-5 w-5" />
+          </div>
+          <p className="text-sm text-muted-foreground">Nenhuma compra parcelada no cartão registrada.</p>
         </Card>
+      )}
+
+      {!isLoading && rows.length > 0 && byCard.size === 0 && (
+        <Card className="p-10 text-center text-sm text-muted-foreground">Nenhum resultado para "{query}".</Card>
       )}
 
       {[...byCard.entries()].map(([cardKey, { card, groups }]) => {
@@ -104,7 +157,7 @@ function InstallmentsPage() {
                 const nextPending = items.find((i) => i.status !== "paid");
                 const pct = total ? (paidCount / total) * 100 : 0;
                 return (
-                  <Card key={first.purchase_group_id ?? first.id} className="space-y-2 p-4">
+                  <Card key={first.purchase_group_id ?? first.id} className="hover-lift space-y-2 p-4">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold">{first.description}</p>
