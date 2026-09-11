@@ -321,7 +321,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { theme } = useTheme();
 
   return (
-    <div className={cn("min-h-screen bg-background", theme === "light" && "light")}>
+    <div className={cn("min-h-screen bg-background text-foreground", theme === "light" && "light")}>
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-slate-800 bg-slate-900 md:flex">
         <SidebarContent />
