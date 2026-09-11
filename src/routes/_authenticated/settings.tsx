@@ -3,13 +3,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlan, PLAN_LABEL } from "@/lib/plan";
+import { useTheme } from "@/lib/theme";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Download, Sparkles, User, Crown, Lock, ArrowRight } from "lucide-react";
+import { Download, Sparkles, User, Crown, Lock, ArrowRight, Sun, Moon } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -57,6 +58,7 @@ function SettingsPage() {
   const { data: profile } = useProfile();
   const plan = usePlan();
   const isPro = plan.hasAccess;
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     if (profile?.full_name) setFullName(profile.full_name);
@@ -113,7 +115,7 @@ function SettingsPage() {
         .join(";"),
     );
 
-    const csv = "\uFEFF" + [header.map(esc).join(";"), ...rows].join("\n");
+    const csv = "﻿" + [header.map(esc).join(";"), ...rows].join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const a = document.createElement("a");
     a.href = url;
@@ -148,6 +150,40 @@ function SettingsPage() {
         <Button className="mt-4" onClick={saveProfile} disabled={saving}>
           {saving ? "Salvando..." : "Salvar alterações"}
         </Button>
+      </Card>
+
+      <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">
+        <div className="mb-4 flex items-center gap-2">
+          {theme === "dark" ? (
+            <Moon className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <Sun className="h-4 w-4 text-muted-foreground" />
+          )}
+          <h2 className="font-semibold">Aparência</h2>
+        </div>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Escolha como o Finlist aparece para você. O menu lateral continua escuro nos dois modos.
+        </p>
+        <div className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted/40 p-1">
+          <button
+            type="button"
+            onClick={() => setTheme("dark")}
+            className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              theme === "dark" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Moon className="h-3.5 w-3.5" /> Escuro
+          </button>
+          <button
+            type="button"
+            onClick={() => setTheme("light")}
+            className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              theme === "light" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Sun className="h-3.5 w-3.5" /> Claro
+          </button>
+        </div>
       </Card>
 
       <Card className="border-border/60 bg-card p-5 shadow-[var(--shadow-card)]">

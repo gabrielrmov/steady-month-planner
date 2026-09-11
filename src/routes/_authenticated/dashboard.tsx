@@ -70,6 +70,8 @@ type Row = {
   categories?: { name: string; color: string } | null;
 };
 
+type CategoryBudget = { id: string; name: string; color: string; monthly_budget: number | null };
+
 function Dashboard() {
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const from = format(month, "yyyy-MM-dd");
@@ -103,6 +105,16 @@ function Dashboard() {
       return (data ?? []) as unknown as Row[];
     },
   });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("categories").select("id, name, color, monthly_budget");
+      if (error) throw error;
+      return (data ?? []) as CategoryBudget[];
+    },
+  });
+  const budgetById = useMemo(() => new Map(categories.map((c) => [c.id, c.monthly_budget])), [categories]);
 
   const txs = useMemo(() => rows.filter((t) => t.due_date >= from && t.due_date <= to), [rows, from, to]);
 
@@ -154,18 +166,22 @@ function Dashboard() {
     });
   }, [rows, month]);
 
-  // top categorias do mês
+  // top categorias do mês (com orçamento, quando definido)
   const topCategories = useMemo(() => {
-    const map = new Map<string, { name: string; color: string; total: number }>();
+    const map = new Map<string, { name: string; color: string; total: number; budget: number | null }>();
     for (const t of expense) {
+      const key = t.category_id ?? "none";
       const name = t.categories?.name ?? "Sem categoria";
       const color = t.categories?.color ?? "#64748B";
-      const cur = map.get(name) ?? { name, color, total: 0 };
+      const budget = t.category_id ? (budgetById.get(t.category_id) ?? null) : null;
+      const cur = map.get(key) ?? { name, color, total: 0, budget };
       cur.total += Number(t.amount);
-      map.set(name, cur);
+      map.set(key, cur);
     }
     return [...map.values()].sort((a, b) => b.total - a.total).slice(0, 5);
-  }, [expense]);
+  }, [expense, budgetById]);
+
+  const overBudget = topCategories.filter((c) => c.budget !== null && c.total > c.budget);
 
   const today = new Date(new Date().toDateString());
   const overdueList = txs.filter(
@@ -187,13 +203,15 @@ function Dashboard() {
       ? `Você tem ${overdue} conta(s) em atraso somando ${brl(
           overdueList.reduce((s, t) => s + Number(t.amount), 0),
         )}.`
-      : expenseTotal > incomeTotal
-        ? `As saídas superam as entradas em ${brl(expenseTotal - incomeTotal)} neste mês.`
-        : topCategories[0]
-          ? `${topCategories[0].name} é seu maior gasto do mês (${brl(topCategories[0].total)}${
-              expenseTotal ? `, ${Math.round((topCategories[0].total / expenseTotal) * 100)}% do total` : ""
-            }).`
-          : "Cadastre suas contas do mês para ver insights personalizados.";
+      : overBudget.length > 0
+        ? `${overBudget[0].name} já passou do orçamento mensal (${brl(overBudget[0].total)} de ${brl(overBudget[0].budget!)}).`
+        : expenseTotal > incomeTotal
+          ? `As saídas superam as entradas em ${brl(expenseTotal - incomeTotal)} neste mês.`
+          : topCategories[0]
+            ? `${topCategories[0].name} é seu maior gasto do mês (${brl(topCategories[0].total)}${
+                expenseTotal ? `, ${Math.round((topCategories[0].total / expenseTotal) * 100)}% do total` : ""
+              }).`
+            : "Cadastre suas contas do mês para ver insights personalizados.";
 
   return (
     <div className="mx-auto max-w-6xl space-y-5">
@@ -262,7 +280,7 @@ function Dashboard() {
 
       <Card className="animate-rise p-5">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--primary-subtle)] text-primary">
             <Sparkles className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
@@ -333,9 +351,14 @@ function Dashboard() {
         </Card>
 
         <Card className="p-5">
-          <div className="mb-4">
-            <h2 className="font-semibold">Onde o dinheiro foi</h2>
-            <p className="text-xs text-muted-foreground">Top categorias do mês</p>
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <div>
+              <h2 className="font-semibold">Onde o dinheiro foi</h2>
+              <p className="text-xs text-muted-foreground">Top categorias do mês</p>
+            </div>
+            <Link to="/categories" className="hidden shrink-0 sm:block">
+              <Button variant="outline" size="sm">Orçamentos</Button>
+            </Link>
           </div>
           {topCategories.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">Sem gastos categorizados.</p>
@@ -343,6 +366,9 @@ function Dashboard() {
             <ul className="space-y-3.5">
               {topCategories.map((c) => {
                 const pct = expenseTotal > 0 ? Math.round((c.total / expenseTotal) * 100) : 0;
+                const hasBudget = c.budget !== null && c.budget > 0;
+                const budgetPct = hasBudget ? Math.min(100, (c.total / c.budget!) * 100) : null;
+                const isOver = hasBudget && c.total > c.budget!;
                 return (
                   <li key={c.name}>
                     <div className="flex items-center justify-between gap-2 text-sm">
@@ -350,11 +376,22 @@ function Dashboard() {
                         <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: c.color }} />
                         <span className="truncate">{c.name}</span>
                       </span>
-                      <span className="shrink-0 font-semibold tabular-nums">{brl(c.total)}</span>
+                      <span className={`shrink-0 font-semibold tabular-nums ${isOver ? "text-destructive" : ""}`}>
+                        {brl(c.total)}
+                        {hasBudget && <span className="font-normal text-muted-foreground"> / {brl(c.budget!)}</span>}
+                      </span>
                     </div>
                     <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                      <div className="h-full rounded-full" style={{ width: `${pct}%`, background: c.color }} />
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${hasBudget ? budgetPct : pct}%`, background: isOver ? "var(--destructive)" : c.color }}
+                      />
                     </div>
+                    {isOver && (
+                      <p className="mt-1 text-[11px] text-destructive">
+                        {Math.round(((c.total - c.budget!) / c.budget!) * 100)}% acima do orçamento
+                      </p>
+                    )}
                   </li>
                 );
               })}
@@ -473,9 +510,9 @@ function StatCard({
   deltaGoodWhenUp?: boolean;
 }) {
   const toneClass = {
-    success: "bg-success/10 text-success",
-    destructive: "bg-destructive/10 text-destructive",
-    warning: "bg-warning/15 text-warning-foreground",
+    success: "bg-[var(--success-subtle)] text-success",
+    destructive: "bg-[var(--destructive-subtle)] text-destructive",
+    warning: "bg-[var(--warning-subtle)] text-warning",
   }[tone];
   const up = (delta ?? 0) > 0;
   const good = deltaGoodWhenUp ? up : !up;

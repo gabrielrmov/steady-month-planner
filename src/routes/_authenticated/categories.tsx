@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Wallet } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/categories")({
   head: () => ({
@@ -26,18 +26,30 @@ export const Route = createFileRoute("/_authenticated/categories")({
 
 const COLORS = ["#2563EB", "#10B981", "#F59E0B", "#EC4899", "#8B5CF6", "#EF4444", "#059669", "#6B7280"];
 
+const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+type Category = {
+  id: string;
+  name: string;
+  color: string;
+  kind: "expense" | "income";
+  monthly_budget: number | null;
+};
+
 function CategoriesPage() {
   const qc = useQueryClient();
   const [name, setName] = useState("");
   const [kind, setKind] = useState<"expense" | "income">("expense");
   const [color, setColor] = useState(COLORS[0]);
+  const [budget, setBudget] = useState("");
+  const [budgetDrafts, setBudgetDrafts] = useState<Record<string, string>>({});
 
   const { data: cats = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
       const { data, error } = await supabase.from("categories").select("*").order("name");
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as Category[];
     },
   });
 
@@ -50,12 +62,14 @@ function CategoriesPage() {
         name,
         color,
         kind,
+        monthly_budget: kind === "expense" && budget ? Number(budget) : null,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["categories"] });
       setName("");
+      setBudget("");
       toast.success("Categoria criada");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -69,17 +83,44 @@ function CategoriesPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
   });
 
+  const updateBudget = useMutation({
+    mutationFn: async ({ id, value }: { id: string; value: number | null }) => {
+      const { error } = await supabase.from("categories").update({ monthly_budget: value }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["categories"] });
+      toast.success("Orçamento atualizado");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const saveBudgetDraft = (cat: Category) => {
+    const draft = budgetDrafts[cat.id];
+    if (draft === undefined) return;
+    const trimmed = draft.trim();
+    const value = trimmed === "" ? null : Number(trimmed);
+    if (value !== null && (Number.isNaN(value) || value < 0)) {
+      toast.error("Valor de orçamento inválido");
+      return;
+    }
+    if (value === (cat.monthly_budget ?? null)) return;
+    updateBudget.mutate({ id: cat.id, value });
+  };
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
         <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Categorias</h1>
-        <p className="text-sm text-muted-foreground">Organize suas contas por tipo</p>
+        <p className="text-sm text-muted-foreground">
+          Organize suas contas por tipo e defina orçamentos mensais para acompanhar gastos
+        </p>
       </div>
 
       <Card className="p-5">
         <form
           onSubmit={(e) => { e.preventDefault(); if (name) add.mutate(); }}
-          className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto]"
+          className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto_auto]"
         >
           <div>
             <Label htmlFor="cname" className="sr-only">Nome</Label>
@@ -92,6 +133,20 @@ function CategoriesPage() {
               <SelectItem value="income">Entrada</SelectItem>
             </SelectContent>
           </Select>
+          {kind === "expense" && (
+            <div className="relative w-32">
+              <Label htmlFor="cbudget" className="sr-only">Orçamento mensal</Label>
+              <Input
+                id="cbudget"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Orçamento"
+                value={budget}
+                onChange={(e) => setBudget(e.target.value)}
+              />
+            </div>
+          )}
           <div className="flex items-center gap-1">
             {COLORS.map((c) => (
               <button
@@ -110,12 +165,27 @@ function CategoriesPage() {
 
       <Card className="divide-y divide-border">
         {cats.map((c) => (
-          <div key={c.id} className="flex items-center gap-3 p-4">
-            <span className="h-4 w-4 rounded-full" style={{ backgroundColor: c.color }} />
-            <span className="flex-1 text-sm font-medium">{c.name}</span>
+          <div key={c.id} className="flex flex-wrap items-center gap-3 p-4">
+            <span className="h-4 w-4 shrink-0 rounded-full" style={{ backgroundColor: c.color }} />
+            <span className="min-w-0 flex-1 text-sm font-medium">{c.name}</span>
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
               {c.kind === "expense" ? "Saída" : "Entrada"}
             </span>
+            {c.kind === "expense" && (
+              <div className="flex items-center gap-1.5">
+                <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Sem orçamento"
+                  defaultValue={c.monthly_budget ?? ""}
+                  onChange={(e) => setBudgetDrafts((d) => ({ ...d, [c.id]: e.target.value }))}
+                  onBlur={() => saveBudgetDraft(c)}
+                  className="h-8 w-32 text-xs"
+                />
+              </div>
+            )}
             <Button variant="ghost" size="icon" onClick={() => del.mutate(c.id)}>
               <Trash2 className="h-4 w-4 text-muted-foreground" />
             </Button>
