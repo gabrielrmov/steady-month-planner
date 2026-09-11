@@ -102,7 +102,7 @@ const faqs = [
 function PricingPage() {
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/95">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link to="/" className="flex items-center gap-2">
             <div
@@ -111,7 +111,7 @@ function PricingPage() {
             >
               <Wallet className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold tracking-tight text-foreground">Finlist</span>
+            <span className="text-lg font-semibold tracking-tight text-foreground">Finlist</span>
           </Link>
           <Link to="/auth">
             <Button size="sm">Entrar</Button>
@@ -121,7 +121,7 @@ function PricingPage() {
 
       <main className="mx-auto max-w-6xl px-6 py-16">
         <div className="mx-auto max-w-2xl text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border px-4 py-1.5 text-xs font-medium text-muted-foreground">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
             Planos simples, sem surpresa
           </div>
@@ -138,10 +138,8 @@ function PricingPage() {
           {plans.map((p) => (
             <Card
               key={p.name}
-              className={`relative p-6 shadow-[var(--shadow-card)] ${
-                p.highlight
-                  ? "border-primary/50 bg-card shadow-[var(--shadow-elegant)]"
-                  : "border-border/60 bg-card"
+              className={`relative p-6 ${
+                p.highlight ? "border-primary/50 bg-card" : "border-border/60 bg-card"
               }`}
             >
               {p.highlight && (

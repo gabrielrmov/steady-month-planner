@@ -163,45 +163,43 @@ function ProductPreview() {
     { name: "Notebook 4/10", tag: "Parcela", value: "R$ 420,00", done: false },
   ];
   return (
-    <div className="surface-glass rounded-2xl p-2 shadow-[var(--shadow-elegant)]">
-      <div className="rounded-xl border border-border bg-card">
-        <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-          <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
-          <span className="h-2.5 w-2.5 rounded-full bg-warning/70" />
-          <span className="h-2.5 w-2.5 rounded-full bg-success/70" />
-          <span className="ml-3 text-xs text-muted-foreground">Finlist · Agosto</span>
-        </div>
-        <div className="grid gap-3 p-4 sm:grid-cols-3">
-          {[
-            { label: "Entradas", value: "R$ 8.400", tone: "text-success" },
-            { label: "Saídas", value: "R$ 5.137", tone: "text-destructive" },
-            { label: "Saldo previsto", value: "R$ 3.263", tone: "text-foreground" },
-          ].map((k) => (
-            <div key={k.label} className="rounded-lg border border-border bg-background/40 p-3">
-              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{k.label}</p>
-              <p className={`mt-1 text-lg font-bold ${k.tone}`}>{k.value}</p>
+    <div className="rounded-2xl border border-border bg-card">
+      <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+        <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
+        <span className="h-2.5 w-2.5 rounded-full bg-warning/70" />
+        <span className="h-2.5 w-2.5 rounded-full bg-success/70" />
+        <span className="ml-3 text-xs text-muted-foreground">Finlist · Agosto</span>
+      </div>
+      <div className="grid gap-3 p-4 sm:grid-cols-3">
+        {[
+          { label: "Entradas", value: "R$ 8.400", tone: "text-success" },
+          { label: "Saídas", value: "R$ 5.137", tone: "text-destructive" },
+          { label: "Saldo previsto", value: "R$ 3.263", tone: "text-foreground" },
+        ].map((k) => (
+          <div key={k.label} className="rounded-lg border border-border bg-background/40 p-3">
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{k.label}</p>
+            <p className={`mt-1 text-lg font-bold ${k.tone}`}>{k.value}</p>
+          </div>
+        ))}
+      </div>
+      <div className="space-y-1.5 px-4 pb-4">
+        {rows.map((r) => (
+          <div
+            key={r.name}
+            className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-border/60 bg-background/30 px-3 py-2.5"
+          >
+            <div className="flex min-w-0 items-center gap-2.5">
+              <CheckCircle2
+                className={`h-4 w-4 shrink-0 ${r.done ? "text-success" : "text-muted-foreground/40"}`}
+              />
+              <span className="truncate text-sm text-foreground">{r.name}</span>
+              <span className="hidden shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground sm:inline">
+                {r.tag}
+              </span>
             </div>
-          ))}
-        </div>
-        <div className="space-y-1.5 px-4 pb-4">
-          {rows.map((r) => (
-            <div
-              key={r.name}
-              className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-border/60 bg-background/30 px-3 py-2.5"
-            >
-              <div className="flex min-w-0 items-center gap-2.5">
-                <CheckCircle2
-                  className={`h-4 w-4 shrink-0 ${r.done ? "text-success" : "text-muted-foreground/40"}`}
-                />
-                <span className="truncate text-sm text-foreground">{r.name}</span>
-                <span className="hidden shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground sm:inline">
-                  {r.tag}
-                </span>
-              </div>
-              <span className="text-sm font-semibold tabular-nums text-foreground">{r.value}</span>
-            </div>
-          ))}
-        </div>
+            <span className="text-sm font-semibold tabular-nums text-foreground">{r.value}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -210,7 +208,7 @@ function ProductPreview() {
 function Landing() {
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/95">
         <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 py-3.5">
           <Link to="/" className="flex min-w-0 items-center gap-2">
             <div
@@ -219,7 +217,7 @@ function Landing() {
             >
               <Wallet className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="truncate text-lg font-bold tracking-tight text-foreground">
+            <span className="truncate text-lg font-semibold tracking-tight text-foreground">
               Finlist
             </span>
           </Link>
@@ -246,20 +244,15 @@ function Landing() {
 
       <main>
         {/* Hero */}
-        <section className="relative overflow-hidden px-6 pt-16 pb-20 md:pt-24 md:pb-28">
-          <div className="bg-grid absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]" />
-          <div className="absolute inset-0 -z-10">
-            <div className="absolute -top-40 left-1/2 h-[520px] w-[720px] -translate-x-1/2 rounded-full bg-primary/15 blur-3xl" />
-          </div>
-
+        <section className="px-6 pt-16 pb-20 md:pt-24 md:pb-28">
           <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.05fr_1fr]">
             <div>
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
                 <Sparkles className="h-3.5 w-3.5 text-primary" />
                 30 dias grátis · sem cartão de crédito
               </div>
               <h1 className="text-4xl font-bold leading-[1.05] tracking-tight md:text-6xl">
-                Toda conta do mês, <span className="text-gradient">sob controle.</span>
+                Toda conta do mês, <span className="text-primary">sob controle.</span>
               </h1>
               <p className="mt-5 max-w-xl text-lg text-muted-foreground">
                 Checklist mês a mês de contas a pagar e receber, cartões, parcelas, relatórios e
@@ -267,7 +260,7 @@ function Landing() {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link to="/auth">
-                  <Button size="lg" className="shadow-[var(--shadow-elegant)]">
+                  <Button size="lg">
                     Começar teste de 30 dias
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -295,7 +288,7 @@ function Landing() {
         </section>
 
         {/* Stats */}
-        <section className="border-y border-border bg-card/30 px-6 py-10">
+        <section className="border-y border-border px-6 py-10">
           <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 md:grid-cols-4">
             {stats.map((s) => (
               <div key={s.label} className="text-center">
@@ -327,9 +320,9 @@ function Landing() {
               {features.map((f) => (
                 <Card
                   key={f.title}
-                  className="group border-border/60 bg-card p-6 shadow-[var(--shadow-card)] transition-colors hover:border-primary/40"
+                  className="border-border/60 bg-card p-6 transition-colors hover:border-primary/40"
                 >
-                  <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-transform group-hover:scale-105">
+                  <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <f.icon className="h-5 w-5" />
                   </div>
                   <h3 className="font-semibold text-foreground">{f.title}</h3>
@@ -341,7 +334,7 @@ function Landing() {
         </section>
 
         {/* PJ highlight */}
-        <section className="border-y border-border bg-card/30 px-6 py-20">
+        <section className="border-y border-border px-6 py-20">
           <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
@@ -370,7 +363,7 @@ function Landing() {
                 <Button variant="outline">Conhecer o plano Pessoal + PJ</Button>
               </Link>
             </div>
-            <Card className="border-border/60 bg-card p-6 shadow-[var(--shadow-card)]">
+            <Card className="border-border/60 bg-card p-6">
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <Calculator className="h-4 w-4 text-primary" />
                 Preço sugerido do serviço
@@ -405,10 +398,7 @@ function Landing() {
             </div>
             <div className="grid gap-5 md:grid-cols-3">
               {steps.map((s) => (
-                <div
-                  key={s.step}
-                  className="relative overflow-hidden rounded-2xl border border-border bg-card p-6"
-                >
+                <div key={s.step} className="rounded-2xl border border-border bg-card p-6">
                   <span className="text-5xl font-bold text-primary/15">{s.step}</span>
                   <h3 className="mt-4 font-semibold text-foreground">{s.title}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
@@ -419,7 +409,7 @@ function Landing() {
         </section>
 
         {/* Social proof */}
-        <section className="border-y border-border bg-card/30 px-6 py-20">
+        <section className="border-y border-border px-6 py-20">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 text-center">
               <div className="mb-3 flex items-center justify-center gap-1">
@@ -433,10 +423,7 @@ function Landing() {
             </div>
             <div className="grid gap-5 md:grid-cols-3">
               {testimonials.map((t) => (
-                <Card
-                  key={t.author}
-                  className="border-border/60 bg-card p-6 shadow-[var(--shadow-card)]"
-                >
+                <Card key={t.author} className="border-border/60 bg-card p-6">
                   <p className="text-sm leading-relaxed text-muted-foreground">"{t.quote}"</p>
                   <div className="mt-5 flex items-center gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
@@ -456,7 +443,7 @@ function Landing() {
         {/* Pricing preview */}
         <section className="px-6 py-20">
           <div className="mx-auto max-w-5xl">
-            <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-[var(--shadow-card)] md:p-12">
+            <div className="rounded-2xl border border-border bg-card p-8 text-center md:p-12">
               <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Shield className="h-6 w-6" />
               </div>
@@ -482,7 +469,7 @@ function Landing() {
         </section>
 
         {/* FAQ */}
-        <section className="border-t border-border bg-card/30 px-6 py-20">
+        <section className="border-t border-border px-6 py-20">
           <div className="mx-auto max-w-3xl">
             <div className="mb-12 text-center">
               <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
@@ -501,10 +488,7 @@ function Landing() {
         </section>
 
         {/* Final CTA */}
-        <section className="relative overflow-hidden px-6 py-24">
-          <div className="absolute inset-0 -z-10">
-            <div className="absolute bottom-0 left-1/2 h-[360px] w-[720px] -translate-x-1/2 translate-y-1/3 rounded-full bg-primary/15 blur-3xl" />
-          </div>
+        <section className="px-6 py-24">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold tracking-tight md:text-5xl">
               Pronto para organizar suas contas?
@@ -513,7 +497,7 @@ function Landing() {
               Crie sua conta em menos de um minuto e comece com 30 dias de acesso completo.
             </p>
             <Link to="/auth" className="mt-8 inline-block">
-              <Button size="lg" className="shadow-[var(--shadow-elegant)]">
+              <Button size="lg">
                 Começar grátis agora
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
