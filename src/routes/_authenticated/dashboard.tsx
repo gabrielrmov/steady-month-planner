@@ -229,7 +229,7 @@ function Dashboard() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-5">
-      <div className="space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
+      <div className="animate-rise space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
         <div className="min-w-0">
           <h1 className="truncate text-2xl font-extrabold tracking-tighter sm:text-3xl">Dashboard</h1>
           <p className="text-sm text-muted-foreground">Visão geral do mês</p>
@@ -255,6 +255,7 @@ function Dashboard() {
           tone="success"
           delta={delta(incomeTotal, prevIncome)}
           deltaGoodWhenUp
+          delayMs={0}
         />
         <StatCard
           label="Saídas previstas"
@@ -262,6 +263,7 @@ function Dashboard() {
           icon={ArrowDownCircle}
           tone="destructive"
           delta={delta(expenseTotal, prevExpense)}
+          delayMs={60}
         />
         <StatCard
           label="Saldo previsto"
@@ -270,6 +272,7 @@ function Dashboard() {
           tone={balance >= 0 ? "success" : "destructive"}
           subtitle={incomeTotal > 0 ? `${savingRate}% da renda sobra` : undefined}
           highlight
+          delayMs={120}
         />
         <StatCard
           label="A pagar restante"
@@ -277,6 +280,7 @@ function Dashboard() {
           icon={AlertCircle}
           tone="warning"
           subtitle={overdue > 0 ? `${overdue} em atraso` : "em dia"}
+          delayMs={180}
         />
         <StatCard
           label="Ainda a receber"
@@ -290,10 +294,11 @@ function Dashboard() {
                 : "tudo recebido"
               : undefined
           }
+          delayMs={240}
         />
       </div>
 
-      <Card className="animate-rise glow-ring p-5">
+      <Card className="animate-rise glow-ring p-5" style={{ animationDelay: "300ms" }}>
         <div className="flex flex-wrap items-center gap-3">
           <div
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-primary-foreground"
@@ -318,7 +323,7 @@ function Dashboard() {
       </Card>
 
       <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
-        <Card className="p-5">
+        <Card className="animate-rise p-5" style={{ animationDelay: "360ms" }}>
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <h2 className="font-bold tracking-tight">Fluxo dos últimos 6 meses</h2>
@@ -361,14 +366,30 @@ function Dashboard() {
                   }}
                   formatter={(v: number | string, n) => [brl(Number(v)), n === "entradas" ? "Entradas" : "Saídas"]}
                 />
-                <Area type="monotone" dataKey="entradas" stroke="var(--success)" fill="url(#gIn)" strokeWidth={2} />
-                <Area type="monotone" dataKey="saidas" stroke="var(--destructive)" fill="url(#gOut)" strokeWidth={2} />
+                <Area
+                  type="monotone"
+                  dataKey="entradas"
+                  stroke="var(--success)"
+                  fill="url(#gIn)"
+                  strokeWidth={2}
+                  animationDuration={900}
+                  animationEasing="ease-out"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="saidas"
+                  stroke="var(--destructive)"
+                  fill="url(#gOut)"
+                  strokeWidth={2}
+                  animationDuration={900}
+                  animationEasing="ease-out"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="animate-rise p-5" style={{ animationDelay: "420ms" }}>
           <div className="mb-4 flex items-center justify-between gap-2">
             <div>
               <h2 className="font-bold tracking-tight">Onde o dinheiro foi</h2>
@@ -382,13 +403,13 @@ function Dashboard() {
             <p className="py-10 text-center text-sm text-muted-foreground">Sem gastos categorizados.</p>
           ) : (
             <ul className="space-y-3.5">
-              {topCategories.map((c) => {
+              {topCategories.map((c, i) => {
                 const pct = expenseTotal > 0 ? Math.round((c.total / expenseTotal) * 100) : 0;
                 const hasBudget = c.budget !== null && c.budget > 0;
                 const budgetPct = hasBudget ? Math.min(100, (c.total / c.budget!) * 100) : null;
                 const isOver = hasBudget && c.total > c.budget!;
                 return (
-                  <li key={c.name}>
+                  <li key={c.name} className="animate-rise" style={{ animationDelay: `${480 + i * 50}ms` }}>
                     <div className="flex items-center justify-between gap-2 text-sm">
                       <span className="flex min-w-0 items-center gap-2">
                         <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: c.color }} />
@@ -401,8 +422,12 @@ function Dashboard() {
                     </div>
                     <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                       <div
-                        className="h-full rounded-full transition-all"
-                        style={{ width: `${hasBudget ? budgetPct : pct}%`, background: isOver ? "var(--destructive)" : c.color }}
+                        className="animate-grow-x h-full rounded-full transition-[width]"
+                        style={{
+                          width: `${hasBudget ? budgetPct : pct}%`,
+                          background: isOver ? "var(--destructive)" : c.color,
+                          animationDelay: `${520 + i * 50}ms`,
+                        }}
                       />
                     </div>
                     {isOver && (
@@ -425,7 +450,7 @@ function Dashboard() {
       </div>
 
       {alerts.length > 0 && (
-        <Card className="border-warning/40 p-5">
+        <Card className="animate-rise border-warning/40 p-5" style={{ animationDelay: "500ms" }}>
           <div className="mb-3 flex items-center gap-2">
             <BellRing className="h-4 w-4 text-warning-foreground" />
             <h2 className="font-bold tracking-tight">Alertas de vencimento</h2>
@@ -449,7 +474,7 @@ function Dashboard() {
         </Card>
       )}
 
-      <Card className="p-6">
+      <Card className="animate-rise p-6" style={{ animationDelay: "560ms" }}>
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h2 className="font-bold tracking-tight">Checklist do mês</h2>
@@ -488,7 +513,7 @@ function Dashboard() {
         ) : (
           <>
             <ul className="divide-y divide-border">
-              {checklistItems.map((t) => {
+              {checklistItems.map((t, i) => {
                 const days = differenceInCalendarDays(new Date(t.due_date + "T00:00:00"), today);
                 const isOverdue = days < 0;
                 const isToday = days === 0;
@@ -502,13 +527,14 @@ function Dashboard() {
                 return (
                   <li
                     key={t.id}
-                    className="group -mx-2 flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-muted/40"
+                    className="animate-rise group -mx-2 flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-muted/40"
+                    style={{ animationDelay: `${620 + i * 40}ms` }}
                   >
                     <input
                       type="checkbox"
                       checked={false}
                       onChange={(e) => togglePaid.mutate({ id: t.id, paid: e.target.checked })}
-                      className="h-5 w-5 shrink-0 rounded border-border accent-[oklch(0.55_0.22_260)]"
+                      className="h-5 w-5 shrink-0 cursor-pointer rounded border-border accent-[oklch(0.55_0.22_260)] transition-transform active:scale-90"
                     />
                     <span
                       className={`h-1.5 w-1.5 shrink-0 rounded-full ${
@@ -568,6 +594,7 @@ function StatCard({
   delta,
   deltaGoodWhenUp,
   highlight,
+  delayMs,
 }: {
   label: string;
   value: string;
@@ -577,6 +604,7 @@ function StatCard({
   delta?: number | null;
   deltaGoodWhenUp?: boolean;
   highlight?: boolean;
+  delayMs?: number;
 }) {
   const toneClass = {
     success: "bg-[var(--success-subtle)] text-success",
@@ -586,7 +614,10 @@ function StatCard({
   const up = (delta ?? 0) > 0;
   const good = deltaGoodWhenUp ? up : !up;
   return (
-    <Card className={`p-4 sm:p-5 ${highlight ? "glow-ring" : "hover-lift"}`}>
+    <Card
+      className={`animate-rise p-4 sm:p-5 ${highlight ? "glow-ring" : "hover-lift"}`}
+      style={{ animationDelay: `${delayMs ?? 0}ms` }}
+    >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">{label}</p>
@@ -599,7 +630,9 @@ function StatCard({
           )}
           {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
         </div>
-        <div className={`hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg sm:flex lg:hidden ${toneClass}`}>
+        <div
+          className={`hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 hover:scale-110 sm:flex lg:hidden ${toneClass}`}
+        >
           <Icon className="h-5 w-5" />
         </div>
       </div>
