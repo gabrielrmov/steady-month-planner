@@ -21,7 +21,10 @@ import {
   User,
   Sparkles,
   Calculator,
-    PieChart,
+  PieChart,
+  PiggyBank,
+  Sun,
+  Moon,
 
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +32,7 @@ import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePlan, PLAN_LABEL } from "@/lib/plan";
+import { useTheme } from "@/lib/theme";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -62,6 +66,7 @@ const groups = [
       { to: "/transactions", label: "Contas", icon: ListChecks, tab: undefined, sub: transactionSubItems },
       { to: "/cards", label: "Cartões", icon: CreditCard, tab: undefined },
       { to: "/installments", label: "Parcelas", icon: Hourglass, tab: undefined },
+      { to: "/savings", label: "Metas de economia", icon: PiggyBank, tab: undefined },
       { to: "/open-finance", label: "Open Finance", icon: Landmark, tab: undefined },
     ],
 
@@ -76,14 +81,13 @@ const groups = [
   },
 ] as const;
 
-
 function useProfile() {
   return useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
-            const { data: sessionRes } = await supabase.auth.getSession();
+      const { data: sessionRes } = await supabase.auth.getSession();
       const uid = sessionRes.session?.user.id;
-            if (!uid) return null;
+      if (!uid) return null;
       const { data, error } = await supabase
         .from("profiles")
         .select("id, full_name, email")
@@ -101,6 +105,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const queryClient = useQueryClient();
   const { data: profile } = useProfile();
   const plan = usePlan();
+  const { theme, toggleTheme } = useTheme();
 
   const handleSignOut = async () => {
     await queryClient.cancelQueries();
@@ -138,6 +143,14 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           </div>
           <span className="text-lg font-bold tracking-tight text-white">Finlist</span>
         </Link>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          title={theme === "dark" ? "Mudar para tema claro" : "Mudar para tema escuro"}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800/50 hover:text-white"
+        >
+          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
       </div>
 
       {/* Navigation */}
@@ -232,7 +245,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           ))}
         </div>
 
-
         <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 p-2">
           <Avatar className="h-10 w-10 rounded-xl ring-2 ring-indigo-500/20">
             <AvatarFallback className="bg-slate-800 text-xs font-semibold text-slate-200">
@@ -306,9 +318,10 @@ function MobileTabBar() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const { theme } = useTheme();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={cn("min-h-screen bg-background", theme === "light" && "light")}>
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-slate-800 bg-slate-900 md:flex">
         <SidebarContent />
@@ -351,5 +364,3 @@ export function AppShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
-
-
