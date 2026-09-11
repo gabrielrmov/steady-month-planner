@@ -158,9 +158,9 @@ function TransactionsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
-      <div className="space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
+      <div className="animate-rise space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
         <div className="min-w-0">
-          <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">Contas</h1>
+          <h1 className="truncate text-2xl font-extrabold tracking-tighter sm:text-3xl">Contas</h1>
           <p className="text-sm text-muted-foreground">Gerencie contas a pagar e receber</p>
         </div>
         <div className="flex items-center gap-2">
@@ -183,7 +183,7 @@ function TransactionsPage() {
             }}
           >
             <DialogTrigger asChild>
-              <Button onClick={() => setEditing(null)} className="shrink-0">
+              <Button onClick={() => setEditing(null)} className="hover-glow shrink-0">
                 <Plus className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Nova</span>
               </Button>
             </DialogTrigger>
@@ -201,26 +201,31 @@ function TransactionsPage() {
         </div>
       </div>
 
-      <div className="relative">
+      <div className="animate-rise relative" style={{ animationDelay: "60ms" }}>
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar por descrição, categoria ou cartão..."
-          className="pl-9 pr-9"
+          className="pl-9 pr-9 transition-shadow focus-visible:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_18%,transparent)]"
         />
         {query && (
           <button
             type="button"
             onClick={() => setQuery("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
         )}
       </div>
 
-      <Tabs value={search.tab ?? "recurring"} onValueChange={(v) => navigate({ search: { tab: v as any }, replace: true })}>
+      <Tabs
+        value={search.tab ?? "recurring"}
+        onValueChange={(v) => navigate({ search: { tab: v as any }, replace: true })}
+        className="animate-rise"
+        style={{ animationDelay: "120ms" }}
+      >
         <div className="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0">
           <TabsList className="w-max sm:flex-wrap">
             <TabsTrigger value="recurring">Recorrentes ({recurring.length})</TabsTrigger>
@@ -242,18 +247,18 @@ function TransactionsPage() {
             <EmptyState message="Nenhuma compra no cartão neste mês." />
           )}
           {isLoading && <ListSkeleton rows={3} />}
-          {[...cardsGrouped.entries()].map(([key, group]) => {
+          {[...cardsGrouped.entries()].map(([key, group], gi) => {
             const total = group.items.reduce((s, i) => s + Number(i.amount), 0);
             return (
-              <div key={key} className="space-y-2">
+              <div key={key} className="animate-rise space-y-2" style={{ animationDelay: `${gi * 70}ms` }}>
                 <div className="flex items-center gap-2 px-1">
                   <div
-                    className="flex h-7 w-7 items-center justify-center rounded-md"
+                    className="flex h-7 w-7 items-center justify-center rounded-md transition-transform duration-200 hover:scale-110"
                     style={{ backgroundColor: group.color + "22", color: group.color }}
                   >
                     <CreditCard className="h-3.5 w-3.5" />
                   </div>
-                  <h3 className="font-semibold">{group.name}</h3>
+                  <h3 className="font-bold tracking-tight">{group.name}</h3>
                   <span className="ml-auto text-sm font-semibold">{brl(total)}</span>
                 </div>
                 <TxList items={group.items} loading={false} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} onEdit={handleEdit} showInstallment />
@@ -291,7 +296,7 @@ function ListSkeleton({ rows = 4 }: { rows?: number }) {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <Card className="flex flex-col items-center gap-2 p-10 text-center">
+    <Card className="animate-rise flex flex-col items-center gap-2 p-10 text-center">
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primary-subtle)] text-primary">
         <Inbox className="h-5 w-5" />
       </div>
@@ -323,18 +328,22 @@ function TxList({
   if (items.length === 0)
     return <EmptyState message="Nada por aqui neste mês." />;
   return (
-    <Card className="divide-y divide-border">
-      {items.map((t) => {
+    <Card className="animate-rise divide-y divide-border">
+      {items.map((t, i) => {
         const paid = t.status === "paid";
         const isInstallment = !!(t.installment_total && t.installment_total > 1);
         const hasGroup = !!t.purchase_group_id;
         return (
-          <div key={t.id} className="flex items-start gap-3 p-3 transition-colors hover:bg-muted/40 sm:items-center sm:p-4">
+          <div
+            key={t.id}
+            className="animate-rise group flex items-start gap-3 p-3 transition-all duration-150 hover:translate-x-0.5 hover:bg-muted/40 sm:items-center sm:p-4"
+            style={{ animationDelay: `${Math.min(i, 10) * 35}ms` }}
+          >
             <input
               type="checkbox"
               checked={paid}
               onChange={(e) => onToggle({ id: t.id, paid: e.target.checked })}
-              className="mt-1 h-5 w-5 shrink-0 rounded border-border accent-[oklch(0.55_0.22_260)] sm:mt-0"
+              className="mt-1 h-5 w-5 shrink-0 cursor-pointer rounded border-border accent-[oklch(0.55_0.22_260)] transition-transform active:scale-90 sm:mt-0"
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -365,15 +374,16 @@ function TxList({
                   {brl(Number(t.amount))}
                 </span>
                 <div className="flex items-center">
-                  <Button variant="ghost" size="icon" onClick={() => onEdit(t)} title="Editar">
-                    <Pencil className="h-4 w-4 text-muted-foreground" />
+                  <Button variant="ghost" size="icon" className="group" onClick={() => onEdit(t)} title="Editar">
+                    <Pencil className="h-4 w-4 text-muted-foreground transition-transform duration-150 group-hover:scale-110" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => onDelete(t.id)} title="Excluir este">
-                    <Trash2 className="h-4 w-4 text-muted-foreground" />
+                  <Button variant="ghost" size="icon" className="group" onClick={() => onDelete(t.id)} title="Excluir este">
+                    <Trash2 className="h-4 w-4 text-muted-foreground transition-transform duration-150 group-hover:scale-110" />
                   </Button>
                   {hasGroup && (
                     <Button
                       variant="ghost"
+                      className="group"
                       size="icon"
                       onClick={() => {
                         const msg = isInstallment
@@ -383,7 +393,7 @@ function TxList({
                       }}
                       title="Excluir de todos os meses"
                     >
-                      <Trash2 className="h-4 w-4 text-destructive" />
+                      <Trash2 className="h-4 w-4 text-destructive transition-transform duration-150 group-hover:scale-110" />
                     </Button>
                   )}
                 </div>
@@ -393,15 +403,16 @@ function TxList({
               {brl(Number(t.amount))}
             </span>
             <div className="hidden items-center sm:flex">
-              <Button variant="ghost" size="icon" onClick={() => onEdit(t)} title="Editar">
-                <Pencil className="h-4 w-4 text-muted-foreground" />
+              <Button variant="ghost" size="icon" className="group" onClick={() => onEdit(t)} title="Editar">
+                <Pencil className="h-4 w-4 text-muted-foreground transition-transform duration-150 group-hover:scale-110" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={() => onDelete(t.id)} title="Excluir este">
-                <Trash2 className="h-4 w-4 text-muted-foreground" />
+              <Button variant="ghost" size="icon" className="group" onClick={() => onDelete(t.id)} title="Excluir este">
+                <Trash2 className="h-4 w-4 text-muted-foreground transition-transform duration-150 group-hover:scale-110" />
               </Button>
               {hasGroup && (
                 <Button
                   variant="ghost"
+                  className="group"
                   size="icon"
                   onClick={() => {
                     const msg = isInstallment
@@ -411,7 +422,7 @@ function TxList({
                   }}
                   title="Excluir de todos os meses"
                 >
-                  <Trash2 className="h-4 w-4 text-destructive" />
+                  <Trash2 className="h-4 w-4 text-destructive transition-transform duration-150 group-hover:scale-110" />
                 </Button>
               )}
             </div>
