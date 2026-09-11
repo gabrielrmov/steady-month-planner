@@ -213,7 +213,10 @@
   border: 1px solid var(--border);
 }
 
-/* Subtle hover feedback: a border tint, no movement. */
+/* Subtle hover feedback: a border tint. The lift itself now lives on the
+   Card component's own base classes, so this only adds the accent tint on
+   top of it (kept separate so non-Card elements can still opt in to just
+   the tint without a lift). */
 @utility hover-lift {
   transition:
     border-color 0.2s ease,
@@ -283,6 +286,76 @@
   );
   background-size: 200% 100%;
   animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* Sidebar active-item accent bar growing in from the center. */
+@keyframes bar-in {
+  from {
+    transform: translateY(-50%) scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(-50%) scaleY(1);
+    opacity: 1;
+  }
+}
+
+@utility animate-bar-in {
+  animation: bar-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Horizontal bars/fills growing in from the left on mount. */
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@utility animate-grow-x {
+  transform-origin: left;
+  animation: grow-x 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* A slow, restrained breathing glow — reserved for the one or two focal
+   elements that should feel alive (brand mark, hero stat), never applied
+   broadly. */
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: var(--shadow-glow-accent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--primary) 55%, var(--border)),
+      0 10px 34px -6px color-mix(in oklab, var(--primary) 60%, transparent);
+  }
+}
+
+@utility animate-glow-pulse {
+  animation: glow-pulse 3.2s ease-in-out infinite;
+}
+
+/* Press feedback for anything clickable that isn't already handled by a
+   component's own variant. */
+@utility press-scale {
+  transition: transform 0.15s ease;
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @layer base {
