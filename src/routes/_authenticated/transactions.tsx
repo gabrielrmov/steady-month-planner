@@ -11,10 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Repeat2, CreditCard, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, Repeat2, CreditCard, Pencil, Inbox } from "lucide-react";
 
 const tabSchema = z.object({
   tab: z.enum(["recurring", "sporadic", "cards", "income", "received"]).optional(),
@@ -208,8 +209,9 @@ function TransactionsPage() {
         </TabsContent>
         <TabsContent value="cards" className="mt-4 space-y-4">
           {!isLoading && cardsGrouped.size === 0 && (
-            <Card className="p-10 text-center text-sm text-muted-foreground">Nenhuma compra no cartão neste mês.</Card>
+            <EmptyState message="Nenhuma compra no cartão neste mês." />
           )}
+          {isLoading && <ListSkeleton rows={3} />}
           {[...cardsGrouped.entries()].map(([key, group]) => {
             const total = group.items.reduce((s, i) => s + Number(i.amount), 0);
             return (
@@ -240,6 +242,34 @@ function TransactionsPage() {
   );
 }
 
+function ListSkeleton({ rows = 4 }: { rows?: number }) {
+  return (
+    <Card className="divide-y divide-border">
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="flex items-center gap-3 p-4">
+          <Skeleton className="h-5 w-5 shrink-0 rounded" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-1/3" />
+            <Skeleton className="h-3 w-1/4" />
+          </div>
+          <Skeleton className="h-4 w-16" />
+        </div>
+      ))}
+    </Card>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <Card className="flex flex-col items-center gap-2 p-10 text-center">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primary-subtle)] text-primary">
+        <Inbox className="h-5 w-5" />
+      </div>
+      <p className="text-sm text-muted-foreground">{message}</p>
+    </Card>
+  );
+}
+
 function TxList({
   items,
   loading,
@@ -259,9 +289,9 @@ function TxList({
   incomeMode?: boolean;
   showInstallment?: boolean;
 }) {
-  if (loading) return <Card className="p-8 text-center text-sm text-muted-foreground">Carregando...</Card>;
+  if (loading) return <ListSkeleton />;
   if (items.length === 0)
-    return <Card className="p-10 text-center text-sm text-muted-foreground">Nada por aqui neste mês.</Card>;
+    return <EmptyState message="Nada por aqui neste mês." />;
   return (
     <Card className="divide-y divide-border">
       {items.map((t) => {
@@ -269,7 +299,7 @@ function TxList({
         const isInstallment = !!(t.installment_total && t.installment_total > 1);
         const hasGroup = !!t.purchase_group_id;
         return (
-          <div key={t.id} className="flex items-start gap-3 p-3 sm:items-center sm:p-4">
+          <div key={t.id} className="flex items-start gap-3 p-3 transition-colors hover:bg-muted/40 sm:items-center sm:p-4">
             <input
               type="checkbox"
               checked={paid}
@@ -356,7 +386,6 @@ function TxList({
               )}
             </div>
           </div>
-
         );
       })}
     </Card>
@@ -500,8 +529,8 @@ function TransactionForm({
       isInstallmentPurchase
         ? `${installments} parcelas criadas`
         : isRecurring
-        ? `${months} contas criadas`
-        : "Conta adicionada",
+          ? `${months} contas criadas`
+          : "Conta adicionada",
     );
     onSaved();
   };
