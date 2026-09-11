@@ -299,7 +299,7 @@ function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
         <StatCard
           label="Entradas previstas"
           value={brl(incomeTotal)}
@@ -308,6 +308,7 @@ function Dashboard() {
           delta={delta(incomeTotal, prevIncome)}
           deltaGoodWhenUp
           delayMs={0}
+          size="lg"
         />
         <StatCard
           label="Saídas previstas"
@@ -316,6 +317,7 @@ function Dashboard() {
           tone="destructive"
           delta={delta(expenseTotal, prevExpense)}
           delayMs={60}
+          size="lg"
         />
         <StatCard
           label="Saldo previsto"
@@ -325,7 +327,11 @@ function Dashboard() {
           subtitle={incomeTotal > 0 ? `${savingRate}% da renda sobra` : undefined}
           highlight
           delayMs={120}
+          size="lg"
         />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <StatCard
           label="A pagar restante"
           value={brl(expensePending)}
@@ -656,6 +662,7 @@ function StatCard({
   deltaGoodWhenUp,
   highlight,
   delayMs,
+  size = "md",
 }: {
   label: string;
   value: string;
@@ -666,6 +673,7 @@ function StatCard({
   deltaGoodWhenUp?: boolean;
   highlight?: boolean;
   delayMs?: number;
+  size?: "md" | "lg";
 }) {
   const toneClass = {
     success: "bg-[var(--success-subtle)] text-success",
@@ -674,27 +682,36 @@ function StatCard({
   }[tone];
   const up = (delta ?? 0) > 0;
   const good = deltaGoodWhenUp ? up : !up;
+  const isLg = size === "lg";
   return (
     <Card
-      className={`animate-rise p-4 sm:p-5 ${highlight ? "glow-ring" : "hover-lift"}`}
+      className={`animate-rise ${isLg ? "p-5 sm:p-6" : "p-4 sm:p-5"} ${highlight ? "glow-ring" : "hover-lift"}`}
       style={{ animationDelay: `${delayMs ?? 0}ms` }}
     >
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">{label}</p>
-          <p className="mt-1.5 truncate text-lg font-extrabold tracking-tighter sm:mt-2 sm:text-2xl lg:text-lg">{value}</p>
+          <p
+            className={`mt-1.5 truncate font-extrabold tracking-tighter sm:mt-2 ${
+              isLg ? "text-2xl sm:text-3xl" : "text-lg sm:text-xl"
+            }`}
+          >
+            {value}
+          </p>
           {delta !== null && delta !== undefined && delta !== 0 && (
-            <p className={`mt-1 flex items-center gap-1 text-xs ${good ? "text-success" : "text-destructive"}`}>
+            <p className={`mt-1.5 flex items-center gap-1 text-xs ${good ? "text-success" : "text-destructive"}`}>
               {up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
               {Math.abs(delta)}% vs mês anterior
             </p>
           )}
-          {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
+          {subtitle && <p className="mt-1.5 text-xs text-muted-foreground">{subtitle}</p>}
         </div>
         <div
-          className={`hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 hover:scale-110 sm:flex lg:hidden ${toneClass}`}
+          className={`flex shrink-0 items-center justify-center rounded-lg transition-transform duration-200 hover:scale-110 ${toneClass} ${
+            isLg ? "h-11 w-11 sm:h-12 sm:w-12" : "h-9 w-9 sm:h-10 sm:w-10"
+          }`}
         >
-          <Icon className="h-5 w-5" />
+          <Icon className={isLg ? "h-5 w-5 sm:h-6 sm:w-6" : "h-4 w-4 sm:h-5 sm:w-5"} />
         </div>
       </div>
     </Card>
