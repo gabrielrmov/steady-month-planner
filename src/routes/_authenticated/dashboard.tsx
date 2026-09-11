@@ -27,6 +27,7 @@ import {
   PiggyBank,
   Sparkles,
   Clock,
+  CheckCircle2,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { ensureRecurringForMonth } from "@/lib/automation";
@@ -141,6 +142,19 @@ function Dashboard() {
   const incomePaid = income.filter((t) => t.status === "paid").reduce((s, t) => s + Number(t.amount), 0);
   const incomePending = incomeTotal - incomePaid;
   const balance = incomeTotal - expenseTotal;
+
+  const CHECKLIST_LIMIT = 8;
+  const unpaidExpense = useMemo(
+    () =>
+      expense
+        .filter((t) => t.status !== "paid")
+        .sort((a, b) => a.due_date.localeCompare(b.due_date)),
+    [expense],
+  );
+  const paidExpense = useMemo(() => expense.filter((t) => t.status === "paid"), [expense]);
+  const paidExpenseTotal = paidExpense.reduce((s, t) => s + Number(t.amount), 0);
+  const checklistItems = unpaidExpense.slice(0, CHECKLIST_LIMIT);
+  const hiddenUnpaidCount = Math.max(0, unpaidExpense.length - checklistItems.length);
   const paidRatio = expenseTotal > 0 ? Math.round((expensePaid / expenseTotal) * 100) : 0;
   const savingRate = incomeTotal > 0 ? Math.round((balance / incomeTotal) * 100) : 0;
 
@@ -457,35 +471,84 @@ function Dashboard() {
               <Button size="sm" variant="outline">Adicionar conta</Button>
             </Link>
           </div>
+        ) : unpaidExpense.length === 0 ? (
+          <div className="flex items-center gap-3 rounded-lg bg-[var(--success-subtle)] px-4 py-4">
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-success" />
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground">Tudo pago este mês</p>
+              <p className="text-xs text-muted-foreground">
+                {paidExpense.length} conta(s) quitadas · {brl(paidExpenseTotal)}
+              </p>
+            </div>
+          </div>
         ) : (
-          <ul className="divide-y divide-border">
-            {expense.map((t) => {
-              const isPaid = t.status === "paid";
-              const isOverdue = !isPaid && new Date(t.due_date) < new Date(new Date().toDateString());
-              return (
-                <li key={t.id} className="flex items-center gap-3 py-3">
-                  <input
-                    type="checkbox"
-                    checked={isPaid}
-                    onChange={(e) => togglePaid.mutate({ id: t.id, paid: e.target.checked })}
-                    className="h-5 w-5 rounded border-border accent-[oklch(0.55_0.22_260)]"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className={`truncate text-sm font-medium ${isPaid ? "line-through text-muted-foreground" : ""}`}>
-                      {t.description}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Vence {format(new Date(t.due_date + "T00:00:00"), "dd/MM")}
-                      {isOverdue && <span className="ml-2 text-destructive">Atrasado</span>}
-                    </p>
-                  </div>
-                  <span className={`text-sm font-semibold ${isPaid ? "text-muted-foreground line-through" : ""}`}>
-                    {brl(Number(t.amount))}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
+          <>
+            <ul className="divide-y divide-border">
+              {checklistItems.map((t) => {
+                const days = differenceInCalendarDays(new Date(t.due_date + "T00:00:00"), today);
+                const isOverdue = days < 0;
+                const isToday = days === 0;
+                const dateLabel = isOverdue
+                  ? `Atrasada há ${Math.abs(days)}d`
+                  : isToday
+                    ? "Vence hoje"
+                    : days <= 6
+                      ? `Vence em ${days}d`
+                      : `Vence ${format(new Date(t.due_date + "T00:00:00"), "dd/MM")}`;
+                return (
+                  <li
+                    key={t.id}
+                    className="group -mx-2 flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-muted/40"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={false}
+                      onChange={(e) => togglePaid.mutate({ id: t.id, paid: e.target.checked })}
+                      className="h-5 w-5 shrink-0 rounded border-border accent-[oklch(0.55_0.22_260)]"
+                    />
+                    <span
+                      className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                        isOverdue ? "bg-destructive" : isToday ? "bg-warning" : "bg-transparent"
+                      }`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-foreground">{t.description}</p>
+                      <p
+                        className={`text-xs ${
+                          isOverdue
+                            ? "font-medium text-destructive"
+                            : isToday
+                              ? "font-medium text-warning"
+                              : "text-muted-foreground"
+                        }`}
+                      >
+                        {dateLabel}
+                      </p>
+                    </div>
+                    <span className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
+                      {brl(Number(t.amount))}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+
+            {hiddenUnpaidCount > 0 && (
+              <Link
+                to="/transactions"
+                className="mt-1 block px-2 py-2 text-center text-xs font-medium text-primary hover:underline"
+              >
+                + {hiddenUnpaidCount} conta(s) não paga(s)
+              </Link>
+            )}
+
+            {paidExpense.length > 0 && (
+              <div className="mt-3 flex items-center gap-2.5 border-t border-border px-2 pt-3 text-xs text-muted-foreground">
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-success" />
+                {paidExpense.length} conta(s) já paga(s) · {brl(paidExpenseTotal)}
+              </div>
+            )}
+          </>
         )}
       </Card>
     </div>
