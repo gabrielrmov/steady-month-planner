@@ -231,7 +231,7 @@ function Dashboard() {
     <div className="mx-auto max-w-6xl space-y-5">
       <div className="space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
         <div className="min-w-0">
-          <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">Dashboard</h1>
+          <h1 className="truncate text-2xl font-extrabold tracking-tighter sm:text-3xl">Dashboard</h1>
           <p className="text-sm text-muted-foreground">Visão geral do mês</p>
         </div>
         <div className="flex items-center justify-between gap-1 rounded-lg border border-border bg-card p-1 sm:justify-start sm:gap-2">
@@ -269,6 +269,7 @@ function Dashboard() {
           icon={Wallet}
           tone={balance >= 0 ? "success" : "destructive"}
           subtitle={incomeTotal > 0 ? `${savingRate}% da renda sobra` : undefined}
+          highlight
         />
         <StatCard
           label="A pagar restante"
@@ -292,9 +293,12 @@ function Dashboard() {
         />
       </div>
 
-      <Card className="animate-rise p-5">
+      <Card className="animate-rise glow-ring p-5">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--primary-subtle)] text-primary">
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-primary-foreground"
+            style={{ background: "var(--gradient-primary)" }}
+          >
             <Sparkles className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
@@ -317,7 +321,7 @@ function Dashboard() {
         <Card className="p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <h2 className="font-semibold">Fluxo dos últimos 6 meses</h2>
+              <h2 className="font-bold tracking-tight">Fluxo dos últimos 6 meses</h2>
               <p className="text-xs text-muted-foreground">Entradas x saídas previstas</p>
             </div>
             <Link to="/reports" className="hidden sm:block">
@@ -367,7 +371,7 @@ function Dashboard() {
         <Card className="p-5">
           <div className="mb-4 flex items-center justify-between gap-2">
             <div>
-              <h2 className="font-semibold">Onde o dinheiro foi</h2>
+              <h2 className="font-bold tracking-tight">Onde o dinheiro foi</h2>
               <p className="text-xs text-muted-foreground">Top categorias do mês</p>
             </div>
             <Link to="/categories" className="hidden shrink-0 sm:block">
@@ -424,7 +428,7 @@ function Dashboard() {
         <Card className="border-warning/40 p-5">
           <div className="mb-3 flex items-center gap-2">
             <BellRing className="h-4 w-4 text-warning-foreground" />
-            <h2 className="font-semibold">Alertas de vencimento</h2>
+            <h2 className="font-bold tracking-tight">Alertas de vencimento</h2>
           </div>
           <ul className="space-y-2">
             {alerts.slice(0, 6).map((t) => {
@@ -448,13 +452,13 @@ function Dashboard() {
       <Card className="p-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="font-semibold">Checklist do mês</h2>
+            <h2 className="font-bold tracking-tight">Checklist do mês</h2>
             <p className="text-sm text-muted-foreground">
               Marque cada conta conforme o pagamento
             </p>
           </div>
           <Link to="/transactions">
-            <Button size="sm">Ver todas</Button>
+            <Button size="sm" className="hover-glow">Ver todas</Button>
           </Link>
         </div>
 
@@ -563,6 +567,7 @@ function StatCard({
   subtitle,
   delta,
   deltaGoodWhenUp,
+  highlight,
 }: {
   label: string;
   value: string;
@@ -571,6 +576,7 @@ function StatCard({
   subtitle?: string;
   delta?: number | null;
   deltaGoodWhenUp?: boolean;
+  highlight?: boolean;
 }) {
   const toneClass = {
     success: "bg-[var(--success-subtle)] text-success",
@@ -580,11 +586,11 @@ function StatCard({
   const up = (delta ?? 0) > 0;
   const good = deltaGoodWhenUp ? up : !up;
   return (
-    <Card className="hover-lift p-4 sm:p-5">
+    <Card className={`p-4 sm:p-5 ${highlight ? "glow-ring" : "hover-lift"}`}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">{label}</p>
-          <p className="mt-1.5 truncate text-lg font-bold tracking-tight sm:mt-2 sm:text-2xl lg:text-lg">{value}</p>
+          <p className="mt-1.5 truncate text-lg font-extrabold tracking-tighter sm:mt-2 sm:text-2xl lg:text-lg">{value}</p>
           {delta !== null && delta !== undefined && delta !== 0 && (
             <p className={`mt-1 flex items-center gap-1 text-xs ${good ? "text-success" : "text-destructive"}`}>
               {up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
