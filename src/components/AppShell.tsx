@@ -141,7 +141,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           >
             <Wallet className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="text-lg font-bold tracking-tighter text-sidebar-foreground">Finlist</span>
+          <span className="font-display text-xl text-sidebar-foreground">Finlist</span>
         </Link>
         <button
           type="button"
@@ -163,7 +163,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           let itemIndex = 0;
           return groups.map((group) => (
             <div key={group.title} className="space-y-1">
-              <h3 className="px-3 text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/35">
+              <h3 className="px-3 font-mono text-[10px] font-medium uppercase tracking-widest text-sidebar-foreground/35">
                 {group.title}
               </h3>
               {group.items.map((item) => {
@@ -222,7 +222,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                     className={cn(
                       "animate-rise group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                       active
-                        ? "bg-primary/10 text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:animate-bar-in before:rounded-full before:bg-primary before:shadow-[0_0_10px_color-mix(in_oklab,var(--primary)_70%,transparent)]"
+                        ? "bg-primary/10 text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:animate-bar-in before:rounded-full before:bg-primary"
                         : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground",
                     )}
                   >
@@ -354,7 +354,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <Wallet className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="truncate font-bold tracking-tighter text-sidebar-foreground">Finlist</span>
+            <span className="truncate font-display text-lg text-sidebar-foreground">Finlist</span>
           </div>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
