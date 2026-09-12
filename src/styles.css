@@ -7,7 +7,7 @@
 @theme inline {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "DM Serif Display", Georgia, "Times New Roman", serif;
-  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-mono: "Inter", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -50,11 +50,11 @@
 /* "Origin" token set — a midnight gallery of quiet wealth. Near-black */
 /* obsidian/graphite/steel surfaces, one signature violet (Iris Gleam) */
 /* as the accent that carries every highlight, links and active state, */
-/* and a cyan data-signal reserved for charts. No drop shadows, no     */
-/* decorative gradients — surfaces differentiate by color step, not    */
+/* and a cyan data-signal reserved for charts. No drop shadows, no */
+/* decorative gradients — surfaces differentiate by color step, not */
 /* elevation. Buttons are the one deliberate exception: white-on-black */
-/* is the only primary action, so the CTA fill uses its own --cta      */
-/* tokens instead of --primary (which stays the violet UI accent).     */
+/* is the only primary action, so the CTA fill uses its own --cta */
+/* tokens instead of --primary (which stays the violet UI accent). */
 /* ------------------------------------------------------------------ */
 :root {
   --radius: 0.625rem;
@@ -110,7 +110,7 @@
   --sidebar-ring: var(--iris-gleam);
 
   /* Primary CTA — white-on-black is the only primary action (never the
-     violet accent, which stays reserved for links/active-states/data). */
+  violet accent, which stays reserved for links/active-states/data). */
   --cta: var(--pure);
   --cta-foreground: var(--void);
 
@@ -128,7 +128,7 @@
   --primary-subtle: color-mix(in oklab, var(--iris-gleam) 16%, transparent);
 
   /* Exactly two legitimate gradients in the whole system — both structural,
-     never decorative. Nothing else should use a gradient. */
+  never decorative. Nothing else should use a gradient. */
   --gradient-chrome: linear-gradient(135deg, rgb(43, 43, 44), rgb(19, 19, 19));
   --gradient-sky: linear-gradient(
     rgb(15, 16, 17),
@@ -138,15 +138,15 @@
     rgb(64, 138, 193) 102%
   );
   /* Legacy call sites still read `background: var(--gradient-primary)` for
-     icon chips/logo marks — kept as a flat color (not a gradient) so those
-     spots stay on-brand without a decorative gradient. */
+  icon chips/logo marks — kept as a flat color (not a gradient) so those
+  spots stay on-brand without a decorative gradient. */
   --gradient-primary: var(--primary);
   --gradient-subtle: var(--card);
   --gradient-success: var(--success);
 
   /* Origin ships exactly one shadow token in its whole system (used once,
-     on a single button). Everything else is flat — surfaces differentiate
-     by color step, not elevation. */
+  on a single button). Everything else is flat — surfaces differentiate
+  by color step, not elevation. */
   --shadow-lg: rgba(0, 0, 0, 0.2) 0px 18px 20px 0px;
   --shadow-card: none;
   --shadow-elegant: none;
@@ -190,11 +190,11 @@
 }
 
 /* Light theme — scoped to the authenticated app surface (AppShell root), not the
-   :root/.dark tokens above, so the dark marketing pages and the always-dark
-   sidebar are unaffected. Toggled via ThemeProvider (src/lib/theme.tsx).
-   Origin itself is a dark-only system; this is a same-family light
-   adaptation (paper/silver surfaces, a darker Deep Iris accent for
-   contrast) rather than a literal spec value. */
+:root/.dark tokens above, so the dark marketing pages and the always-dark
+sidebar are unaffected. Toggled via ThemeProvider (src/lib/theme.tsx).
+Origin itself is a dark-only system; this is a same-family light
+adaptation (paper/silver surfaces, a darker Deep Iris accent for
+contrast) rather than a literal spec value. */
 .light {
   --background: #f6f6f5;
   --foreground: var(--obsidian);
@@ -254,7 +254,7 @@
 }
 
 /* Solid accent text — Origin explicitly forbids gradient text; this
-   utility keeps the old call sites working as a flat Iris Gleam color. */
+utility keeps the old call sites working as a flat Iris Gleam color. */
 @utility text-gradient {
   color: var(--primary);
 }
@@ -265,8 +265,8 @@
 }
 
 /* Quiet hover feedback: a background-color step (Graphite → Steel), the
-   way Origin's own "Steel Hover" surface is meant to be used — no lift,
-   no shadow. */
+way Origin's own "Steel Hover" surface is meant to be used — no lift,
+no shadow. */
 @utility hover-lift {
   transition: background-color 0.2s ease, border-color 0.2s ease;
   &:hover {
@@ -276,7 +276,7 @@
 }
 
 /* A quiet 1px accent ring (not a blurred glow) marking the one or two
-   focal cards on a page. */
+focal cards on a page. */
 @utility glow-ring {
   box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 45%, var(--border));
 }
@@ -290,7 +290,7 @@
 }
 
 /* Kept as a no-op-ish ambient wash for any call site still using it —
-   deliberately much quieter than before (Origin doesn't do glow blooms). */
+deliberately much quieter than before (Origin doesn't do glow blooms). */
 @utility ambient-glow {
   position: absolute;
   inset: 0;
@@ -369,9 +369,9 @@
 }
 
 /* A very quiet opacity breathe — Origin's motion philosophy is
-   "predictability over spectacle", so this replaces the old glow-pulse
-   box-shadow animation with a much subtler opacity pulse. Reserved for
-   the one or two focal elements that should feel alive (brand mark). */
+"predictability over spectacle", so this replaces the old glow-pulse
+box-shadow animation with a much subtler opacity pulse. Reserved for
+the one or two focal elements that should feel alive (brand mark). */
 @keyframes glow-pulse {
   0%,
   100% {
@@ -387,7 +387,7 @@
 }
 
 /* Press feedback for anything clickable that isn't already handled by a
-   component's own variant. */
+component's own variant. */
 @utility press-scale {
   transition: transform 0.15s ease;
   &:active {
