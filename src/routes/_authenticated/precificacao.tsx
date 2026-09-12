@@ -84,7 +84,7 @@ function Pricing() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="animate-rise">
-        <h1 className="text-2xl font-extrabold tracking-tighter sm:text-3xl">Precificação de serviços</h1>
+        <h1 className="font-display text-[28px] font-normal sm:text-[34px]">Precificação de serviços</h1>
         <p className="text-sm text-muted-foreground">
           Descubra quanto cobrar por projeto cobrindo custos, impostos e lucro.
         </p>
@@ -146,7 +146,7 @@ function Pricing() {
 
         <div className="space-y-4">
           <Card className="animate-rise glow-ring p-6" style={{ animationDelay: "180ms" }}>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <p className="font-mono text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Preço sugerido do serviço
             </p>
             <p className="mt-2 text-4xl font-bold tracking-tight">{brl(price)}</p>

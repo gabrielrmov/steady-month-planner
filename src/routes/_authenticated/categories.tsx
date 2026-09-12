@@ -111,7 +111,7 @@ function CategoriesPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="animate-rise">
-        <h1 className="text-2xl font-extrabold tracking-tighter sm:text-3xl">Categorias</h1>
+        <h1 className="font-display text-[28px] font-normal sm:text-[34px]">Categorias</h1>
         <p className="text-sm text-muted-foreground">
           Organize suas contas por tipo e defina orçamentos mensais para acompanhar gastos
         </p>
@@ -172,7 +172,7 @@ function CategoriesPage() {
           >
             <span className="h-4 w-4 shrink-0 rounded-full" style={{ backgroundColor: c.color }} />
             <span className="min-w-0 flex-1 text-sm font-medium">{c.name}</span>
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">
+            <span className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
               {c.kind === "expense" ? "Saída" : "Entrada"}
             </span>
             {c.kind === "expense" && (

@@ -128,7 +128,7 @@ function SettingsPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="animate-rise">
-        <h1 className="text-2xl font-extrabold tracking-tighter sm:text-3xl">Configurações</h1>
+        <h1 className="font-display text-[28px] font-normal sm:text-[34px]">Configurações</h1>
         <p className="text-sm text-muted-foreground">Sua conta, plano e dados</p>
       </div>
 
@@ -169,7 +169,7 @@ function SettingsPage() {
             type="button"
             onClick={() => setTheme("dark")}
             className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              theme === "dark" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              theme === "dark" ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <Moon className="h-3.5 w-3.5" /> Escuro
@@ -178,7 +178,7 @@ function SettingsPage() {
             type="button"
             onClick={() => setTheme("light")}
             className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              theme === "light" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              theme === "light" ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <Sun className="h-3.5 w-3.5" /> Claro

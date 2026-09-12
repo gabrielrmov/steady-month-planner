@@ -110,7 +110,7 @@ function SavingsPage() {
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="animate-rise flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-2xl font-extrabold tracking-tighter sm:text-3xl">Metas de economia</h1>
+          <h1 className="font-display text-[28px] font-normal sm:text-[34px]">Metas de economia</h1>
           <p className="text-sm text-muted-foreground">Defina objetivos e acompanhe quanto falta para alcançá-los</p>
         </div>
         {!formOpen && (

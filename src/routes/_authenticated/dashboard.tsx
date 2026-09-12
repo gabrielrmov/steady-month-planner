@@ -283,7 +283,7 @@ function Dashboard() {
     <div className="mx-auto max-w-6xl space-y-5">
       <div className="animate-rise space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
         <div className="min-w-0">
-          <h1 className="truncate text-2xl font-extrabold tracking-tighter sm:text-3xl">Dashboard</h1>
+          <h1 className="font-display truncate text-[28px] font-normal sm:text-[34px]">Dashboard</h1>
           <p className="text-sm text-muted-foreground">Visão geral do mês</p>
         </div>
         <div className="flex items-center justify-between gap-1 rounded-lg border border-border bg-card p-1 sm:justify-start sm:gap-2">
@@ -364,7 +364,7 @@ function Dashboard() {
           >
             <Sparkles className="h-4 w-4" />
           </div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="font-mono text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
             Insights do mês
           </p>
         </div>
@@ -690,7 +690,7 @@ function StatCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">{label}</p>
+          <p className="font-mono text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">{label}</p>
           <p
             className={`mt-1.5 truncate font-extrabold tracking-tighter sm:mt-2 ${
               isLg ? "text-2xl sm:text-3xl" : "text-lg sm:text-xl"

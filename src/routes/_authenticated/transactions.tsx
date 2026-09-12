@@ -160,7 +160,7 @@ function TransactionsPage() {
     <div className="mx-auto max-w-5xl space-y-5">
       <div className="animate-rise space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
         <div className="min-w-0">
-          <h1 className="truncate text-2xl font-extrabold tracking-tighter sm:text-3xl">Contas</h1>
+          <h1 className="font-display truncate text-[28px] font-normal sm:text-[34px]">Contas</h1>
           <p className="text-sm text-muted-foreground">Gerencie contas a pagar e receber</p>
         </div>
         <div className="flex items-center gap-2">

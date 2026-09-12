@@ -267,7 +267,7 @@ function OnboardingPage() {
           <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Icon className="h-6 w-6" />
           </div>
-          <h1 className="text-xl font-semibold text-foreground">{current.title}</h1>
+          <h1 className="font-display text-xl font-normal text-foreground">{current.title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{current.subtitle}</p>
         </div>
 

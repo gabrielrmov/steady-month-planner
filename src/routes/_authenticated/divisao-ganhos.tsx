@@ -268,7 +268,7 @@ function IncomeSplitPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="animate-rise">
-        <h1 className="text-2xl font-extrabold tracking-tighter sm:text-3xl">Divisão de ganhos</h1>
+        <h1 className="font-display text-[28px] font-normal sm:text-[34px]">Divisão de ganhos</h1>
         <p className="text-sm text-muted-foreground">
           Informe quanto você ganhou e veja como distribuir entre suas categorias.
         </p>
@@ -287,7 +287,7 @@ function IncomeSplitPage() {
       </Card>
 
       <Card className="animate-rise glow-ring p-5" style={{ animationDelay: "120ms" }}>
-        <p className="mb-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <p className="mb-4 font-mono text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Como fica dividido
         </p>
         {hasChartData ? (
