@@ -100,7 +100,7 @@ function AuthPage() {
 
         <Card className="border-border/60 bg-card p-6">
           <div className="mb-6 text-center">
-            <h1 className="text-lg font-semibold text-foreground">
+            <h1 className="font-display text-lg font-normal text-foreground">
               {isProIntent ? "Criar conta e assinar o Pro" : "Entrar no Finlist"}
             </h1>
             <p className="mt-1.5 text-sm text-muted-foreground">

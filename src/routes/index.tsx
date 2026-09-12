@@ -177,7 +177,7 @@ function ProductPreview() {
           { label: "Saldo previsto", value: "R$ 3.263", tone: "text-foreground" },
         ].map((k) => (
           <div key={k.label} className="rounded-lg border border-border bg-background/40 p-3">
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{k.label}</p>
+            <p className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">{k.label}</p>
             <p className={`mt-1 text-lg font-bold ${k.tone}`}>{k.value}</p>
           </div>
         ))}
@@ -253,10 +253,10 @@ function Landing() {
                 <Sparkles className="h-3.5 w-3.5 text-primary" />
                 30 dias grátis · sem cartão de crédito
               </div>
-              <h1 className="text-5xl font-extrabold leading-[1.02] tracking-tighter md:text-7xl">
+              <h1 className="font-display text-4xl font-normal leading-[0.95] sm:text-6xl md:text-7xl">
                 Toda conta do mês,
                 <br />
-                <span className="text-gradient">sob controle.</span>
+                <span className="text-primary">sob controle.</span>
               </h1>
               <p className="mt-6 max-w-xl text-lg text-muted-foreground">
                 Checklist mês a mês de contas a pagar e receber, cartões, parcelas, relatórios e
@@ -309,10 +309,10 @@ function Landing() {
         <section className="px-6 py-20">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                 Recursos
               </p>
-              <h2 className="mt-3 text-3xl font-extrabold tracking-tighter md:text-4xl">
+              <h2 className="mt-3 font-display text-3xl font-normal md:text-4xl">
                 Tudo que você precisa para fechar o mês no azul
               </h2>
               <p className="mt-3 text-muted-foreground">
@@ -341,10 +341,10 @@ function Landing() {
         <section className="border-y border-border px-6 py-20">
           <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                 Módulo PJ
               </p>
-              <h2 className="mt-3 text-3xl font-extrabold tracking-tighter md:text-4xl">
+              <h2 className="mt-3 font-display text-3xl font-normal md:text-4xl">
                 Descubra quanto cobrar por serviço
               </h2>
               <p className="mt-4 text-muted-foreground">
@@ -395,7 +395,7 @@ function Landing() {
         <section className="px-6 py-20">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 text-center">
-              <h2 className="text-3xl font-extrabold tracking-tighter md:text-4xl">Como funciona</h2>
+              <h2 className="font-display text-3xl font-normal md:text-4xl">Como funciona</h2>
               <p className="mt-3 text-muted-foreground">
                 Três passos para começar a organizar suas finanças.
               </p>
@@ -403,7 +403,7 @@ function Landing() {
             <div className="grid gap-5 md:grid-cols-3">
               {steps.map((s) => (
                 <div key={s.step} className="hover-lift rounded-2xl border border-border bg-card p-6">
-                  <span className="text-gradient text-5xl font-extrabold opacity-30">{s.step}</span>
+                  <span className="text-primary text-5xl font-extrabold opacity-30">{s.step}</span>
                   <h3 className="mt-4 font-semibold text-foreground">{s.title}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
                 </div>
@@ -421,7 +421,7 @@ function Landing() {
                   <Star key={i} className="h-4 w-4 fill-primary text-primary" />
                 ))}
               </div>
-              <h2 className="text-3xl font-extrabold tracking-tighter md:text-4xl">
+              <h2 className="font-display text-3xl font-normal md:text-4xl">
                 Amado por quem organiza o mês
               </h2>
             </div>
@@ -451,7 +451,7 @@ function Landing() {
               <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Shield className="h-6 w-6" />
               </div>
-              <h2 className="text-2xl font-extrabold tracking-tighter md:text-4xl">
+              <h2 className="font-display text-2xl font-normal md:text-4xl">
                 Teste 30 dias, depois escolha seu plano
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
@@ -478,7 +478,7 @@ function Landing() {
         <section className="border-t border-border px-6 py-20">
           <div className="mx-auto max-w-3xl">
             <div className="mb-12 text-center">
-              <h2 className="text-3xl font-extrabold tracking-tighter md:text-4xl">
+              <h2 className="font-display text-3xl font-normal md:text-4xl">
                 Perguntas frequentes
               </h2>
             </div>
@@ -497,7 +497,7 @@ function Landing() {
         <section className="relative overflow-hidden px-6 py-24">
           <div className="ambient-glow" aria-hidden="true" />
           <div className="relative mx-auto max-w-3xl text-center">
-            <h2 className="text-4xl font-extrabold tracking-tighter md:text-5xl">
+            <h2 className="font-display text-4xl font-normal md:text-5xl">
               Pronto para organizar suas contas?
             </h2>
             <p className="mt-4 text-muted-foreground">
