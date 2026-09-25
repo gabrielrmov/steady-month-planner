@@ -224,7 +224,7 @@ function SectionHeading({
   return (
     <div className={center ? "mx-auto max-w-2xl text-center" : "max-w-2xl"}>
       <p className="text-sm font-semibold text-primary">{eyebrow}</p>
-      <h2 className="mt-3 font-display text-3xl font-semibold leading-[1.08] text-foreground md:text-[44px]">
+      <h2 className="mt-3 text-balance font-display text-3xl font-semibold leading-[1.08] text-foreground md:text-[44px]">
         {title}
       </h2>
       {desc && <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{desc}</p>}
@@ -509,7 +509,7 @@ function CalendarVisual() {
           return (
             <div
               key={day}
-              className={`flex aspect-square flex-col items-center justify-center rounded-lg text-xs ${
+              className={`flex h-10 flex-col items-center justify-center rounded-lg text-xs ${
                 isToday ? "bg-foreground font-semibold text-background" : "text-foreground"
               }`}
             >
@@ -581,7 +581,7 @@ function FeatureRow({
     <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
       <div className={flip ? "lg:order-2" : ""}>
         <p className="text-sm font-semibold text-primary">{eyebrow}</p>
-        <h3 className="mt-3 font-display text-2xl font-semibold leading-tight md:text-[34px]">{title}</h3>
+        <h3 className="mt-3 text-balance font-display text-2xl font-semibold leading-tight md:text-[34px]">{title}</h3>
         <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">{desc}</p>
         <ul className="mt-6 space-y-3">
           {bullets.map((b) => (
@@ -641,7 +641,7 @@ function Landing() {
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               30 dias grátis · sem cartão de crédito
             </div>
-            <h1 className="mt-7 font-display text-[42px] font-semibold leading-[1.02] sm:text-6xl md:text-[76px]">
+            <h1 className="mt-7 text-balance font-display text-[38px] font-semibold leading-[1.04] sm:text-6xl md:text-[76px]">
               Toda conta do mês,
               <br />
               <span className="text-primary">sob controle.</span>
@@ -806,7 +806,7 @@ function Landing() {
         <section className="px-6 pb-24 md:pb-32">
           <div className="mx-auto max-w-6xl">
             <figure className="mx-auto max-w-3xl text-center">
-              <blockquote className="font-display text-2xl font-semibold leading-snug md:text-[34px]">
+              <blockquote className="text-balance font-display text-2xl font-semibold leading-snug md:text-[34px]">
                 “{testimonials[0].quote}”
               </blockquote>
               <figcaption className="mt-6 text-sm text-muted-foreground">
@@ -915,7 +915,7 @@ function Landing() {
         {/* Final CTA */}
         <section className="px-6 pb-24">
           <div className="mx-auto max-w-6xl overflow-hidden rounded-3xl bg-foreground px-8 py-16 text-center text-background md:px-16 md:py-24">
-            <h2 className="mx-auto max-w-3xl font-display text-3xl font-semibold leading-[1.08] md:text-5xl">
+            <h2 className="mx-auto max-w-3xl text-balance font-display text-3xl font-semibold leading-[1.08] md:text-5xl">
               Comece o próximo mês já sabendo quanto vai sobrar.
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-lg opacity-70">
