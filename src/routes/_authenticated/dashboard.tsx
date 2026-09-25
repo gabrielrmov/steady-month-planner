@@ -283,7 +283,7 @@ function Dashboard() {
     <div className="mx-auto max-w-6xl space-y-5">
       <div className="animate-rise space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
         <div className="min-w-0">
-          <h1 className="font-display truncate text-[28px] font-normal sm:text-[34px]">Dashboard</h1>
+          <h1 className="font-display truncate text-[28px] font-semibold sm:text-[34px]">Dashboard</h1>
           <p className="text-sm text-muted-foreground">Visão geral do mês</p>
         </div>
         <div className="flex items-center justify-between gap-1 rounded-lg border border-border bg-card p-1 sm:justify-start sm:gap-2">

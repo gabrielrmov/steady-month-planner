@@ -268,7 +268,7 @@ function IncomeSplitPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="animate-rise">
-        <h1 className="font-display text-[28px] font-normal sm:text-[34px]">Divisão de ganhos</h1>
+        <h1 className="font-display text-[28px] font-semibold sm:text-[34px]">Divisão de ganhos</h1>
         <p className="text-sm text-muted-foreground">
           Informe quanto você ganhou e veja como distribuir entre suas categorias.
         </p>

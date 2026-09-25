@@ -211,7 +211,7 @@ function ReportsPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="animate-rise flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-[28px] font-normal sm:text-[34px]">Relatórios</h1>
+          <h1 className="font-display text-[28px] font-semibold sm:text-[34px]">Relatórios</h1>
           <p className="text-sm text-muted-foreground">Últimos {monthsBack} meses</p>
         </div>
         <div className="flex items-center gap-2">
