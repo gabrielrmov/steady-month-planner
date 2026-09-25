@@ -338,6 +338,6 @@ component's own variant. */
 
   /* Display headlines: tight, confident, never decorative. */
   .font-display {
-    letter-spacing: -0.025em;
+    letter-spacing: -0.015em;
   }
 }
