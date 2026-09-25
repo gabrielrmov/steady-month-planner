@@ -6,7 +6,7 @@
 
 @theme inline {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "DM Serif Display", Georgia, "Times New Roman", serif;
+  --font-display: "Inter Tight", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Inter", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -47,214 +47,144 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* "Origin" token set — a midnight gallery of quiet wealth. Near-black */
-/* obsidian/graphite/steel surfaces, one signature violet (Iris Gleam) */
-/* as the accent that carries every highlight, links and active state, */
-/* and a cyan data-signal reserved for charts. No drop shadows, no */
-/* decorative gradients — surfaces differentiate by color step, not */
-/* elevation. Buttons are the one deliberate exception: white-on-black */
-/* is the only primary action, so the CTA fill uses its own --cta */
-/* tokens instead of --primary (which stays the violet UI accent). */
+/* Light-first system, in the spirit of Mercury/Ramp: a warm off-white */
+/* canvas, white cards lifted by a hairline border and a whisper of    */
+/* shadow, near-black ink, and one confident blue for links, active    */
+/* states and data. Primary buttons are near-black (the CTA tokens),   */
+/* so blue never has to fight the main action for attention.           */
+/* The dark theme is opt-in (.dark), toggled from the app.             */
 /* ------------------------------------------------------------------ */
 :root {
-  --radius: 0.625rem;
+  --radius: 0.75rem;
 
-  /* Origin palette (raw) */
-  --iris-gleam: #847dff;
-  --cyan-signal: #00b3dd;
-  --pale-iris: #d1c9ff;
-  --deep-iris: #4b49aa;
-  --orchid-bloom: #dd90d8;
-  --periwinkle: #90b8f0;
-  --obsidian: #0f1011;
-  --abyss: #090a0b;
-  --graphite: #2e2e2e;
-  --steel: #3f4041;
-  --silver: #cacaca;
-  --fog: #6a6b6b;
-  --ash: #9f9fa0;
-  --cloud: #f5f5f7;
-  --pure: #ffffff;
-  --void: #000000;
+  --background: #f7f7f4;
+  --foreground: #111318;
+  --card: #ffffff;
+  --card-foreground: #111318;
+  --popover: #ffffff;
+  --popover-foreground: #111318;
+  --primary: #2e55e6;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f0ec;
+  --secondary-foreground: #111318;
+  --muted: #f0f0ec;
+  --muted-foreground: #646973;
+  --accent: #f0f0ec;
+  --accent-foreground: #111318;
+  --destructive: #d92d20;
+  --destructive-foreground: #ffffff;
+  --success: #12805c;
+  --success-foreground: #ffffff;
+  --warning: #b54708;
+  --warning-foreground: #ffffff;
+  --border: #e6e5e0;
+  --input: #dcdbd5;
+  --ring: #2e55e6;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #111318;
+  --sidebar-primary: #2e55e6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f2f2ee;
+  --sidebar-accent-foreground: #111318;
+  --sidebar-border: #ebeae5;
+  --sidebar-ring: #2e55e6;
 
-  --background: var(--obsidian);
-  --foreground: var(--cloud);
-  --card: var(--graphite);
-  --card-foreground: var(--cloud);
-  --popover: var(--graphite);
-  --popover-foreground: var(--cloud);
-  --primary: var(--iris-gleam);
-  --primary-foreground: var(--pure);
-  --secondary: var(--steel);
-  --secondary-foreground: var(--cloud);
-  --muted: var(--abyss);
-  --muted-foreground: var(--ash);
-  --accent: var(--steel);
-  --accent-foreground: var(--cloud);
-  --destructive: oklch(0.62 0.19 25);
-  --destructive-foreground: oklch(0.98 0.005 250);
-  --success: oklch(0.68 0.15 152);
-  --success-foreground: oklch(0.13 0.03 152);
-  --warning: oklch(0.76 0.14 75);
-  --warning-foreground: oklch(0.16 0.03 75);
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.12);
-  --ring: var(--iris-gleam);
-  --sidebar: var(--abyss);
-  --sidebar-foreground: var(--cloud);
-  --sidebar-primary: var(--iris-gleam);
-  --sidebar-primary-foreground: var(--pure);
-  --sidebar-accent: var(--steel);
-  --sidebar-accent-foreground: var(--cloud);
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: var(--iris-gleam);
+  /* Primary action: near-black on light, white on dark. */
+  --cta: #111318;
+  --cta-foreground: #ffffff;
 
-  /* Primary CTA — white-on-black is the only primary action (never the
-  violet accent, which stays reserved for links/active-states/data). */
-  --cta: var(--pure);
-  --cta-foreground: var(--void);
+  /* Categorical chart slots — validated (lightness, chroma, CVD, contrast)
+  against the white card surface. Slots 3-5 sit under 3:1 on white, so
+  charts using them keep visible labels/legends. */
+  --chart-1: #2e55e6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #eda100;
+  --chart-5: #e87ba4;
+  --chart-6: #4a3aa7;
 
-  /* Chromatic chart set — the "gallery" palette used categorically */
-  --chart-1: var(--cyan-signal);
-  --chart-2: var(--iris-gleam);
-  --chart-3: var(--orchid-bloom);
-  --chart-4: var(--periwinkle);
-  --chart-5: var(--pale-iris);
-  --chart-6: var(--deep-iris);
+  --success-subtle: #e7f4ee;
+  --warning-subtle: #fdf1e6;
+  --destructive-subtle: #fdecea;
+  --primary-subtle: #ebeffd;
 
-  --success-subtle: oklch(0.68 0.15 152 / 0.14);
-  --warning-subtle: oklch(0.76 0.14 75 / 0.14);
-  --destructive-subtle: oklch(0.62 0.19 25 / 0.14);
-  --primary-subtle: color-mix(in oklab, var(--iris-gleam) 16%, transparent);
-
-  /* Exactly two legitimate gradients in the whole system — both structural,
-  never decorative. Nothing else should use a gradient. */
-  --gradient-chrome: linear-gradient(135deg, rgb(43, 43, 44), rgb(19, 19, 19));
-  --gradient-sky: linear-gradient(
-    rgb(15, 16, 17),
-    rgb(19, 29, 39) 18%,
-    rgb(26, 71, 136) 37%,
-    rgb(64, 138, 193) 69%,
-    rgb(64, 138, 193) 102%
-  );
-  /* Legacy call sites still read `background: var(--gradient-primary)` for
-  icon chips/logo marks — kept as a flat color (not a gradient) so those
-  spots stay on-brand without a decorative gradient. */
   --gradient-primary: var(--primary);
   --gradient-subtle: var(--card);
   --gradient-success: var(--success);
 
-  /* Origin ships exactly one shadow token in its whole system (used once,
-  on a single button). Everything else is flat — surfaces differentiate
-  by color step, not elevation. */
-  --shadow-lg: rgba(0, 0, 0, 0.2) 0px 18px 20px 0px;
-  --shadow-card: none;
-  --shadow-elegant: none;
+  /* Hairline elevation: cards read as paper on the canvas, not floating. */
+  --shadow-card: 0 1px 2px rgba(16, 18, 24, 0.05);
+  --shadow-elegant: 0 12px 32px -12px rgba(16, 18, 24, 0.18);
+  --shadow-lg: 0 24px 60px -24px rgba(16, 18, 24, 0.25);
   --shadow-glow: 0 0 0 1px var(--border);
-  --shadow-glow-accent: 0 0 0 1px color-mix(in oklab, var(--primary) 45%, var(--border));
-  --shimmer-highlight: oklch(1 0 0 / 0.05);
+  --shadow-glow-accent: 0 0 0 1px color-mix(in oklab, var(--primary) 40%, var(--border));
+  --shimmer-highlight: rgba(16, 18, 24, 0.04);
 }
 
 .dark {
-  --background: var(--obsidian);
-  --foreground: var(--cloud);
-  --card: var(--graphite);
-  --card-foreground: var(--cloud);
-  --popover: var(--graphite);
-  --popover-foreground: var(--cloud);
-  --primary: var(--iris-gleam);
-  --primary-foreground: var(--pure);
-  --secondary: var(--steel);
-  --secondary-foreground: var(--cloud);
-  --muted: var(--abyss);
-  --muted-foreground: var(--ash);
-  --accent: var(--steel);
-  --accent-foreground: var(--cloud);
-  --destructive: oklch(0.62 0.19 25);
-  --destructive-foreground: oklch(0.98 0.005 250);
-  --success: oklch(0.68 0.15 152);
-  --success-foreground: oklch(0.13 0.03 152);
-  --warning: oklch(0.76 0.14 75);
-  --warning-foreground: oklch(0.16 0.03 75);
-  --border: rgba(255, 255, 255, 0.1);
+  --background: #0e0f12;
+  --foreground: #edeef0;
+  --card: #16181d;
+  --card-foreground: #edeef0;
+  --popover: #1b1d23;
+  --popover-foreground: #edeef0;
+  --primary: #7a93ff;
+  --primary-foreground: #0b0d12;
+  --secondary: #1f2228;
+  --secondary-foreground: #edeef0;
+  --muted: #1b1d23;
+  --muted-foreground: #9ba0ab;
+  --accent: #22252c;
+  --accent-foreground: #edeef0;
+  --destructive: #f2665b;
+  --destructive-foreground: #0b0d12;
+  --success: #34c38f;
+  --success-foreground: #0b0d12;
+  --warning: #e2a33b;
+  --warning-foreground: #0b0d12;
+  --border: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.12);
-  --ring: var(--iris-gleam);
-  --sidebar: var(--abyss);
-  --sidebar-foreground: var(--cloud);
-  --sidebar-primary: var(--iris-gleam);
-  --sidebar-primary-foreground: var(--pure);
-  --sidebar-accent: var(--steel);
-  --sidebar-accent-foreground: var(--cloud);
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: var(--iris-gleam);
-}
+  --ring: #7a93ff;
+  --sidebar: #0b0c0f;
+  --sidebar-foreground: #edeef0;
+  --sidebar-primary: #7a93ff;
+  --sidebar-primary-foreground: #0b0d12;
+  --sidebar-accent: #1a1c22;
+  --sidebar-accent-foreground: #edeef0;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #7a93ff;
 
-/* Light theme — scoped to the authenticated app surface (AppShell root), not the
-:root/.dark tokens above, so the dark marketing pages and the always-dark
-sidebar are unaffected. Toggled via ThemeProvider (src/lib/theme.tsx).
-Origin itself is a dark-only system; this is a same-family light
-adaptation (paper/silver surfaces, a darker Deep Iris accent for
-contrast) rather than a literal spec value. */
-.light {
-  --background: #f6f6f5;
-  --foreground: var(--obsidian);
-  --card: #ffffff;
-  --card-foreground: var(--obsidian);
-  --popover: #ffffff;
-  --popover-foreground: var(--obsidian);
-  --primary: var(--deep-iris);
-  --primary-foreground: #ffffff;
-  --secondary: #ececec;
-  --secondary-foreground: var(--graphite);
-  --muted: #ececec;
-  --muted-foreground: var(--fog);
-  --accent: #e6e6e6;
-  --accent-foreground: var(--graphite);
-  --destructive: oklch(0.5 0.19 25);
-  --destructive-foreground: oklch(0.99 0.003 250);
-  --success: oklch(0.44 0.13 152);
-  --success-foreground: oklch(0.99 0.003 250);
-  --warning: oklch(0.58 0.14 75);
-  --warning-foreground: oklch(0.18 0.04 75);
-  --border: rgba(0, 0, 0, 0.1);
-  --input: rgba(0, 0, 0, 0.12);
-  --ring: var(--deep-iris);
+  --cta: #ffffff;
+  --cta-foreground: #0e0f12;
 
-  --chart-1: #0088a8;
-  --chart-2: var(--deep-iris);
-  --chart-3: #a8479f;
-  --chart-4: #3d6db0;
-  --chart-5: #6c63d1;
-  --chart-6: #33306f;
+  /* Same hues, stepped for the dark card surface (validated separately). */
+  --chart-1: #5b7cfa;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #c98500;
+  --chart-5: #d55181;
+  --chart-6: #9085e9;
 
-  --success-subtle: oklch(0.44 0.13 152 / 0.1);
-  --warning-subtle: oklch(0.58 0.14 75 / 0.12);
-  --destructive-subtle: oklch(0.5 0.19 25 / 0.08);
-  --primary-subtle: color-mix(in oklab, var(--deep-iris) 10%, transparent);
+  --success-subtle: rgba(52, 195, 143, 0.14);
+  --warning-subtle: rgba(226, 163, 59, 0.14);
+  --destructive-subtle: rgba(242, 102, 91, 0.14);
+  --primary-subtle: rgba(122, 147, 255, 0.14);
 
-  --cta: var(--void);
-  --cta-foreground: var(--pure);
-
-  --gradient-primary: var(--primary);
-  --gradient-subtle: var(--card);
-  --gradient-success: var(--success);
-  --shadow-card: none;
-  --shadow-elegant: none;
-  --shadow-glow: 0 0 0 1px var(--border);
-  --shadow-glow-accent: 0 0 0 1px color-mix(in oklab, var(--primary) 35%, var(--border));
-  --shimmer-highlight: oklch(0 0 0 / 0.04);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-elegant: 0 12px 32px -12px rgba(0, 0, 0, 0.6);
+  --shadow-glow-accent: 0 0 0 1px color-mix(in oklab, var(--primary) 40%, var(--border));
+  --shimmer-highlight: rgba(255, 255, 255, 0.05);
 }
 
 @utility bg-grid {
   background-image:
-    linear-gradient(to right, oklch(1 0 0 / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(1 0 0 / 0.05) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in oklab, var(--foreground) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--foreground) 6%, transparent) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 40%, transparent 100%);
 }
 
-/* Solid accent text — Origin explicitly forbids gradient text; this
-utility keeps the old call sites working as a flat Iris Gleam color. */
+/* Legacy call sites: gradient text is out — this renders as the solid accent. */
 @utility text-gradient {
   color: var(--primary);
 }
@@ -264,40 +194,32 @@ utility keeps the old call sites working as a flat Iris Gleam color. */
   border: 1px solid var(--border);
 }
 
-/* Quiet hover feedback: a background-color step (Graphite → Steel), the
-way Origin's own "Steel Hover" surface is meant to be used — no lift,
-no shadow. */
+/* Quiet hover: a border that warms toward the accent plus a slightly deeper
+shadow. No lift, no glow. */
 @utility hover-lift {
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
   &:hover {
-    background-color: var(--steel);
-    border-color: color-mix(in oklab, var(--primary) 22%, var(--border));
+    border-color: color-mix(in oklab, var(--primary) 25%, var(--border));
+    box-shadow: var(--shadow-elegant);
   }
 }
 
-/* A quiet 1px accent ring (not a blurred glow) marking the one or two
-focal cards on a page. */
+/* A 1px accent ring marking the one focal card on a page. */
 @utility glow-ring {
-  box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 45%, var(--border));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 35%, var(--border)), var(--shadow-card);
 }
 
 @utility hover-glow {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-  &:hover {
-    border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
-    background-color: color-mix(in oklab, var(--primary) 10%, transparent);
-  }
 }
 
-/* Kept as a no-op-ish ambient wash for any call site still using it —
-deliberately much quieter than before (Origin doesn't do glow blooms). */
 @utility ambient-glow {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background-image: radial-gradient(
     ellipse 60% 50% at 50% 0%,
-    color-mix(in oklab, var(--primary) 8%, transparent),
+    color-mix(in oklab, var(--primary) 7%, transparent),
     transparent 70%
   );
 }
@@ -368,22 +290,9 @@ deliberately much quieter than before (Origin doesn't do glow blooms). */
   animation: grow-x 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* A very quiet opacity breathe — Origin's motion philosophy is
-"predictability over spectacle", so this replaces the old glow-pulse
-box-shadow animation with a much subtler opacity pulse. Reserved for
-the one or two focal elements that should feel alive (brand mark). */
-@keyframes glow-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.82;
-  }
-}
-
+/* Kept as a no-op for old call sites — nothing in this system pulses. */
 @utility animate-glow-pulse {
-  animation: glow-pulse 3.2s ease-in-out infinite;
+  animation: none;
 }
 
 /* Press feedback for anything clickable that isn't already handled by a
@@ -391,7 +300,7 @@ component's own variant. */
 @utility press-scale {
   transition: transform 0.15s ease;
   &:active {
-    transform: scale(0.96);
+    transform: scale(0.97);
   }
 }
 
@@ -411,10 +320,24 @@ component's own variant. */
     border-color: var(--color-border);
   }
 
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Display headlines: tight, confident, never decorative. */
+  .font-display {
+    letter-spacing: -0.025em;
   }
 }
