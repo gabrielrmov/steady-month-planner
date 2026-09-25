@@ -2,7 +2,8 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 
 export type Theme = "dark" | "light";
 
-const STORAGE_KEY = "finlist-theme";
+// v2: the redesign made light the default, so everyone starts fresh on it.
+const STORAGE_KEY = "finlist-theme-v2";
 
 type ThemeContextValue = {
   theme: Theme;
@@ -13,14 +14,14 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
+  const [theme, setThemeState] = useState<Theme>("light");
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === "light" || stored === "dark") setThemeState(stored);
     } catch {
-      // localStorage unavailable (private mode, etc.) — fall back to dark.
+      // localStorage unavailable (private mode, etc.) — fall back to light.
     }
   }, []);
 
