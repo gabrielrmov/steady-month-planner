@@ -42,7 +42,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { QuickAdd } from "@/components/QuickAdd";
 
 const transactionSubItems = [
@@ -136,12 +136,12 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="flex h-16 items-center justify-between px-5">
         <Link to="/dashboard" className="group flex items-center gap-3">
           <div
-            className="animate-glow-pulse flex h-8 w-8 items-center justify-center rounded-lg transition-transform duration-300 group-hover:scale-105"
+            className="flex h-8 w-8 items-center justify-center rounded-lg transition-transform duration-300 group-hover:scale-105"
             style={{ background: "var(--gradient-primary)" }}
           >
             <Wallet className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="font-display text-xl text-sidebar-foreground">Finlist</span>
+          <span className="font-display text-xl font-semibold text-sidebar-foreground">Finlist</span>
         </Link>
         <button
           type="button"
@@ -163,7 +163,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           let itemIndex = 0;
           return groups.map((group) => (
             <div key={group.title} className="space-y-1">
-              <h3 className="px-3 font-mono text-[10px] font-medium uppercase tracking-widest text-sidebar-foreground/35">
+              <h3 className="px-3 font-mono text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                 {group.title}
               </h3>
               {group.items.map((item) => {
@@ -198,7 +198,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                   "relative block py-2 pl-6 text-sm transition-colors before:absolute before:left-0 before:top-1/2 before:h-px before:w-2 before:-translate-y-1/2 before:bg-sidebar-border",
                                   subActive
                                     ? "font-medium text-primary"
-                                    : "text-sidebar-foreground/45 hover:text-primary",
+                                    : "text-muted-foreground hover:text-foreground",
                                 )}
                               >
                                 {sub.label}
@@ -222,7 +222,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                     className={cn(
                       "animate-rise group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                       active
-                        ? "bg-primary/10 text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:animate-bar-in before:rounded-full before:bg-primary"
+                        ? "bg-sidebar-accent font-semibold text-sidebar-foreground [&>svg]:text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:animate-bar-in before:rounded-full before:bg-primary"
                         : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground",
                     )}
                   >
@@ -249,7 +249,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               key={l.to}
               to={l.to}
               onClick={onNavigate}
-              className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-sidebar-foreground/45 transition-all duration-200 hover:translate-x-0.5 hover:text-sidebar-foreground"
+              className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-muted-foreground transition-colors duration-200 hover:bg-sidebar-accent hover:text-sidebar-foreground"
             >
               <l.icon className="h-3.5 w-3.5" />
               {l.label}
@@ -257,7 +257,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           ))}
         </div>
 
-        <div className="flex items-center gap-3 rounded-2xl border border-sidebar-border bg-background/40 p-2">
+        <div className="flex items-center gap-3 rounded-2xl border border-sidebar-border bg-background p-2">
           <Avatar className="h-10 w-10 rounded-xl">
             <AvatarFallback className="bg-sidebar-accent text-xs font-semibold text-sidebar-foreground">
               {initials || <User className="h-4 w-4" />}
@@ -337,8 +337,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { theme } = useTheme();
 
+  // Mirror the theme on <html> so portals (dialogs, popovers, toasts) match.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("dark", theme === "dark");
+    return () => root.classList.remove("dark");
+  }, [theme]);
+
   return (
-    <div className={cn("min-h-screen bg-background text-foreground", theme === "light" && "light")}>
+    <div className={cn("min-h-screen bg-background text-foreground", theme === "dark" && "dark")}>
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-sidebar-border bg-sidebar md:flex">
         <SidebarContent />
@@ -354,7 +361,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <Wallet className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="truncate font-display text-lg text-sidebar-foreground">Finlist</span>
+            <span className="truncate font-display text-lg font-semibold text-sidebar-foreground">Finlist</span>
           </div>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
