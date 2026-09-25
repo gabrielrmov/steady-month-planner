@@ -78,7 +78,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Organize suas contas a pagar e receber com checklist mensal, categorias e dashboard de fluxo de caixa.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "https://steady-month-planner.dsggabriel7.workers.dev/og-image.png" }, { name: "twitter:card", content: "summary_large_image" }, { name: "twitter:image", content: "https://steady-month-planner.dsggabriel7.workers.dev/og-image.png" }, { name: "theme-color", content: "#04070F" },
+      { property: "og:image", content: "https://steady-month-planner.dsggabriel7.workers.dev/og-image.png" }, { name: "twitter:card", content: "summary_large_image" }, { name: "twitter:image", content: "https://steady-month-planner.dsggabriel7.workers.dev/og-image.png" }, { name: "theme-color", content: "#F7F7F4" },
       { name: "twitter:title", content: "Finlist — Organizador financeiro mensal" },
       {
         name: "twitter:description",
@@ -92,7 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Serif+Display&family=Roboto+Mono:wght@400;500&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap",
       },
     ],
   }),
@@ -104,7 +104,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR" className="dark">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>

@@ -125,7 +125,7 @@ function PricingPage() {
             <Sparkles className="h-3.5 w-3.5 text-primary" />
             Planos simples, sem surpresa
           </div>
-          <h1 className="font-display text-3xl font-normal md:text-5xl">
+          <h1 className="font-display text-3xl font-semibold md:text-5xl">
             Escolha o plano ideal para você
           </h1>
           <p className="mt-4 text-muted-foreground">
