@@ -70,7 +70,7 @@ const monthLabel = (d: Date) => {
   return t.charAt(0).toUpperCase() + t.slice(1);
 };
 const brlShort = (v: number) =>
-  Math.abs(v) >= 1000 ? `R$ ${(v / 1000).toFixed(1).replace(".", ",")}k` : `R$ ${v.toFixed(0)}`;
+  Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(1).replace(".", ",")}k` : v.toFixed(0);
 
 type Row = {
   id: string;
@@ -357,36 +357,45 @@ function Dashboard() {
         : `Vence em ${days} ${days === 1 ? "dia" : "dias"}`;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8">
-      <div className="animate-rise flex flex-wrap items-end justify-between gap-4">
+    <div className="mx-auto max-w-6xl space-y-5 sm:space-y-8">
+      <div className="animate-rise flex flex-wrap items-end justify-between gap-3 sm:gap-4">
         <div className="min-w-0">
           <h1 className="font-display truncate text-[28px] font-bold leading-[1.2] sm:text-[32px] sm:leading-[38px]">
             Visão geral do mês
           </h1>
           <p className="text-[12px] leading-4 text-muted-foreground">{period}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 rounded-lg border border-border-strong bg-card p-1">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <div className="flex min-w-0 flex-1 items-center justify-between gap-1 rounded-lg border border-border-strong bg-card p-0.5 sm:flex-none sm:p-1">
             <Button
               variant="ghost"
               size="icon"
+              className="h-10 w-10 sm:h-9 sm:w-9"
               aria-label="Mês anterior"
               onClick={() => setMonth(subMonths(month, 1))}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="min-w-36 text-center text-[13px] font-semibold">{period}</span>
+            <span className="min-w-0 flex-1 px-1 text-center text-[13px] font-semibold sm:min-w-36 sm:flex-none">
+              <span className="sm:hidden">
+                {monthLabel(month).replace(/^(\S{3})\S*\s+de\s+/, "$1/")}
+              </span>
+              <span className="hidden sm:inline">{period}</span>
+            </span>
             <Button
               variant="ghost"
               size="icon"
+              className="h-10 w-10 sm:h-9 sm:w-9"
               aria-label="Próximo mês"
               onClick={() => setMonth(addMonths(month, 1))}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-          <Link to="/transactions">
-            <Button>Adicionar lançamento</Button>
+          <Link to="/transactions" className="shrink-0">
+            <Button className="h-11 px-3 text-[13px] sm:h-10 sm:px-5 sm:text-sm">
+              Adicionar lançamento
+            </Button>
           </Link>
         </div>
       </div>
@@ -394,7 +403,7 @@ function Dashboard() {
       <Fragment key={from}>
         <section
           aria-label="Indicadores"
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+          className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4 [&::-webkit-scrollbar]:hidden"
         >
           <Indicator
             index={0}
@@ -450,13 +459,13 @@ function Dashboard() {
           />
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-          <Card className="animate-rise p-6" style={{ animationDelay: "320ms" }}>
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.6fr_1fr]">
+          <Card className="animate-rise p-4 sm:p-6" style={{ animationDelay: "320ms" }}>
             <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="font-display text-[22px] font-bold leading-7">Entradas x saídas</h2>
                 <p className="text-[12px] leading-4 text-muted-foreground">
-                  Últimos 6 meses, até {period}
+                  Últimos 6 meses, até {period} · valores em reais (k = mil)
                 </p>
               </div>
               <div className="flex items-center gap-4 text-[13px] font-semibold">
@@ -474,7 +483,7 @@ function Dashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={series}
-                  margin={{ top: 18, right: 4, left: -18, bottom: 0 }}
+                  margin={{ top: 18, right: 4, left: 0, bottom: 0 }}
                   barGap={8}
                 >
                   <CartesianGrid stroke="var(--border)" vertical={false} />
@@ -491,7 +500,7 @@ function Dashboard() {
                     axisLine={false}
                     fontSize={12}
                     stroke="var(--muted-foreground)"
-                    width={62}
+                    width={38}
                   />
                   <RTooltip
                     cursor={{ fill: "var(--muted)" }}
@@ -544,7 +553,7 @@ function Dashboard() {
             </div>
           </Card>
 
-          <Card className="animate-rise p-6" style={{ animationDelay: "400ms" }}>
+          <Card className="animate-rise p-4 sm:p-6" style={{ animationDelay: "400ms" }}>
             <div className="mb-6 flex items-start justify-between gap-2">
               <div>
                 <h2 className="font-display text-[22px] font-bold leading-7">
@@ -612,15 +621,15 @@ function Dashboard() {
           </Card>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-          <Card className="animate-rise p-6" style={{ animationDelay: "480ms" }}>
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.6fr_1fr]">
+          <Card className="animate-rise p-4 sm:p-6" style={{ animationDelay: "480ms" }}>
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
                 <h2 className="font-display text-[22px] font-bold leading-7">Contas a pagar</h2>
                 <p className="text-[12px] leading-4 text-muted-foreground">{period}</p>
               </div>
               <Link to="/transactions">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="h-10 sm:h-8">
                   Ver todas
                 </Button>
               </Link>
@@ -681,16 +690,18 @@ function Dashboard() {
                           className="animate-fade-in transition-colors hover:bg-muted"
                           style={{ animationDelay: `${560 + ri * 70}ms` }}
                         >
-                          <td className="py-3 pr-2">
-                            <input
-                              type="checkbox"
-                              aria-label={`Marcar ${t.description} como paga`}
-                              checked={false}
-                              onChange={(e) =>
-                                togglePaid.mutate({ id: t.id, paid: e.target.checked })
-                              }
-                              className="h-5 w-5 cursor-pointer rounded-sm accent-[var(--brand)]"
-                            />
+                          <td className="w-11 py-0 pr-0">
+                            <label className="-ml-2 flex h-11 w-11 cursor-pointer items-center justify-center">
+                              <input
+                                type="checkbox"
+                                aria-label={`Marcar ${t.description} como paga`}
+                                checked={false}
+                                onChange={(e) =>
+                                  togglePaid.mutate({ id: t.id, paid: e.target.checked })
+                                }
+                                className="h-5 w-5 cursor-pointer rounded-sm accent-[var(--brand)]"
+                              />
+                            </label>
                           </td>
                           <td className="max-w-0 py-3 pr-2">
                             <p className="truncate text-[15px] font-bold leading-[22px]">
@@ -745,7 +756,7 @@ function Dashboard() {
             )}
           </Card>
 
-          <Card className="animate-rise p-6" style={{ animationDelay: "560ms" }}>
+          <Card className="animate-rise p-4 sm:p-6" style={{ animationDelay: "560ms" }}>
             <h2 className="font-display text-[22px] font-bold leading-7">Resumo</h2>
             <p className="mb-4 text-[12px] leading-4 text-muted-foreground">{period}</p>
             {alerts.length > 0 && (
@@ -831,7 +842,7 @@ function Indicator({
   const value = percent !== undefined ? `${Math.round(shownPercent)}%` : brl(shownAmount);
   return (
     <Card
-      className="animate-rise p-6 hover:-translate-y-0.5 hover:shadow-[var(--shadow-product)]"
+      className="animate-rise w-[80%] shrink-0 snap-start p-4 hover:-translate-y-0.5 hover:shadow-[var(--shadow-product)] sm:w-auto sm:shrink sm:p-6"
       style={{ animationDelay: `${index * 90}ms` }}
     >
       <p className="text-[13px] font-semibold leading-[18px] tracking-[0.2px] text-muted-foreground">
@@ -853,7 +864,7 @@ function Indicator({
         <p className="mt-1 text-[12px] leading-4 text-muted-foreground">{note}</p>
       )}
       {progress !== undefined && <Progress value={shownProgress} className="mt-3 h-2" />}
-      <p className="mt-3 text-[12px] leading-4 text-muted-foreground">{period}</p>
+      <p className="mt-3 hidden text-[12px] leading-4 text-muted-foreground sm:block">{period}</p>
     </Card>
   );
 }
