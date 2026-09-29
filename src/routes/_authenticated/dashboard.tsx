@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { useAnimatedNumber } from "@/lib/use-animated-number";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -390,386 +391,420 @@ function Dashboard() {
         </div>
       </div>
 
-      <section
-        aria-label="Indicadores"
-        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
-      >
-        <Indicator
-          label="Saldo"
-          value={brl(balance)}
-          period={period}
-          tone={balance >= 0 ? "positive" : "negative"}
-          note={incomeTotal > 0 ? `${savingRate}% da renda sobra` : "Sem entradas no mês"}
-        />
-        <Indicator
-          label="Receitas"
-          value={brl(incomeTotal)}
-          period={period}
-          tone="positive"
-          delta={delta(incomeTotal, prevIncome)}
-          upIsGood
-          note={
-            incomePending > 0
-              ? `${brl(incomePending)} ainda a receber`
-              : incomeTotal > 0
-                ? "Tudo recebido"
-                : undefined
-          }
-        />
-        <Indicator
-          label="Despesas"
-          value={brl(expenseTotal)}
-          period={period}
-          tone="negative"
-          delta={delta(expenseTotal, prevExpense)}
-          note={
-            expensePending > 0
-              ? `${brl(expensePending)} ainda a pagar`
-              : expenseTotal > 0
-                ? "Tudo pago"
-                : undefined
-          }
-        />
-        <Indicator
-          label="Metas"
-          value={goalsTarget > 0 ? `${goalsPct}%` : "R$ 0,00"}
-          period={period}
-          tone="positive"
-          note={
-            goalsTarget > 0
-              ? `Você guardou ${brl(goalsSaved)} de ${brl(goalsTarget)}`
-              : "Nenhuma meta criada. Crie a primeira em Metas."
-          }
-          progress={goalsTarget > 0 ? goalsPct : undefined}
-        />
-      </section>
+      <Fragment key={from}>
+        <section
+          aria-label="Indicadores"
+          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          <Indicator
+            index={0}
+            label="Saldo"
+            amount={balance}
+            period={period}
+            tone={balance >= 0 ? "positive" : "negative"}
+            note={incomeTotal > 0 ? `${savingRate}% da renda sobra` : "Sem entradas no mês"}
+          />
+          <Indicator
+            index={1}
+            label="Receitas"
+            amount={incomeTotal}
+            period={period}
+            tone="positive"
+            delta={delta(incomeTotal, prevIncome)}
+            upIsGood
+            note={
+              incomePending > 0
+                ? `${brl(incomePending)} ainda a receber`
+                : incomeTotal > 0
+                  ? "Tudo recebido"
+                  : undefined
+            }
+          />
+          <Indicator
+            index={2}
+            label="Despesas"
+            amount={expenseTotal}
+            period={period}
+            tone="negative"
+            delta={delta(expenseTotal, prevExpense)}
+            note={
+              expensePending > 0
+                ? `${brl(expensePending)} ainda a pagar`
+                : expenseTotal > 0
+                  ? "Tudo pago"
+                  : undefined
+            }
+          />
+          <Indicator
+            index={3}
+            label="Metas"
+            {...(goalsTarget > 0 ? { percent: goalsPct } : { amount: 0 })}
+            period={period}
+            tone="positive"
+            note={
+              goalsTarget > 0
+                ? `Você guardou ${brl(goalsSaved)} de ${brl(goalsTarget)}`
+                : "Nenhuma meta criada. Crie a primeira em Metas."
+            }
+            progress={goalsTarget > 0 ? goalsPct : undefined}
+          />
+        </section>
 
-      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        <Card className="animate-rise p-6">
-          <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 className="font-display text-[22px] font-bold leading-7">Entradas x saídas</h2>
-              <p className="text-[12px] leading-4 text-muted-foreground">
-                Últimos 6 meses, até {period}
-              </p>
+        <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+          <Card className="animate-rise p-6" style={{ animationDelay: "320ms" }}>
+            <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="font-display text-[22px] font-bold leading-7">Entradas x saídas</h2>
+                <p className="text-[12px] leading-4 text-muted-foreground">
+                  Últimos 6 meses, até {period}
+                </p>
+              </div>
+              <div className="flex items-center gap-4 text-[13px] font-semibold">
+                <span className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-sm" style={{ background: "var(--chart-1)" }} />
+                  Entrou
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-sm" style={{ background: "var(--chart-2)" }} />
+                  Saiu
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-4 text-[13px] font-semibold">
-              <span className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-sm" style={{ background: "var(--chart-1)" }} />
-                Entrou
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-sm" style={{ background: "var(--chart-2)" }} />
-                Saiu
-              </span>
-            </div>
-          </div>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={series}
-                margin={{ top: 18, right: 4, left: -18, bottom: 0 }}
-                barGap={8}
-              >
-                <CartesianGrid stroke="var(--border)" vertical={false} />
-                <XAxis
-                  dataKey="mes"
-                  tickLine={false}
-                  axisLine={false}
-                  fontSize={12}
-                  stroke="var(--muted-foreground)"
-                />
-                <YAxis
-                  tickFormatter={(v) => brlShort(Number(v))}
-                  tickLine={false}
-                  axisLine={false}
-                  fontSize={12}
-                  stroke="var(--muted-foreground)"
-                  width={62}
-                />
-                <RTooltip
-                  cursor={{ fill: "var(--muted)" }}
-                  contentStyle={{
-                    background: "var(--popover)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    fontSize: 13,
-                    color: "var(--popover-foreground)",
-                  }}
-                  formatter={(v: number | string, n) => [
-                    brl(Number(v)),
-                    n === "entradas" ? "Entrou" : "Saiu",
-                  ]}
-                />
-                <Bar dataKey="entradas" fill="var(--chart-1)" radius={[4, 4, 0, 0]} maxBarSize={28}>
-                  <LabelList
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={series}
+                  margin={{ top: 18, right: 4, left: -18, bottom: 0 }}
+                  barGap={8}
+                >
+                  <CartesianGrid stroke="var(--border)" vertical={false} />
+                  <XAxis
+                    dataKey="mes"
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={12}
+                    stroke="var(--muted-foreground)"
+                  />
+                  <YAxis
+                    tickFormatter={(v) => brlShort(Number(v))}
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={12}
+                    stroke="var(--muted-foreground)"
+                    width={62}
+                  />
+                  <RTooltip
+                    cursor={{ fill: "var(--muted)" }}
+                    contentStyle={{
+                      background: "var(--popover)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      fontSize: 13,
+                      color: "var(--popover-foreground)",
+                    }}
+                    formatter={(v: number | string, n) => [
+                      brl(Number(v)),
+                      n === "entradas" ? "Entrou" : "Saiu",
+                    ]}
+                  />
+                  <Bar
                     dataKey="entradas"
-                    position="top"
-                    formatter={(v: number) => (v > 0 ? brlShort(v) : "")}
-                    fontSize={11}
-                    fill="var(--foreground)"
-                  />
-                </Bar>
-                <Bar dataKey="saidas" fill="var(--chart-2)" radius={[4, 4, 0, 0]} maxBarSize={28}>
-                  <LabelList
+                    fill="var(--chart-1)"
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={28}
+                    animationDuration={900}
+                    animationBegin={250}
+                  >
+                    <LabelList
+                      dataKey="entradas"
+                      position="top"
+                      formatter={(v: number) => (v > 0 ? brlShort(v) : "")}
+                      fontSize={11}
+                      fill="var(--foreground)"
+                    />
+                  </Bar>
+                  <Bar
                     dataKey="saidas"
-                    position="top"
-                    formatter={(v: number) => (v > 0 ? brlShort(v) : "")}
-                    fontSize={11}
-                    fill="var(--foreground)"
-                  />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-
-        <Card className="animate-rise p-6">
-          <div className="mb-6 flex items-start justify-between gap-2">
-            <div>
-              <h2 className="font-display text-[22px] font-bold leading-7">
-                Despesas por categoria
-              </h2>
-              <p className="text-[12px] leading-4 text-muted-foreground">{period}</p>
+                    fill="var(--chart-2)"
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={28}
+                    animationDuration={900}
+                    animationBegin={450}
+                  >
+                    <LabelList
+                      dataKey="saidas"
+                      position="top"
+                      formatter={(v: number) => (v > 0 ? brlShort(v) : "")}
+                      fontSize={11}
+                      fill="var(--foreground)"
+                    />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-            <Link to="/categories" className="hidden shrink-0 sm:block">
-              <Button variant="outline" size="sm">
-                Orçamentos
-              </Button>
-            </Link>
-          </div>
-          {topCategories.length === 0 ? (
-            <p className="py-10 text-center text-[15px] leading-[22px] text-muted-foreground">
-              Nenhuma despesa categorizada neste mês. Adicione um lançamento para ver o resumo.
-            </p>
-          ) : (
-            <ul className="space-y-4">
-              {topCategories.map((c, i) => {
-                const pct = expenseTotal > 0 ? Math.round((c.total / expenseTotal) * 100) : 0;
-                const hasBudget = c.budget !== null && c.budget > 0;
-                const budgetPct = hasBudget ? Math.min(100, (c.total / c.budget!) * 100) : null;
-                const isOver = hasBudget && c.total > c.budget!;
-                return (
-                  <li key={c.name}>
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="truncate text-[15px] font-bold leading-[22px]">
-                        {c.name}
-                      </span>
-                      <span
-                        className={`num shrink-0 text-[14px] leading-5 ${isOver ? "text-negative" : ""}`}
-                      >
-                        {brl(c.total)}
-                      </span>
-                    </div>
-                    <div className="mt-1.5 h-2 w-full overflow-hidden rounded-lg bg-muted">
-                      <div
-                        className="animate-grow-x h-full rounded-lg"
-                        style={{
-                          width: `${hasBudget ? budgetPct : pct}%`,
-                          background: isOver
-                            ? "var(--negative)"
-                            : i === 0
-                              ? "var(--signal)"
-                              : "var(--chart-1)",
-                        }}
-                      />
-                    </div>
-                    <p
-                      className={`mt-1 text-[12px] leading-4 ${isOver ? "font-semibold text-negative" : "text-muted-foreground"}`}
-                    >
-                      {isOver
-                        ? `▲ Você gastou ${brl(c.total - c.budget!)} a mais que o previsto em ${c.name}.`
-                        : hasBudget
-                          ? `▼ Dentro do previsto: ${brl(c.budget!)}`
-                          : `${pct}% das despesas`}
-                    </p>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </Card>
-      </div>
+          </Card>
 
-      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        <Card className="animate-rise p-6">
-          <div className="mb-4 flex items-start justify-between gap-3">
-            <div>
-              <h2 className="font-display text-[22px] font-bold leading-7">Contas a pagar</h2>
-              <p className="text-[12px] leading-4 text-muted-foreground">{period}</p>
-            </div>
-            <Link to="/transactions">
-              <Button variant="outline" size="sm">
-                Ver todas
-              </Button>
-            </Link>
-          </div>
-
-          {isLoading ? (
-            <div className="space-y-2 py-2">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-12 animate-pulse rounded-lg bg-muted" />
-              ))}
-            </div>
-          ) : expense.length === 0 ? (
-            <div className="py-10 text-center">
-              <p className="text-[15px] leading-[22px] text-muted-foreground">
-                Nenhum lançamento neste mês. Adicione o primeiro para ver o resumo.
-              </p>
-              <Link to="/transactions" className="mt-4 inline-block">
-                <Button size="sm" variant="outline">
-                  Adicionar lançamento
+          <Card className="animate-rise p-6" style={{ animationDelay: "400ms" }}>
+            <div className="mb-6 flex items-start justify-between gap-2">
+              <div>
+                <h2 className="font-display text-[22px] font-bold leading-7">
+                  Despesas por categoria
+                </h2>
+                <p className="text-[12px] leading-4 text-muted-foreground">{period}</p>
+              </div>
+              <Link to="/categories" className="hidden shrink-0 sm:block">
+                <Button variant="outline" size="sm">
+                  Orçamentos
                 </Button>
               </Link>
             </div>
-          ) : unpaidExpense.length === 0 ? (
-            <div className="flex items-center gap-3 rounded-lg bg-[var(--success-subtle)] px-4 py-4">
-              <CheckCircle2 className="h-5 w-5 shrink-0 text-positive" />
-              <div className="min-w-0">
-                <p className="text-[15px] font-bold leading-[22px]">Tudo pago neste mês</p>
-                <p className="text-[12px] leading-4 text-muted-foreground">
-                  {paidExpense.length} {paidExpense.length === 1 ? "conta paga" : "contas pagas"}:{" "}
-                  {brl(paidExpenseTotal)}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <>
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-border text-[13px] font-semibold leading-[18px] tracking-[0.2px] text-muted-foreground">
-                    <th className="w-8 py-2 pr-2">
-                      <span className="sr-only">Pago</span>
-                    </th>
-                    <th className="w-full py-2 pr-2">Conta</th>
-                    <th className="hidden py-2 pr-2 sm:table-cell">Vencimento</th>
-                    <th className="py-2 text-right">Valor</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {checklistItems.map((t) => {
-                    const days = differenceInCalendarDays(
-                      new Date(t.due_date + "T00:00:00"),
-                      today,
-                    );
-                    const isOverdue = days < 0;
-                    const soon = days >= 0 && days <= 7;
-                    return (
-                      <tr key={t.id} className="hover:bg-muted">
-                        <td className="py-3 pr-2">
-                          <input
-                            type="checkbox"
-                            aria-label={`Marcar ${t.description} como paga`}
-                            checked={false}
-                            onChange={(e) =>
-                              togglePaid.mutate({ id: t.id, paid: e.target.checked })
-                            }
-                            className="h-5 w-5 cursor-pointer rounded-sm accent-[var(--brand)]"
-                          />
-                        </td>
-                        <td className="max-w-0 py-3 pr-2">
-                          <p className="truncate text-[15px] font-bold leading-[22px]">
-                            {t.description}
-                          </p>
-                          <p
-                            className={`text-[12px] leading-4 sm:hidden ${isOverdue ? "font-semibold text-negative" : soon ? "font-semibold text-attention" : "text-muted-foreground"}`}
-                          >
-                            {dueLabel(days)}
-                          </p>
-                        </td>
-                        <td className="hidden py-3 pr-2 sm:table-cell">
-                          <span
-                            className={`inline-flex items-center whitespace-nowrap rounded-full border px-3 py-0.5 text-[12px] leading-4 ${
-                              isOverdue
-                                ? "border-negative font-semibold text-negative"
-                                : soon
-                                  ? "border-attention font-semibold text-attention"
-                                  : "border-border text-muted-foreground"
-                            }`}
-                          >
-                            {days > 7
-                              ? format(new Date(t.due_date + "T00:00:00"), "dd/MM/yyyy")
-                              : dueLabel(days)}
-                          </span>
-                        </td>
-                        <td className="num py-3 text-right text-[14px] leading-5">
-                          {brl(Number(t.amount))}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              {hiddenUnpaidCount > 0 && (
-                <Link
-                  to="/transactions"
-                  className="mt-2 block py-2 text-center text-[13px] font-semibold text-primary hover:underline"
-                >
-                  Ver mais {hiddenUnpaidCount}{" "}
-                  {hiddenUnpaidCount === 1 ? "conta a pagar" : "contas a pagar"}
-                </Link>
-              )}
-              {paidExpense.length > 0 && (
-                <p className="mt-2 flex items-center gap-2 border-t border-border pt-3 text-[12px] leading-4 text-muted-foreground">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-positive" />
-                  {paidExpense.length} {paidExpense.length === 1 ? "conta paga" : "contas pagas"}:{" "}
-                  {brl(paidExpenseTotal)} ({paidRatio}% do mês)
-                </p>
-              )}
-            </>
-          )}
-        </Card>
-
-        <Card className="animate-rise p-6">
-          <h2 className="font-display text-[22px] font-bold leading-7">Resumo</h2>
-          <p className="mb-4 text-[12px] leading-4 text-muted-foreground">{period}</p>
-          {alerts.length > 0 && (
-            <div className="mb-4 rounded-lg border border-attention p-3">
-              <p className="flex items-center gap-2 text-[13px] font-semibold leading-[18px] text-attention">
-                <BellRing className="h-4 w-4" />
-                {overdue > 0
-                  ? `${overdue} ${overdue === 1 ? "conta vencida" : "contas vencidas"}`
-                  : "Vencimentos próximos"}
+            {topCategories.length === 0 ? (
+              <p className="py-10 text-center text-[15px] leading-[22px] text-muted-foreground">
+                Nenhuma despesa categorizada neste mês. Adicione um lançamento para ver o resumo.
               </p>
-              <ul className="mt-2 space-y-1">
-                {alerts.slice(0, 3).map((t) => {
-                  const days = differenceInCalendarDays(new Date(t.due_date + "T00:00:00"), today);
+            ) : (
+              <ul className="space-y-4">
+                {topCategories.map((c, i) => {
+                  const pct = expenseTotal > 0 ? Math.round((c.total / expenseTotal) * 100) : 0;
+                  const hasBudget = c.budget !== null && c.budget > 0;
+                  const budgetPct = hasBudget ? Math.min(100, (c.total / c.budget!) * 100) : null;
+                  const isOver = hasBudget && c.total > c.budget!;
                   return (
-                    <li key={t.id} className="text-[15px] leading-[22px]">
-                      {t.description}: {dueLabel(days).toLowerCase()},{" "}
-                      <span className="num text-[14px]">{brl(Number(t.amount))}</span>.
+                    <li key={c.name}>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="truncate text-[15px] font-bold leading-[22px]">
+                          {c.name}
+                        </span>
+                        <span
+                          className={`num shrink-0 text-[14px] leading-5 ${isOver ? "text-negative" : ""}`}
+                        >
+                          {brl(c.total)}
+                        </span>
+                      </div>
+                      <div className="mt-1.5 h-2 w-full overflow-hidden rounded-lg bg-muted">
+                        <div
+                          className="animate-grow-x h-full rounded-lg"
+                          style={{
+                            animationDelay: `${350 + i * 90}ms`,
+                            width: `${hasBudget ? budgetPct : pct}%`,
+                            background: isOver
+                              ? "var(--negative)"
+                              : i === 0
+                                ? "var(--signal)"
+                                : "var(--chart-1)",
+                          }}
+                        />
+                      </div>
+                      <p
+                        className={`mt-1 text-[12px] leading-4 ${isOver ? "font-semibold text-negative" : "text-muted-foreground"}`}
+                      >
+                        {isOver
+                          ? `▲ Você gastou ${brl(c.total - c.budget!)} a mais que o previsto em ${c.name}.`
+                          : hasBudget
+                            ? `▼ Dentro do previsto: ${brl(c.budget!)}`
+                            : `${pct}% das despesas`}
+                      </p>
                     </li>
                   );
                 })}
               </ul>
+            )}
+          </Card>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+          <Card className="animate-rise p-6" style={{ animationDelay: "480ms" }}>
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <h2 className="font-display text-[22px] font-bold leading-7">Contas a pagar</h2>
+                <p className="text-[12px] leading-4 text-muted-foreground">{period}</p>
+              </div>
+              <Link to="/transactions">
+                <Button variant="outline" size="sm">
+                  Ver todas
+                </Button>
+              </Link>
             </div>
-          )}
-          <ul className="space-y-3">
-            {topInsights.map((ins, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-[15px] leading-[22px]">
-                <span
-                  className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${insightToneDot[ins.tone]}`}
-                />
-                <span className="min-w-0">{ins.text}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-6 space-y-2">
-            <div className="flex items-center justify-between text-[13px] font-semibold leading-[18px]">
-              <span>Contas pagas no mês</span>
-              <span className="num text-[14px]">{paidRatio}%</span>
+
+            {isLoading ? (
+              <div className="space-y-2 py-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="h-12 animate-pulse rounded-lg bg-muted" />
+                ))}
+              </div>
+            ) : expense.length === 0 ? (
+              <div className="py-10 text-center">
+                <p className="text-[15px] leading-[22px] text-muted-foreground">
+                  Nenhum lançamento neste mês. Adicione o primeiro para ver o resumo.
+                </p>
+                <Link to="/transactions" className="mt-4 inline-block">
+                  <Button size="sm" variant="outline">
+                    Adicionar lançamento
+                  </Button>
+                </Link>
+              </div>
+            ) : unpaidExpense.length === 0 ? (
+              <div className="flex items-center gap-3 rounded-lg bg-[var(--success-subtle)] px-4 py-4">
+                <CheckCircle2 className="h-5 w-5 shrink-0 text-positive" />
+                <div className="min-w-0">
+                  <p className="text-[15px] font-bold leading-[22px]">Tudo pago neste mês</p>
+                  <p className="text-[12px] leading-4 text-muted-foreground">
+                    {paidExpense.length} {paidExpense.length === 1 ? "conta paga" : "contas pagas"}:{" "}
+                    {brl(paidExpenseTotal)}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-border text-[13px] font-semibold leading-[18px] tracking-[0.2px] text-muted-foreground">
+                      <th className="w-8 py-2 pr-2">
+                        <span className="sr-only">Pago</span>
+                      </th>
+                      <th className="w-full py-2 pr-2">Conta</th>
+                      <th className="hidden py-2 pr-2 sm:table-cell">Vencimento</th>
+                      <th className="py-2 text-right">Valor</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {checklistItems.map((t, ri) => {
+                      const days = differenceInCalendarDays(
+                        new Date(t.due_date + "T00:00:00"),
+                        today,
+                      );
+                      const isOverdue = days < 0;
+                      const soon = days >= 0 && days <= 7;
+                      return (
+                        <tr
+                          key={t.id}
+                          className="animate-fade-in transition-colors hover:bg-muted"
+                          style={{ animationDelay: `${560 + ri * 70}ms` }}
+                        >
+                          <td className="py-3 pr-2">
+                            <input
+                              type="checkbox"
+                              aria-label={`Marcar ${t.description} como paga`}
+                              checked={false}
+                              onChange={(e) =>
+                                togglePaid.mutate({ id: t.id, paid: e.target.checked })
+                              }
+                              className="h-5 w-5 cursor-pointer rounded-sm accent-[var(--brand)]"
+                            />
+                          </td>
+                          <td className="max-w-0 py-3 pr-2">
+                            <p className="truncate text-[15px] font-bold leading-[22px]">
+                              {t.description}
+                            </p>
+                            <p
+                              className={`text-[12px] leading-4 sm:hidden ${isOverdue ? "font-semibold text-negative" : soon ? "font-semibold text-attention" : "text-muted-foreground"}`}
+                            >
+                              {dueLabel(days)}
+                            </p>
+                          </td>
+                          <td className="hidden py-3 pr-2 sm:table-cell">
+                            <span
+                              className={`inline-flex items-center whitespace-nowrap rounded-full border px-3 py-0.5 text-[12px] leading-4 ${
+                                isOverdue
+                                  ? "border-negative font-semibold text-negative"
+                                  : soon
+                                    ? "border-attention font-semibold text-attention"
+                                    : "border-border text-muted-foreground"
+                              }`}
+                            >
+                              {days > 7
+                                ? format(new Date(t.due_date + "T00:00:00"), "dd/MM/yyyy")
+                                : dueLabel(days)}
+                            </span>
+                          </td>
+                          <td className="num py-3 text-right text-[14px] leading-5">
+                            {brl(Number(t.amount))}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                {hiddenUnpaidCount > 0 && (
+                  <Link
+                    to="/transactions"
+                    className="mt-2 block py-2 text-center text-[13px] font-semibold text-primary hover:underline"
+                  >
+                    Ver mais {hiddenUnpaidCount}{" "}
+                    {hiddenUnpaidCount === 1 ? "conta a pagar" : "contas a pagar"}
+                  </Link>
+                )}
+                {paidExpense.length > 0 && (
+                  <p className="mt-2 flex items-center gap-2 border-t border-border pt-3 text-[12px] leading-4 text-muted-foreground">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-positive" />
+                    {paidExpense.length} {paidExpense.length === 1 ? "conta paga" : "contas pagas"}:{" "}
+                    {brl(paidExpenseTotal)} ({paidRatio}% do mês)
+                  </p>
+                )}
+              </>
+            )}
+          </Card>
+
+          <Card className="animate-rise p-6" style={{ animationDelay: "560ms" }}>
+            <h2 className="font-display text-[22px] font-bold leading-7">Resumo</h2>
+            <p className="mb-4 text-[12px] leading-4 text-muted-foreground">{period}</p>
+            {alerts.length > 0 && (
+              <div className="mb-4 rounded-lg border border-attention p-3">
+                <p className="flex items-center gap-2 text-[13px] font-semibold leading-[18px] text-attention">
+                  <BellRing className="h-4 w-4" />
+                  {overdue > 0
+                    ? `${overdue} ${overdue === 1 ? "conta vencida" : "contas vencidas"}`
+                    : "Vencimentos próximos"}
+                </p>
+                <ul className="mt-2 space-y-1">
+                  {alerts.slice(0, 3).map((t) => {
+                    const days = differenceInCalendarDays(
+                      new Date(t.due_date + "T00:00:00"),
+                      today,
+                    );
+                    return (
+                      <li key={t.id} className="text-[15px] leading-[22px]">
+                        {t.description}: {dueLabel(days).toLowerCase()},{" "}
+                        <span className="num text-[14px]">{brl(Number(t.amount))}</span>.
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+            <ul className="space-y-3">
+              {topInsights.map((ins, i) => (
+                <li
+                  key={i}
+                  className="animate-rise flex items-start gap-2.5 text-[15px] leading-[22px]"
+                  style={{ animationDelay: `${700 + i * 90}ms` }}
+                >
+                  <span
+                    className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${insightToneDot[ins.tone]}`}
+                  />
+                  <span className="min-w-0">{ins.text}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-6 space-y-2">
+              <div className="flex items-center justify-between text-[13px] font-semibold leading-[18px]">
+                <span>Contas pagas no mês</span>
+                <span className="num text-[14px]">{paidRatio}%</span>
+              </div>
+              <Progress value={paidRatio} className="h-2" />
             </div>
-            <Progress value={paidRatio} className="h-2" />
-          </div>
-        </Card>
-      </div>
+          </Card>
+        </div>
+      </Fragment>
     </div>
   );
 }
 
 function Indicator({
   label,
-  value,
+  amount,
+  percent,
+  index = 0,
   period,
   tone,
   delta,
@@ -778,7 +813,9 @@ function Indicator({
   progress,
 }: {
   label: string;
-  value: string;
+  amount?: number;
+  percent?: number;
+  index?: number;
   period: string;
   tone: "positive" | "negative";
   delta?: number | null;
@@ -788,8 +825,15 @@ function Indicator({
 }) {
   const up = (delta ?? 0) > 0;
   const good = upIsGood ? up : !up;
+  const shownAmount = useAnimatedNumber(amount ?? 0);
+  const shownPercent = useAnimatedNumber(percent ?? 0);
+  const shownProgress = useAnimatedNumber(progress ?? 0, 1100);
+  const value = percent !== undefined ? `${Math.round(shownPercent)}%` : brl(shownAmount);
   return (
-    <Card className="animate-rise p-6">
+    <Card
+      className="animate-rise p-6 hover:-translate-y-0.5 hover:shadow-[var(--shadow-product)]"
+      style={{ animationDelay: `${index * 90}ms` }}
+    >
       <p className="text-[13px] font-semibold leading-[18px] tracking-[0.2px] text-muted-foreground">
         {label}
       </p>
@@ -808,7 +852,7 @@ function Indicator({
       {delta !== null && delta !== undefined && delta !== 0 && note && (
         <p className="mt-1 text-[12px] leading-4 text-muted-foreground">{note}</p>
       )}
-      {progress !== undefined && <Progress value={progress} className="mt-3 h-2" />}
+      {progress !== undefined && <Progress value={shownProgress} className="mt-3 h-2" />}
       <p className="mt-3 text-[12px] leading-4 text-muted-foreground">{period}</p>
     </Card>
   );
