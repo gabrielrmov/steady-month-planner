@@ -207,7 +207,7 @@ function TransactionsPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar por descrição, categoria ou cartão..."
-          className="pl-9 pr-9 transition-shadow focus-visible:shadow-[0_0_0_3px_color-mix(in_oklab,var(--primary)_18%,transparent)]"
+          className="pl-9 pr-9 "
         />
         {query && (
           <button
@@ -343,7 +343,7 @@ function TxList({
               type="checkbox"
               checked={paid}
               onChange={(e) => onToggle({ id: t.id, paid: e.target.checked })}
-              className="mt-1 h-5 w-5 shrink-0 cursor-pointer rounded border-border accent-[oklch(0.55_0.22_260)] transition-transform active:scale-90 sm:mt-0"
+              className="mt-1 h-5 w-5 shrink-0 cursor-pointer rounded border-border accent-[var(--brand)] transition-transform active:scale-90 sm:mt-0"
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">

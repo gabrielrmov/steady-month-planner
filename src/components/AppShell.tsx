@@ -158,7 +158,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           let itemIndex = 0;
           return groups.map((group) => (
             <div key={group.title} className="space-y-1">
-              <h3 className="px-3 font-mono text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+              <h3 className="px-3 text-[13px] font-semibold leading-[18px] tracking-[0.2px] text-muted-foreground">
                 {group.title}
               </h3>
               {group.items.map((item) => {

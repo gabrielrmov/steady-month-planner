@@ -93,7 +93,7 @@ export function QuickAdd() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Novo lançamento"
-        className={cn("fixed bottom-20 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-2xl text-primary-foreground shadow-[var(--shadow-elegant)] ring-4 ring-background transition-all duration-200 hover:scale-105 active:scale-95 sm:h-14 sm:w-14 md:bottom-8 md:right-8", hidden && "pointer-events-none translate-y-24 opacity-0")}
+        className={cn("fixed bottom-20 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-2xl text-primary-foreground border border-primary transition-all duration-200 hover:scale-105 active:scale-95 sm:h-14 sm:w-14 md:bottom-8 md:right-8", hidden && "pointer-events-none translate-y-24 opacity-0")}
         style={{ background: "var(--gradient-primary)" }}
       >
         <Plus className="h-6 w-6" />

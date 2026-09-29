@@ -31,11 +31,11 @@ const goals = [
 ];
 
 const defaultCategories = [
-  { name: "Moradia", color: "#2563EB", kind: "expense" },
-  { name: "Alimentação", color: "#10B981", kind: "expense" },
-  { name: "Transporte", color: "#F59E0B", kind: "expense" },
-  { name: "Lazer", color: "#EC4899", kind: "expense" },
-  { name: "Salário", color: "#059669", kind: "income" },
+  { name: "Moradia", color: "#0b6e5f", kind: "expense" },
+  { name: "Alimentação", color: "#0a6c86", kind: "expense" },
+  { name: "Transporte", color: "#f2b01e", kind: "expense" },
+  { name: "Lazer", color: "#3a7a6b", kind: "expense" },
+  { name: "Salário", color: "#0b3b33", kind: "income" },
 ];
 
 function OnboardingPage() {

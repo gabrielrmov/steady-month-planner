@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/cards")({
   component: CardsPage,
 });
 
-const COLORS = ["#2563EB", "#10B981", "#F59E0B", "#EC4899", "#8B5CF6", "#EF4444", "#059669", "#111827"];
+const COLORS = ["#0b6e5f", "#0b3b33", "#0a6c86", "#f2b01e", "#b3261e", "#3a7a6b", "#4a5f59", "#8a5a00"];
 
 const FREE_CARD_LIMIT = 2;
 

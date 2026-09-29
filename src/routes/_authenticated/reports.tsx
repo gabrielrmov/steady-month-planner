@@ -287,7 +287,7 @@ function ReportsPage() {
             >
               <TrendingUp className="h-4 w-4" />
             </div>
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            <p className="text-[13px] font-semibold leading-[18px] tracking-[0.2px] text-muted-foreground">
               Insights automáticos
             </p>
           </div>
