@@ -389,13 +389,15 @@ function DarkFeature({
   panel: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] md:gap-16">
-      <div>
+    <div className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] md:gap-16">
+      <div className="min-w-0">
         <h3 className="text-[20px] font-medium leading-[26px] text-white">{title}</h3>
         <p className="mt-2 max-w-sm text-[14px] leading-[22px] text-[#a9b6bd]">{desc}</p>
         {code}
       </div>
-      <div className="rounded-lg border border-white/10 bg-white/[0.03] p-6 md:p-8">{panel}</div>
+      <div className="min-w-0 rounded-lg border border-white/10 bg-white/[0.03] p-6 md:p-8">
+        {panel}
+      </div>
     </div>
   );
 }
