@@ -569,7 +569,7 @@ function Dashboard() {
                           background: isOver
                             ? "var(--negative)"
                             : i === 0
-                              ? "var(--accent)"
+                              ? "var(--signal)"
                               : "var(--chart-1)",
                         }}
                       />

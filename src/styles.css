@@ -10,11 +10,13 @@
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --shadow-2xs: none;
   --shadow-xs: none;
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-lg: none;
-  --shadow-xl: none;
-  --shadow-2xl: none;
+  --shadow-sm: var(--shadow-card);
+  --shadow-md: 0 8px 16px rgba(17, 26, 74, 0.05), 0 4px 8px rgba(17, 26, 74, 0.05);
+  --shadow-lg: 0 12px 24px rgba(17, 26, 74, 0.08), 0 4px 8px rgba(17, 26, 74, 0.05);
+  --shadow-xl: var(--shadow-product);
+  --shadow-2xl: var(--shadow-widget);
+  --color-signal: var(--signal);
+  --color-on-signal: var(--on-signal);
   --color-brand: var(--brand);
   --color-on-brand: var(--on-brand);
   --color-brand-deep: var(--brand-deep);
@@ -67,141 +69,160 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Paleta inspirada na Column: azul-marinho como ação principal, tinta */
-/* quase preta, cinzas frios e bordas finas. Cartões brancos separados */
-/* por borda de 1px, sem sombra e sem degradê. Tema escuro via .dark.  */
+/* Padrão visual da Column (DESIGN.md): azul-marinho #111a4a como cor  */
+/* de marca e de texto, fundo #f6f6f8 com cartões brancos, seafoam     */
+/* para dados, laranja só em uma superfície por página, raio de 8px.   */
+/* Tema escuro via .dark, sobre o Midnight Ink #011821.                */
 /* ------------------------------------------------------------------ */
 :root {
-  --radius: 0.5rem; /* 8px; lg = 12px via escala */
+  --radius: 0.5rem;
 
   --brand: #111a4a;
   --on-brand: #ffffff;
   --brand-deep: #080b32;
+  --signal: #ec652b;
+  --on-signal: #12161e;
   --on-accent: #12161e;
   --tint: #d4e3f7;
   --border-strong: #7c7f88;
-  --positive: #0c6997;
+  --positive: #167e6c;
   --negative: #a41742;
   --attention: #a84400;
 
-  --background: #ffffff;
-  --foreground: #12161e;
+  --background: #f6f6f8;
+  --foreground: #111a4a;
   --card: #ffffff;
-  --card-foreground: #12161e;
+  --card-foreground: #111a4a;
   --popover: #ffffff;
-  --popover-foreground: #12161e;
+  --popover-foreground: #111a4a;
   --primary: #111a4a;
   --primary-foreground: #ffffff;
   --secondary: #eeeff2;
-  --secondary-foreground: #12161e;
-  --muted: #f6f6f8;
+  --secondary-foreground: #111a4a;
+  --muted: #eeeff2;
   --muted-foreground: #575a64;
-  --accent: #eef4fb;
-  --accent-foreground: #12161e;
+  --accent: #eeeff2;
+  --accent-foreground: #111a4a;
   --destructive: #a41742;
   --destructive-foreground: #ffffff;
-  --success: #0c6997;
+  --success: #167e6c;
   --success-foreground: #ffffff;
   --warning: #a84400;
   --warning-foreground: #ffffff;
   --border: #e3e4e8;
   --input: #cfd0d8;
-  --ring: #1e4199;
+  --ring: #111a4a;
   --sidebar: #ffffff;
-  --sidebar-foreground: #12161e;
+  --sidebar-foreground: #111a4a;
   --sidebar-primary: #111a4a;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eef4fb;
-  --sidebar-accent-foreground: #12161e;
+  --sidebar-accent: #eeeff2;
+  --sidebar-accent-foreground: #111a4a;
   --sidebar-border: #e3e4e8;
-  --sidebar-ring: #1e4199;
+  --sidebar-ring: #111a4a;
 
   --cta: #111a4a;
   --cta-foreground: #ffffff;
 
-  --chart-1: #1e4199;
-  --chart-2: #71d2f0;
-  --chart-3: #d4e3f7;
-  --chart-4: #f2b01e;
-  --chart-5: #0c6997;
+  --chart-1: #167e6c;
+  --chart-2: #111a4a;
+  --chart-3: #88deeb;
+  --chart-4: #ec652b;
+  --chart-5: #1e4199;
   --chart-6: #a41742;
 
-  --success-subtle: #eaf3f8;
+  --success-subtle: #e6f3ef;
   --warning-subtle: #fbeee3;
   --destructive-subtle: #f9e6ec;
-  --primary-subtle: #eef4fb;
+  --primary-subtle: #eeeff2;
 
   --gradient-primary: var(--primary);
   --gradient-subtle: var(--card);
   --gradient-success: var(--success);
 
-  --shadow-card: none;
-  --shadow-elegant: none;
+  /* Sombras da Column: cartão com hairline, botão, produto e widget flutuante. */
+  --shadow-card:
+    rgba(18, 22, 30, 0.024) 0 1px 4px 0, rgba(18, 22, 30, 0.05) 0 1px 0 0,
+    rgba(18, 22, 30, 0.024) 0 0 0 1px;
+  --shadow-btn:
+    rgba(17, 26, 74, 0.1) 0 1px 3px 0, rgba(17, 26, 74, 0.05) 0 1px 0 0,
+    rgba(255, 255, 255, 0.5) 0 1px 0 0 inset, rgba(255, 255, 255, 0.5) 0 1px 4px 0 inset;
+  --shadow-product:
+    rgba(0, 0, 0, 0.02) 0 40px 32px 0, rgba(0, 0, 0, 0.03) 0 22px 18px 0,
+    rgba(0, 0, 0, 0.03) 0 12px 10px 0, rgba(0, 0, 0, 0.04) 0 7px 5px 0,
+    rgba(0, 0, 0, 0.07) 0 3px 2px 0;
+  --shadow-widget: rgba(30, 30, 44, 0.15) 24px 48px 64px 0, rgb(255, 255, 255) 0 0 0 1px inset;
+  --shadow-elegant: var(--shadow-card);
   --shadow-glow: none;
   --shadow-glow-accent: none;
-  --shimmer-highlight: rgba(18, 22, 30, 0.05);
+  --shimmer-highlight: rgba(17, 26, 74, 0.05);
 }
 
 .dark {
-  --brand: #7ea7e9;
-  --on-brand: #080b32;
-  --brand-deep: #111a4a;
+  --brand: #88deeb;
+  --on-brand: #011821;
+  --brand-deep: #04212d;
+  --signal: #ec652b;
+  --on-signal: #12161e;
   --on-accent: #12161e;
-  --tint: #1e4199;
-  --border-strong: #7c86c4;
-  --positive: #71d2f0;
+  --tint: #143a4a;
+  --border-strong: #6d8794;
+  --positive: #94efb7;
   --negative: #ff8fa8;
   --attention: #f4df69;
 
-  --background: #080b32;
+  --background: #011821;
   --foreground: #eeeff2;
-  --card: #0f1546;
+  --card: #062633;
   --card-foreground: #eeeff2;
-  --popover: #0f1546;
+  --popover: #062633;
   --popover-foreground: #eeeff2;
-  --primary: #7ea7e9;
-  --primary-foreground: #080b32;
-  --secondary: #1b2560;
+  --primary: #ffffff;
+  --primary-foreground: #111a4a;
+  --secondary: #0c3242;
   --secondary-foreground: #eeeff2;
-  --muted: #0d1240;
-  --muted-foreground: #a9acb6;
-  --accent: #1b2560;
+  --muted: #04202b;
+  --muted-foreground: #a9b6bd;
+  --accent: #0c3242;
   --accent-foreground: #eeeff2;
   --destructive: #ff8fa8;
-  --destructive-foreground: #080b32;
-  --success: #71d2f0;
-  --success-foreground: #080b32;
+  --destructive-foreground: #011821;
+  --success: #94efb7;
+  --success-foreground: #011821;
   --warning: #f4df69;
-  --warning-foreground: #080b32;
-  --border: #27306b;
-  --input: #3a4485;
-  --ring: #7ea7e9;
-  --sidebar: #0a0e38;
+  --warning-foreground: #011821;
+  --border: #143a4a;
+  --input: #275566;
+  --ring: #88deeb;
+  --sidebar: #01141b;
   --sidebar-foreground: #eeeff2;
-  --sidebar-primary: #7ea7e9;
-  --sidebar-primary-foreground: #080b32;
-  --sidebar-accent: #1b2560;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #111a4a;
+  --sidebar-accent: #0c3242;
   --sidebar-accent-foreground: #eeeff2;
-  --sidebar-border: #27306b;
-  --sidebar-ring: #7ea7e9;
+  --sidebar-border: #143a4a;
+  --sidebar-ring: #88deeb;
 
-  --cta: #7ea7e9;
-  --cta-foreground: #080b32;
+  --cta: #ffffff;
+  --cta-foreground: #111a4a;
 
-  --chart-1: #7ea7e9;
-  --chart-2: #71d2f0;
-  --chart-3: #1e4199;
-  --chart-4: #f2b01e;
-  --chart-5: #c4d6f2;
+  --chart-1: #44b48b;
+  --chart-2: #88deeb;
+  --chart-3: #275566;
+  --chart-4: #ec652b;
+  --chart-5: #7ea7e9;
   --chart-6: #ff8fa8;
 
-  --success-subtle: rgba(113, 210, 240, 0.14);
-  --warning-subtle: rgba(244, 223, 105, 0.14);
-  --destructive-subtle: rgba(255, 143, 168, 0.14);
-  --primary-subtle: rgba(126, 167, 233, 0.14);
+  --success-subtle: rgba(148, 239, 183, 0.12);
+  --warning-subtle: rgba(244, 223, 105, 0.12);
+  --destructive-subtle: rgba(255, 143, 168, 0.12);
+  --primary-subtle: rgba(136, 222, 235, 0.1);
 
-  --shadow-card: none;
-  --shadow-elegant: none;
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.03);
+  --shadow-btn: none;
+  --shadow-product: 0 24px 48px rgba(0, 0, 0, 0.35);
+  --shadow-widget: 0 24px 48px rgba(0, 0, 0, 0.45);
+  --shadow-elegant: var(--shadow-card);
   --shimmer-highlight: rgba(255, 255, 255, 0.05);
 }
 
@@ -374,7 +395,6 @@ component's own variant. */
 
   /* Todo número de dinheiro: mono, tabular, alinhado à direita em tabelas. */
   .num {
-    font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     font-weight: 500;
   }

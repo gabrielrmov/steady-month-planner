@@ -11,18 +11,18 @@ const buttonVariants = cva(
       variant: {
         /* The primary action is ink (near-black on light, white on dark); the
          blue accent stays reserved for links, active states and data. */
-        default: "bg-[var(--cta)] text-[var(--cta-foreground)] hover:bg-[var(--cta)]/90",
+        default: "bg-[var(--cta)] text-[var(--cta-foreground)] shadow-[var(--shadow-btn)] hover:bg-[var(--cta)]/90",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-input bg-card shadow-[var(--shadow-card)] hover:bg-accent hover:text-accent-foreground",
+          "border border-primary bg-transparent text-primary hover:bg-primary/5",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 px-4 py-2",
+        default: "h-10 px-5 py-2",
         sm: "h-8 rounded-lg px-3 text-xs",
-        lg: "h-11 rounded-lg px-6 text-[15px]",
+        lg: "h-11 rounded-lg px-6 text-sm",
         icon: "h-9 w-9",
       },
     },

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
@@ -240,9 +240,63 @@ const cases = [
 /* Building blocks                                                     */
 /* ------------------------------------------------------------------ */
 
-function ExampleTag() {
+function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <span className="rounded-sm border border-border-strong px-2 py-0.5 text-[12px] leading-4 text-ink-muted">
+    <p className="flex items-center gap-2 text-[12px] font-medium uppercase leading-[18px] tracking-[0.08em] text-primary">
+      <span className="h-1.5 w-1.5 rounded-full bg-[var(--chart-1)]" aria-hidden />
+      {children}
+    </p>
+  );
+}
+
+/** Campo de pontos em espectro, no espírito do mapa em meio-tom da Column. Decorativo. */
+function HalftoneField() {
+  const dots = useMemo(() => {
+    const cols = 64;
+    const rows = 34;
+    const stops = ["#d65620", "#9f7aee", "#4575cd", "#71d2f0", "#44b48b", "#f4df69"];
+    const out: { x: number; y: number; r: number; c: string; o: number }[] = [];
+    for (let i = 0; i < cols; i++) {
+      for (let j = 0; j < rows; j++) {
+        const nx = i / (cols - 1);
+        const ny = j / (rows - 1);
+        const land =
+          Math.sin(nx * 9 + 0.6) * Math.cos(ny * 7 - 0.4) +
+          0.55 * Math.sin(nx * 21 + ny * 5) * Math.cos(ny * 13);
+        if (land < 0.05) continue;
+        const fade =
+          Math.min(1, nx * 3.2) * Math.min(1, (1 - ny) * 2.4) * Math.min(1, ny * 4 + 0.35);
+        const t = nx * (stops.length - 1);
+        out.push({
+          x: i * 10 + 5,
+          y: j * 10 + 5,
+          r: Math.min(3.2, 0.7 + land * 1.6),
+          c: stops[Math.min(stops.length - 1, Math.round(t))],
+          o: 0.16 + 0.6 * fade,
+        });
+      }
+    }
+    return out;
+  }, []);
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 640 340"
+      preserveAspectRatio="xMaxYMid slice"
+      className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[62%] [mask-image:linear-gradient(to_right,transparent,black_45%)] lg:block"
+    >
+      {dots.map((d, i) => (
+        <circle key={i} cx={d.x} cy={d.y} r={d.r} fill={d.c} opacity={d.o} />
+      ))}
+    </svg>
+  );
+}
+
+function ExampleTag({ className = "" }: { className?: string }) {
+  return (
+    <span
+      className={`rounded-sm border border-border-strong px-2 py-0.5 text-[12px] leading-4 text-ink-muted ${className}`}
+    >
       Exemplo ilustrativo
     </span>
   );
@@ -274,16 +328,20 @@ function LedgerPanel({
   rows,
   title = "Lançamentos",
   period = "Setembro de 2026",
+  float = false,
 }: {
   rows: Row[];
   title?: string;
   period?: string;
+  float?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card">
+    <div
+      className={`rounded-lg bg-card ${float ? "shadow-[var(--shadow-widget)]" : "shadow-[var(--shadow-product)]"}`}
+    >
       <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
         <div>
-          <p className="font-display text-[18px] font-bold leading-6">{title}</p>
+          <p className="font-display text-[18px] font-semibold leading-6">{title}</p>
           <p className="text-[12px] leading-4 text-ink-muted">{period}</p>
         </div>
         <ExampleTag />
@@ -317,7 +375,7 @@ function Section({
 }) {
   return (
     <section id={id} className={`scroll-mt-20 px-6 py-20 md:py-28 ${className}`}>
-      <div className="mx-auto max-w-6xl">{children}</div>
+      <div className="mx-auto max-w-[1200px]">{children}</div>
     </section>
   );
 }
@@ -325,12 +383,8 @@ function Section({
 function Heading({ eyebrow, title, desc }: { eyebrow?: string; title: string; desc?: string }) {
   return (
     <div className="max-w-2xl">
-      {eyebrow && (
-        <p className="text-[13px] font-semibold leading-[18px] tracking-[0.2px] text-primary">
-          {eyebrow}
-        </p>
-      )}
-      <h2 className="mt-2 text-balance font-display text-[32px] font-bold leading-[38px] tracking-[-0.5px] md:text-[40px] md:leading-[46px]">
+      {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+      <h2 className="mt-2 text-balance font-display text-[32px] font-semibold leading-[38px] tracking-[-0.02em] md:text-[40px] md:leading-[46px]">
         {title}
       </h2>
       {desc && <p className="mt-4 text-[17px] leading-[26px] text-ink-muted">{desc}</p>}
@@ -356,10 +410,8 @@ function FeatureRow({
   return (
     <div className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
       <div className={flip ? "md:order-2" : ""}>
-        <p className="text-[13px] font-semibold leading-[18px] tracking-[0.2px] text-primary">
-          {eyebrow}
-        </p>
-        <h3 className="mt-2 text-balance font-display text-[28px] font-bold leading-[34px] tracking-[-0.5px] md:text-[32px] md:leading-[38px]">
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <h3 className="mt-2 text-balance font-display text-[28px] font-semibold leading-[34px] tracking-[-0.02em] md:text-[32px] md:leading-[38px]">
           {title}
         </h3>
         <p className="mt-4 text-[15px] leading-[22px] text-ink-muted">{desc}</p>
@@ -385,9 +437,9 @@ function BillsVisual() {
     { n: "Energia", d: "Vence 25/09/2026", c: 24350 },
   ];
   return (
-    <div className="rounded-xl border border-border bg-card">
+    <div className="rounded-lg bg-card shadow-[var(--shadow-product)]">
       <div className="flex items-center justify-between border-b border-border px-5 py-4">
-        <p className="font-display text-[18px] font-bold leading-6">Contas a pagar</p>
+        <p className="font-display text-[18px] font-semibold leading-6">Contas a pagar</p>
         <ExampleTag />
       </div>
       <ul className="divide-y divide-border">
@@ -419,33 +471,31 @@ function BillsVisual() {
 function GoalVisual() {
   const pct = 40;
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <div className="rounded-lg bg-signal p-6 text-on-signal shadow-[var(--shadow-product)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[13px] font-semibold leading-[18px] tracking-[0.2px] text-ink-muted">
+          <p className="text-[13px] font-semibold leading-[18px] tracking-[0.2px]">
             Meta de economia
           </p>
           <p className="num mt-2 text-[32px] leading-[40px] md:text-[40px] md:leading-[44px]">
             {brl(80000)}
           </p>
-          <p className="text-[14px] leading-5 text-ink-muted">
-            de {brl(200000)} · Setembro de 2026
-          </p>
+          <p className="text-[14px] leading-5">de {brl(200000)} · Setembro de 2026</p>
         </div>
-        <ExampleTag />
+        <ExampleTag className="!border-on-signal !text-on-signal" />
       </div>
       <div
-        className="mt-6 h-3 w-full overflow-hidden rounded-lg bg-muted"
+        className="mt-6 h-3 w-full overflow-hidden rounded-lg bg-white/50"
         role="progressbar"
         aria-valuenow={pct}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label="Progresso da meta"
       >
-        <div className="h-full rounded-lg bg-primary" style={{ width: `${pct}%` }} />
+        <div className="h-full rounded-lg bg-[#111a4a]" style={{ width: `${pct}%` }} />
       </div>
       <p className="mt-2 text-[14px] leading-5">
-        <span className="num text-positive">▲ {pct}%</span> da meta. Faltam {brl(120000)} para
+        <span className="num font-semibold">▲ {pct}%</span> da meta. Faltam {brl(120000)} para
         fechar o mês.
       </p>
     </div>
@@ -463,10 +513,10 @@ function ChartVisual() {
   ];
   const max = 7000;
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <div className="rounded-lg bg-card p-6 shadow-[var(--shadow-product)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-display text-[18px] font-bold leading-6">Entradas x saídas</p>
+          <p className="font-display text-[18px] font-semibold leading-6">Entradas x saídas</p>
           <p className="text-[12px] leading-4 text-ink-muted">Abril a setembro de 2026</p>
         </div>
         <ExampleTag />
@@ -518,8 +568,8 @@ function Landing() {
         </a>
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-border bg-background">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-6">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex h-[62px] max-w-[1200px] items-center justify-between gap-4 px-6">
           <Link to="/" aria-label="FINLIST">
             <Logo />
           </Link>
@@ -548,13 +598,14 @@ function Landing() {
 
       <main>
         {/* Herói */}
-        <section className="px-6 pb-16 pt-14 md:pb-24 md:pt-20">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-16">
+        <section className="relative overflow-hidden px-6 pb-20 pt-14 md:pb-28 md:pt-24">
+          <HalftoneField />
+          <div className="relative mx-auto grid max-w-[1200px] items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
             <div>
-              <p className="inline-block rounded-full border border-border-strong px-3 py-1 text-[13px] font-semibold leading-[18px] text-ink-muted">
+              <p className="inline-block rounded-full border border-white bg-white/80 px-3 py-1 text-[12px] font-medium leading-[18px] text-foreground backdrop-blur-sm">
                 30 dias grátis · sem cartão de crédito
               </p>
-              <h1 className="mt-6 text-balance font-display text-[40px] font-bold leading-[1.02] tracking-[-1px] sm:text-[56px] sm:leading-[56px]">
+              <h1 className="mt-6 text-balance font-display text-[40px] font-semibold leading-[1.1] tracking-[-0.03em] sm:text-[52px]">
                 Seu dinheiro, em ordem.
               </h1>
               <p className="mt-6 max-w-lg text-[17px] leading-[26px] text-ink-muted">
@@ -575,23 +626,20 @@ function Landing() {
                 </a>
               </div>
             </div>
-            <LedgerPanel rows={sampleRows} />
+            <LedgerPanel rows={sampleRows} float />
           </div>
         </section>
 
         {/* Faixa de fatos */}
-        <section
-          aria-label="FINLIST em números"
-          className="border-y border-border bg-muted px-6 py-12"
-        >
-          <dl className="mx-auto grid max-w-6xl grid-cols-2 gap-8 lg:grid-cols-4">
+        <section aria-label="FINLIST em números" className="px-6 pb-16 pt-4">
+          <dl className="mx-auto grid max-w-[1200px] grid-cols-2 gap-x-8 gap-y-12 lg:grid-cols-4">
             {facts.map((f) => (
               <div key={f.label}>
                 <dt className="sr-only">{f.label}</dt>
-                <dd className="num text-[24px] leading-8 sm:text-[32px] sm:leading-[40px]">
+                <dd className="text-[28px] font-medium leading-[1.1] tracking-[-0.01em] text-positive">
                   {f.value}
                 </dd>
-                <p className="mt-1 text-[14px] leading-5 text-ink-muted">{f.label}</p>
+                <p className="mt-2 text-[14px] leading-5 text-ink-muted">{f.label}</p>
               </div>
             ))}
           </dl>
@@ -624,16 +672,16 @@ function Landing() {
             </div>
             <div
               role="tabpanel"
-              className="mt-6 grid gap-8 rounded-xl border border-border bg-card p-6 md:grid-cols-2 md:p-10"
+              className="mt-6 grid gap-8 rounded-lg bg-card p-6 shadow-[var(--shadow-product)] md:grid-cols-2 md:p-10"
             >
               <div>
                 <p className="text-[12px] leading-4 text-ink-muted">{c.who}</p>
-                <h3 className="mt-3 text-balance font-display text-[28px] font-bold leading-[34px] tracking-[-0.5px]">
+                <h3 className="mt-3 text-balance font-display text-[28px] font-semibold leading-[34px] tracking-[-0.02em]">
                   {c.title}
                 </h3>
                 <p className="mt-4 text-[15px] leading-[22px] text-ink-muted">{c.body}</p>
               </div>
-              <div className="rounded-lg border border-border bg-background p-5">
+              <div className="rounded-lg border border-border bg-muted p-5">
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-[13px] font-semibold leading-[18px] tracking-[0.2px] text-ink-muted">
                     Setembro de 2026
@@ -655,7 +703,7 @@ function Landing() {
         </Section>
 
         {/* Recursos: blocos alternados */}
-        <Section id="recursos" className="border-t border-border bg-muted">
+        <Section id="recursos" className="bg-card">
           <Heading
             eyebrow="Recursos"
             title="Tudo do mês em uma lista só."
@@ -734,9 +782,12 @@ function Landing() {
           <Heading eyebrow="E ainda" title="Menos digitação, mais clareza." />
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {moreFeatures.map((f) => (
-              <div key={f.title} className="rounded-xl border border-border bg-card p-6">
+              <div
+                key={f.title}
+                className="rounded-lg border border-border bg-card p-6 shadow-[var(--shadow-card)]"
+              >
                 <f.icon className="h-6 w-6 text-primary" strokeWidth={2} aria-hidden />
-                <h3 className="mt-4 font-display text-[22px] font-bold leading-7">{f.title}</h3>
+                <h3 className="mt-4 font-display text-[22px] font-semibold leading-7">{f.title}</h3>
                 <p className="mt-2 text-[15px] leading-[22px] text-ink-muted">{f.desc}</p>
               </div>
             ))}
@@ -744,13 +795,18 @@ function Landing() {
         </Section>
 
         {/* Como funciona */}
-        <Section id="como-funciona" className="border-t border-border bg-muted">
+        <Section id="como-funciona" className="bg-card">
           <Heading eyebrow="Como funciona" title="Três passos, todo mês." />
           <ol className="mt-12 grid gap-6 md:grid-cols-3">
             {steps.map((st, i) => (
-              <li key={st.title} className="rounded-xl border border-border bg-background p-6">
+              <li
+                key={st.title}
+                className="rounded-lg border border-border bg-card p-6 shadow-[var(--shadow-card)]"
+              >
                 <span className="num text-[18px] leading-6 text-primary">0{i + 1}</span>
-                <h3 className="mt-3 font-display text-[22px] font-bold leading-7">{st.title}</h3>
+                <h3 className="mt-3 font-display text-[22px] font-semibold leading-7">
+                  {st.title}
+                </h3>
                 <p className="mt-2 text-[15px] leading-[22px] text-ink-muted">{st.desc}</p>
               </li>
             ))}
@@ -768,16 +824,16 @@ function Landing() {
             {plans.map((p) => (
               <div
                 key={p.name}
-                className={`relative flex flex-col rounded-xl border bg-card p-7 md:p-8 ${
+                className={`relative flex flex-col rounded-lg border bg-card p-7 shadow-[var(--shadow-card)] md:p-8 ${
                   p.highlight ? "border-2 border-primary" : "border-border"
                 }`}
               >
                 {p.highlight && (
-                  <span className="absolute -top-3 left-7 rounded-full bg-accent px-3 py-1 text-[12px] font-semibold leading-4 text-on-accent">
+                  <span className="absolute -top-3 left-7 rounded-full bg-primary px-3 py-1 text-[12px] font-medium leading-4 text-primary-foreground">
                     Mais completo
                   </span>
                 )}
-                <p className="font-display text-[22px] font-bold leading-7">{p.name}</p>
+                <p className="font-display text-[22px] font-semibold leading-7">{p.name}</p>
                 <p className="mt-1 text-[15px] leading-[22px] text-ink-muted">{p.desc}</p>
                 <p className="mt-6 flex items-baseline gap-1.5">
                   <span className="text-[14px] text-ink-muted">R$</span>
@@ -811,14 +867,14 @@ function Landing() {
         </Section>
 
         {/* Dúvidas */}
-        <Section id="faq" className="border-t border-border">
+        <Section id="faq" className="bg-card">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-16">
             <Heading
               eyebrow="Dúvidas"
               title="Perguntas frequentes"
               desc="Não encontrou o que procurava? Escreva para contato@finlist.app."
             />
-            <div className="divide-y divide-border rounded-xl border border-border bg-card">
+            <div className="divide-y divide-border rounded-lg border border-border bg-background shadow-[var(--shadow-card)]">
               {faqs.map((f) => (
                 <details
                   key={f.q}
@@ -840,8 +896,8 @@ function Landing() {
 
         {/* Chamada final */}
         <section className="px-6 pb-20">
-          <div className="mx-auto max-w-6xl rounded-xl bg-brand-deep px-8 py-16 text-center text-on-brand md:px-16 md:py-20">
-            <h2 className="mx-auto max-w-3xl text-balance font-display text-[32px] font-bold leading-[38px] tracking-[-0.5px] md:text-[40px] md:leading-[46px]">
+          <div className="mx-auto max-w-[1200px] rounded-lg bg-brand-deep px-8 py-16 text-center text-on-brand md:px-16 md:py-20">
+            <h2 className="mx-auto max-w-3xl text-balance font-display text-[32px] font-semibold leading-[38px] tracking-[-0.02em] md:text-[40px] md:leading-[46px]">
               Comece o próximo mês sabendo quanto vai sobrar.
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-[17px] leading-[26px] opacity-80">
@@ -859,7 +915,7 @@ function Landing() {
       </main>
 
       <footer className="border-t border-border px-6 py-14">
-        <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div className="mx-auto grid max-w-[1200px] gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <Logo />
             <p className="mt-4 max-w-xs text-[14px] leading-5 text-ink-muted">
@@ -889,7 +945,7 @@ function Landing() {
             ]}
           />
         </div>
-        <p className="mx-auto mt-10 max-w-6xl text-[12px] leading-4 text-ink-muted">
+        <p className="mx-auto mt-10 max-w-[1200px] text-[12px] leading-4 text-ink-muted">
           © {new Date().getFullYear()} FINLIST. Valores e nomes de exemplo nesta página são
           ilustrativos.
         </p>

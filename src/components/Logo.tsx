@@ -12,7 +12,7 @@ export function LogoMark({ className }: { className?: string }) {
       <rect width="64" height="64" rx="16" fill="var(--brand)" />
       <rect x="17" y="15" width="8" height="34" rx="4" fill="var(--on-brand)" />
       <rect x="17" y="15" width="30" height="8" rx="4" fill="var(--on-brand)" />
-      <rect x="17" y="28" width="22" height="8" rx="4" fill="#f2b01e" />
+      <rect x="17" y="28" width="22" height="8" rx="4" fill="#ec652b" />
     </svg>
   );
 }
