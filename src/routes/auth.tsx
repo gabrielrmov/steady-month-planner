@@ -1,3 +1,4 @@
+import { Logo, LogoMark } from "@/components/Logo";
 import { createFileRoute, useNavigate, Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,13 +10,13 @@ import { Wallet } from "lucide-react";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar | Finlist" },
+      { title: "Entrar | FINLIST" },
       {
         name: "description",
-        content: "Acesse o Finlist para organizar contas a pagar, receber, cartões e parcelas do mês.",
+        content: "Acesse o FINLIST para organizar contas a pagar, receber, cartões e parcelas do mês.",
       },
-      { property: "og:title", content: "Entrar | Finlist" },
-      { property: "og:description", content: "Acesse o Finlist e organize suas contas do mês." },
+      { property: "og:title", content: "Entrar | FINLIST" },
+      { property: "og:description", content: "Acesse o FINLIST e organize suas contas do mês." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://steady-month-planner.dsggabriel7.workers.dev/auth" },
       { name: "twitter:card", content: "summary" },
@@ -88,20 +89,14 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-sm">
-        <Link to="/" className="mb-8 flex items-center justify-center gap-2">
-          <div
-            className="flex h-9 w-9 items-center justify-center rounded-lg"
-            style={{ background: "var(--gradient-primary)" }}
-          >
-            <Wallet className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-semibold tracking-tight text-foreground">Finlist</span>
+        <Link to="/" className="mb-8 flex items-center justify-center" aria-label="FINLIST">
+          <Logo />
         </Link>
 
         <Card className="border-border/60 bg-card p-6">
           <div className="mb-6 text-center">
             <h1 className="font-display text-lg font-semibold text-foreground">
-              {isProIntent ? "Criar conta e assinar o Pro" : "Entrar no Finlist"}
+              {isProIntent ? "Criar conta e assinar o Pro" : "Entrar no FINLIST"}
             </h1>
             <p className="mt-1.5 text-sm text-muted-foreground">
               Use sua conta Google para entrar ou criar sua conta em segundos.

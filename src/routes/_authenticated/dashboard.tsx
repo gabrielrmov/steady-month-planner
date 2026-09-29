@@ -33,9 +33,10 @@ import { Link } from "@tanstack/react-router";
 import { ensureRecurringForMonth } from "@/lib/automation";
 import { toast } from "sonner";
 import {
-  Area,
-  AreaChart,
+  Bar,
+  BarChart,
   CartesianGrid,
+  LabelList,
   ResponsiveContainer,
   Tooltip as RTooltip,
   XAxis,
@@ -45,10 +46,16 @@ import {
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard financeiro | Finlist" },
-      { name: "description", content: "Visão geral do mês: quanto entra, quanto sai e o checklist de contas a pagar." },
-      { property: "og:title", content: "Dashboard financeiro | Finlist" },
-      { property: "og:description", content: "Visão geral do mês: quanto entra, quanto sai e o checklist de contas a pagar." },
+      { title: "Dashboard financeiro | FINLIST" },
+      {
+        name: "description",
+        content: "Visão geral do mês: quanto entra, quanto sai e o checklist de contas a pagar.",
+      },
+      { property: "og:title", content: "Dashboard financeiro | FINLIST" },
+      {
+        property: "og:description",
+        content: "Visão geral do mês: quanto entra, quanto sai e o checklist de contas a pagar.",
+      },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex" },
     ],
@@ -57,6 +64,10 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const monthLabel = (d: Date) => {
+  const t = format(d, "MMMM 'de' yyyy", { locale: ptBR });
+  return t.charAt(0).toUpperCase() + t.slice(1);
+};
 const brlShort = (v: number) =>
   Math.abs(v) >= 1000 ? `R$ ${(v / 1000).toFixed(1).replace(".", ",")}k` : `R$ ${v.toFixed(0)}`;
 
@@ -98,7 +109,9 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("transactions")
-        .select("id, description, amount, type, status, due_date, category_id, categories(name, color)")
+        .select(
+          "id, description, amount, type, status, due_date, category_id, categories(name, color)",
+        )
         .gte("due_date", historyFrom)
         .lte("due_date", to)
         .order("due_date");
@@ -110,14 +123,41 @@ function Dashboard() {
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("categories").select("id, name, color, monthly_budget");
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, name, color, monthly_budget");
       if (error) throw error;
       return (data ?? []) as CategoryBudget[];
     },
   });
-  const budgetById = useMemo(() => new Map(categories.map((c) => [c.id, c.monthly_budget])), [categories]);
+  const { data: goals = [] } = useQuery({
+    queryKey: ["savings-goals"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("savings_goals")
+        .select("id, name, target_amount, current_amount");
+      if (error) throw error;
+      return (data ?? []) as {
+        id: string;
+        name: string;
+        target_amount: number;
+        current_amount: number;
+      }[];
+    },
+  });
+  const goalsSaved = goals.reduce((s, g) => s + Number(g.current_amount), 0);
+  const goalsTarget = goals.reduce((s, g) => s + Number(g.target_amount), 0);
+  const goalsPct =
+    goalsTarget > 0 ? Math.min(100, Math.round((goalsSaved / goalsTarget) * 100)) : 0;
+  const budgetById = useMemo(
+    () => new Map(categories.map((c) => [c.id, c.monthly_budget])),
+    [categories],
+  );
 
-  const txs = useMemo(() => rows.filter((t) => t.due_date >= from && t.due_date <= to), [rows, from, to]);
+  const txs = useMemo(
+    () => rows.filter((t) => t.due_date >= from && t.due_date <= to),
+    [rows, from, to],
+  );
 
   const togglePaid = useMutation({
     mutationFn: async ({ id, paid }: { id: string; paid: boolean }) => {
@@ -137,9 +177,13 @@ function Dashboard() {
   const expense = txs.filter((t) => t.type === "expense");
   const incomeTotal = income.reduce((s, t) => s + Number(t.amount), 0);
   const expenseTotal = expense.reduce((s, t) => s + Number(t.amount), 0);
-  const expensePaid = expense.filter((t) => t.status === "paid").reduce((s, t) => s + Number(t.amount), 0);
+  const expensePaid = expense
+    .filter((t) => t.status === "paid")
+    .reduce((s, t) => s + Number(t.amount), 0);
   const expensePending = expenseTotal - expensePaid;
-  const incomePaid = income.filter((t) => t.status === "paid").reduce((s, t) => s + Number(t.amount), 0);
+  const incomePaid = income
+    .filter((t) => t.status === "paid")
+    .reduce((s, t) => s + Number(t.amount), 0);
   const incomePending = incomeTotal - incomePaid;
   const balance = incomeTotal - expenseTotal;
 
@@ -162,8 +206,12 @@ function Dashboard() {
   const prevFrom = format(startOfMonth(subMonths(month, 1)), "yyyy-MM-dd");
   const prevTo = format(endOfMonth(subMonths(month, 1)), "yyyy-MM-dd");
   const prev = rows.filter((t) => t.due_date >= prevFrom && t.due_date <= prevTo);
-  const prevIncome = prev.filter((t) => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
-  const prevExpense = prev.filter((t) => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
+  const prevIncome = prev
+    .filter((t) => t.type === "income")
+    .reduce((s, t) => s + Number(t.amount), 0);
+  const prevExpense = prev
+    .filter((t) => t.type === "expense")
+    .reduce((s, t) => s + Number(t.amount), 0);
   const delta = (cur: number, before: number) =>
     before > 0 ? Math.round(((cur - before) / before) * 100) : null;
 
@@ -174,15 +222,27 @@ function Dashboard() {
       const a = format(startOfMonth(m), "yyyy-MM-dd");
       const b = format(endOfMonth(m), "yyyy-MM-dd");
       const slice = rows.filter((t) => t.due_date >= a && t.due_date <= b);
-      const inc = slice.filter((t) => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
-      const exp = slice.filter((t) => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
-      return { mes: format(m, "MMM", { locale: ptBR }), entradas: inc, saidas: exp, saldo: inc - exp };
+      const inc = slice
+        .filter((t) => t.type === "income")
+        .reduce((s, t) => s + Number(t.amount), 0);
+      const exp = slice
+        .filter((t) => t.type === "expense")
+        .reduce((s, t) => s + Number(t.amount), 0);
+      return {
+        mes: format(m, "MMM", { locale: ptBR }),
+        entradas: inc,
+        saidas: exp,
+        saldo: inc - exp,
+      };
     });
   }, [rows, month]);
 
   // top categorias do mês (com orçamento, quando definido)
   const topCategories = useMemo(() => {
-    const map = new Map<string, { name: string; color: string; total: number; budget: number | null }>();
+    const map = new Map<
+      string,
+      { name: string; color: string; total: number; budget: number | null }
+    >();
     for (const t of expense) {
       const key = t.category_id ?? "none";
       const name = t.categories?.name ?? "Sem categoria";
@@ -199,7 +259,8 @@ function Dashboard() {
 
   const today = new Date(new Date().toDateString());
   const overdueList = txs.filter(
-    (t) => t.status === "pending" && t.type === "expense" && new Date(t.due_date + "T00:00:00") < today,
+    (t) =>
+      t.status === "pending" && t.type === "expense" && new Date(t.due_date + "T00:00:00") < today,
   );
   const overdue = overdueList.length;
   const upcoming = txs
@@ -213,8 +274,10 @@ function Dashboard() {
 
   const biggest = [...expense].sort((a, b) => Number(b.amount) - Number(a.amount))[0];
 
-  const prevSavingRate = prevIncome > 0 ? Math.round(((prevIncome - prevExpense) / prevIncome) * 100) : null;
-  const savingRateDelta = prevSavingRate !== null && incomeTotal > 0 ? savingRate - prevSavingRate : null;
+  const prevSavingRate =
+    prevIncome > 0 ? Math.round(((prevIncome - prevExpense) / prevIncome) * 100) : null;
+  const savingRateDelta =
+    prevSavingRate !== null && incomeTotal > 0 ? savingRate - prevSavingRate : null;
 
   type Insight = { text: string; tone: "destructive" | "warning" | "success" | "primary" };
   const insights: Insight[] = [];
@@ -257,7 +320,9 @@ function Dashboard() {
   if (topCategories[0]) {
     insights.push({
       text: `${topCategories[0].name} é seu maior gasto do mês (${brl(topCategories[0].total)}${
-        expenseTotal ? `, ${Math.round((topCategories[0].total / expenseTotal) * 100)}% do total` : ""
+        expenseTotal
+          ? `, ${Math.round((topCategories[0].total / expenseTotal) * 100)}% do total`
+          : ""
       }).`,
       tone: "primary",
     });
@@ -269,7 +334,10 @@ function Dashboard() {
     });
   }
   if (insights.length === 0) {
-    insights.push({ text: "Cadastre suas contas do mês para ver insights personalizados.", tone: "primary" });
+    insights.push({
+      text: "Cadastre suas contas do mês para ver insights personalizados.",
+      tone: "primary",
+    });
   }
   const topInsights = insights.slice(0, 3);
   const insightToneDot: Record<Insight["tone"], string> = {
@@ -279,441 +347,474 @@ function Dashboard() {
     primary: "bg-primary",
   };
 
+  const period = monthLabel(month);
+  const dueLabel = (days: number) =>
+    days < 0
+      ? `Venceu há ${Math.abs(days)} ${Math.abs(days) === 1 ? "dia" : "dias"}`
+      : days === 0
+        ? "Vence hoje"
+        : `Vence em ${days} ${days === 1 ? "dia" : "dias"}`;
+
   return (
-    <div className="mx-auto max-w-6xl space-y-5">
-      <div className="animate-rise space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
+    <div className="mx-auto max-w-6xl space-y-8">
+      <div className="animate-rise flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="font-display truncate text-[28px] font-semibold sm:text-[34px]">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Visão geral do mês</p>
+          <h1 className="font-display truncate text-[28px] font-bold leading-[1.2] sm:text-[32px] sm:leading-[38px]">
+            Visão geral do mês
+          </h1>
+          <p className="text-[12px] leading-4 text-muted-foreground">{period}</p>
         </div>
-        <div className="flex items-center justify-between gap-1 rounded-lg border border-border bg-card p-1 sm:justify-start sm:gap-2">
-          <Button variant="ghost" size="icon" onClick={() => setMonth(subMonths(month, 1))}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="min-w-0 flex-1 truncate text-center text-sm font-medium capitalize sm:min-w-32 sm:flex-none">
-            {format(month, "MMMM 'de' yyyy", { locale: ptBR })}
-          </span>
-          <Button variant="ghost" size="icon" onClick={() => setMonth(addMonths(month, 1))}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
-        <StatCard
-          label="Entradas previstas"
-          value={brl(incomeTotal)}
-          icon={ArrowUpCircle}
-          tone="success"
-          delta={delta(incomeTotal, prevIncome)}
-          deltaGoodWhenUp
-          delayMs={0}
-          size="lg"
-        />
-        <StatCard
-          label="Saídas previstas"
-          value={brl(expenseTotal)}
-          icon={ArrowDownCircle}
-          tone="destructive"
-          delta={delta(expenseTotal, prevExpense)}
-          delayMs={60}
-          size="lg"
-        />
-        <StatCard
-          label="Saldo previsto"
-          value={brl(balance)}
-          icon={Wallet}
-          tone={balance >= 0 ? "success" : "destructive"}
-          subtitle={incomeTotal > 0 ? `${savingRate}% da renda sobra` : undefined}
-          highlight
-          delayMs={120}
-          size="lg"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <StatCard
-          label="A pagar restante"
-          value={brl(expensePending)}
-          icon={AlertCircle}
-          tone="warning"
-          subtitle={overdue > 0 ? `${overdue} em atraso` : "em dia"}
-          delayMs={180}
-        />
-        <StatCard
-          label="Ainda a receber"
-          value={brl(incomePending)}
-          icon={Clock}
-          tone="warning"
-          subtitle={
-            incomeTotal > 0
-              ? incomePending > 0
-                ? `${Math.round((incomePending / incomeTotal) * 100)}% do previsto`
-                : "tudo recebido"
-              : undefined
-          }
-          delayMs={240}
-        />
-      </div>
-
-      <Card className="animate-rise glow-ring p-5" style={{ animationDelay: "300ms" }}>
-        <div className="flex flex-wrap items-center gap-3">
-          <div
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-primary-foreground"
-            style={{ background: "var(--gradient-primary)" }}
-          >
-            <Sparkles className="h-4 w-4" />
-          </div>
-          <p className="font-mono text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
-            Insights do mês
-          </p>
-        </div>
-        <ul className="mt-3 space-y-2">
-          {topInsights.map((ins, i) => (
-            <li
-              key={i}
-              className="animate-rise flex items-start gap-2.5 text-sm text-foreground"
-              style={{ animationDelay: `${360 + i * 60}ms` }}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 rounded-lg border border-border-strong bg-card p-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Mês anterior"
+              onClick={() => setMonth(subMonths(month, 1))}
             >
-              <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${insightToneDot[ins.tone]}`} />
-              <span className="min-w-0">{ins.text}</span>
-            </li>
-          ))}
-        </ul>
-        <div className="mt-4 space-y-2">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Progresso de pagamento</span>
-            <span className="font-medium text-foreground">{paidRatio}%</span>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="min-w-36 text-center text-[13px] font-semibold">{period}</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Próximo mês"
+              onClick={() => setMonth(addMonths(month, 1))}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
-          <Progress value={paidRatio} className="h-2" />
+          <Link to="/transactions">
+            <Button>Adicionar lançamento</Button>
+          </Link>
         </div>
-      </Card>
+      </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
-        <Card className="animate-rise p-5" style={{ animationDelay: "360ms" }}>
-          <div className="mb-4 flex items-center justify-between gap-3">
+      <section
+        aria-label="Indicadores"
+        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+      >
+        <Indicator
+          label="Saldo"
+          value={brl(balance)}
+          period={period}
+          tone={balance >= 0 ? "positive" : "negative"}
+          note={incomeTotal > 0 ? `${savingRate}% da renda sobra` : "Sem entradas no mês"}
+        />
+        <Indicator
+          label="Receitas"
+          value={brl(incomeTotal)}
+          period={period}
+          tone="positive"
+          delta={delta(incomeTotal, prevIncome)}
+          upIsGood
+          note={
+            incomePending > 0
+              ? `${brl(incomePending)} ainda a receber`
+              : incomeTotal > 0
+                ? "Tudo recebido"
+                : undefined
+          }
+        />
+        <Indicator
+          label="Despesas"
+          value={brl(expenseTotal)}
+          period={period}
+          tone="negative"
+          delta={delta(expenseTotal, prevExpense)}
+          note={
+            expensePending > 0
+              ? `${brl(expensePending)} ainda a pagar`
+              : expenseTotal > 0
+                ? "Tudo pago"
+                : undefined
+          }
+        />
+        <Indicator
+          label="Metas"
+          value={goalsTarget > 0 ? `${goalsPct}%` : "R$ 0,00"}
+          period={period}
+          tone="positive"
+          note={
+            goalsTarget > 0
+              ? `Você guardou ${brl(goalsSaved)} de ${brl(goalsTarget)}`
+              : "Nenhuma meta criada. Crie a primeira em Metas."
+          }
+          progress={goalsTarget > 0 ? goalsPct : undefined}
+        />
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+        <Card className="animate-rise p-6">
+          <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="font-bold tracking-tight">Fluxo dos últimos 6 meses</h2>
-              <p className="text-xs text-muted-foreground">Entradas x saídas previstas</p>
+              <h2 className="font-display text-[22px] font-bold leading-7">Entradas x saídas</h2>
+              <p className="text-[12px] leading-4 text-muted-foreground">
+                Últimos 6 meses, até {period}
+              </p>
             </div>
-            <Link to="/reports" className="hidden sm:block">
-              <Button variant="outline" size="sm">Relatórios</Button>
-            </Link>
+            <div className="flex items-center gap-4 text-[13px] font-semibold">
+              <span className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded-sm" style={{ background: "var(--chart-1)" }} />
+                Entrou
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded-sm" style={{ background: "var(--chart-2)" }} />
+                Saiu
+              </span>
+            </div>
           </div>
-          <div className="h-56 w-full">
+          <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={series} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="gIn" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--success)" stopOpacity={0.45} />
-                    <stop offset="100%" stopColor="var(--success)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="gOut" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--destructive)" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="var(--destructive)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="mes" tickLine={false} axisLine={false} fontSize={11} stroke="var(--muted-foreground)" />
+              <BarChart
+                data={series}
+                margin={{ top: 18, right: 4, left: -18, bottom: 0 }}
+                barGap={8}
+              >
+                <CartesianGrid stroke="var(--border)" vertical={false} />
+                <XAxis
+                  dataKey="mes"
+                  tickLine={false}
+                  axisLine={false}
+                  fontSize={12}
+                  stroke="var(--muted-foreground)"
+                />
                 <YAxis
                   tickFormatter={(v) => brlShort(Number(v))}
                   tickLine={false}
                   axisLine={false}
-                  fontSize={11}
+                  fontSize={12}
                   stroke="var(--muted-foreground)"
                   width={62}
                 />
                 <RTooltip
+                  cursor={{ fill: "var(--muted)" }}
                   contentStyle={{
                     background: "var(--popover)",
                     border: "1px solid var(--border)",
-                    borderRadius: 12,
-                    fontSize: 12,
+                    borderRadius: 8,
+                    fontSize: 13,
                     color: "var(--popover-foreground)",
                   }}
-                  formatter={(v: number | string, n) => [brl(Number(v)), n === "entradas" ? "Entradas" : "Saídas"]}
+                  formatter={(v: number | string, n) => [
+                    brl(Number(v)),
+                    n === "entradas" ? "Entrou" : "Saiu",
+                  ]}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="entradas"
-                  stroke="var(--success)"
-                  fill="url(#gIn)"
-                  strokeWidth={2}
-                  animationDuration={900}
-                  animationEasing="ease-out"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="saidas"
-                  stroke="var(--destructive)"
-                  fill="url(#gOut)"
-                  strokeWidth={2}
-                  animationDuration={900}
-                  animationEasing="ease-out"
-                />
-              </AreaChart>
+                <Bar dataKey="entradas" fill="var(--chart-1)" radius={[4, 4, 0, 0]} maxBarSize={28}>
+                  <LabelList
+                    dataKey="entradas"
+                    position="top"
+                    formatter={(v: number) => (v > 0 ? brlShort(v) : "")}
+                    fontSize={11}
+                    fill="var(--foreground)"
+                  />
+                </Bar>
+                <Bar dataKey="saidas" fill="var(--chart-2)" radius={[4, 4, 0, 0]} maxBarSize={28}>
+                  <LabelList
+                    dataKey="saidas"
+                    position="top"
+                    formatter={(v: number) => (v > 0 ? brlShort(v) : "")}
+                    fontSize={11}
+                    fill="var(--foreground)"
+                  />
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </Card>
 
-        <Card className="animate-rise p-5" style={{ animationDelay: "420ms" }}>
-          <div className="mb-4 flex items-center justify-between gap-2">
+        <Card className="animate-rise p-6">
+          <div className="mb-6 flex items-start justify-between gap-2">
             <div>
-              <h2 className="font-bold tracking-tight">Onde o dinheiro foi</h2>
-              <p className="text-xs text-muted-foreground">Top categorias do mês</p>
+              <h2 className="font-display text-[22px] font-bold leading-7">
+                Despesas por categoria
+              </h2>
+              <p className="text-[12px] leading-4 text-muted-foreground">{period}</p>
             </div>
             <Link to="/categories" className="hidden shrink-0 sm:block">
-              <Button variant="outline" size="sm">Orçamentos</Button>
+              <Button variant="outline" size="sm">
+                Orçamentos
+              </Button>
             </Link>
           </div>
           {topCategories.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">Sem gastos categorizados.</p>
+            <p className="py-10 text-center text-[15px] leading-[22px] text-muted-foreground">
+              Nenhuma despesa categorizada neste mês. Adicione um lançamento para ver o resumo.
+            </p>
           ) : (
-            <ul className="space-y-3.5">
+            <ul className="space-y-4">
               {topCategories.map((c, i) => {
                 const pct = expenseTotal > 0 ? Math.round((c.total / expenseTotal) * 100) : 0;
                 const hasBudget = c.budget !== null && c.budget > 0;
                 const budgetPct = hasBudget ? Math.min(100, (c.total / c.budget!) * 100) : null;
                 const isOver = hasBudget && c.total > c.budget!;
                 return (
-                  <li key={c.name} className="animate-rise" style={{ animationDelay: `${480 + i * 50}ms` }}>
-                    <div className="flex items-center justify-between gap-2 text-sm">
-                      <span className="flex min-w-0 items-center gap-2">
-                        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: c.color }} />
-                        <span className="truncate">{c.name}</span>
+                  <li key={c.name}>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="truncate text-[15px] font-bold leading-[22px]">
+                        {c.name}
                       </span>
-                      <span className={`shrink-0 font-semibold tabular-nums ${isOver ? "text-destructive" : ""}`}>
+                      <span
+                        className={`num shrink-0 text-[14px] leading-5 ${isOver ? "text-negative" : ""}`}
+                      >
                         {brl(c.total)}
-                        {hasBudget && <span className="font-normal text-muted-foreground"> / {brl(c.budget!)}</span>}
                       </span>
                     </div>
-                    <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                    <div className="mt-1.5 h-2 w-full overflow-hidden rounded-lg bg-muted">
                       <div
-                        className="animate-grow-x h-full rounded-full transition-[width]"
+                        className="animate-grow-x h-full rounded-lg"
                         style={{
                           width: `${hasBudget ? budgetPct : pct}%`,
-                          background: isOver ? "var(--destructive)" : c.color,
-                          animationDelay: `${520 + i * 50}ms`,
+                          background: isOver
+                            ? "var(--negative)"
+                            : i === 0
+                              ? "var(--accent)"
+                              : "var(--chart-1)",
                         }}
                       />
                     </div>
-                    {isOver && (
-                      <p className="mt-1 text-[11px] text-destructive">
-                        {Math.round(((c.total - c.budget!) / c.budget!) * 100)}% acima do orçamento
-                      </p>
-                    )}
+                    <p
+                      className={`mt-1 text-[12px] leading-4 ${isOver ? "font-semibold text-negative" : "text-muted-foreground"}`}
+                    >
+                      {isOver
+                        ? `▲ Você gastou ${brl(c.total - c.budget!)} a mais que o previsto em ${c.name}.`
+                        : hasBudget
+                          ? `▼ Dentro do previsto: ${brl(c.budget!)}`
+                          : `${pct}% das despesas`}
+                    </p>
                   </li>
                 );
               })}
             </ul>
-          )}
-          {biggest && (
-            <p className="mt-5 flex items-center gap-2 border-t border-border pt-4 text-xs text-muted-foreground">
-              <PiggyBank className="h-3.5 w-3.5 text-primary" />
-              Maior despesa: {biggest.description} · {brl(Number(biggest.amount))}
-            </p>
           )}
         </Card>
       </div>
 
-      {alerts.length > 0 && (
-        <Card className="animate-rise border-warning/40 p-5" style={{ animationDelay: "500ms" }}>
-          <div className="mb-3 flex items-center gap-2">
-            <BellRing className="h-4 w-4 text-warning-foreground" />
-            <h2 className="font-bold tracking-tight">Alertas de vencimento</h2>
-          </div>
-          <ul className="space-y-2">
-            {alerts.slice(0, 6).map((t) => {
-              const days = differenceInCalendarDays(new Date(t.due_date + "T00:00:00"), today);
-              const label =
-                days < 0 ? `Atrasada há ${Math.abs(days)} dia(s)` : days === 0 ? "Vence hoje" : `Vence em ${days} dia(s)`;
-              return (
-                <li key={t.id} className="flex items-center justify-between gap-3 text-sm">
-                  <span className="truncate">{t.description}</span>
-                  <span className="flex shrink-0 items-center gap-3">
-                    <span className={days < 0 ? "text-destructive" : "text-muted-foreground"}>{label}</span>
-                    <span className="font-semibold">{brl(Number(t.amount))}</span>
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </Card>
-      )}
-
-      <Card className="animate-rise p-6" style={{ animationDelay: "560ms" }}>
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h2 className="font-bold tracking-tight">Checklist do mês</h2>
-            <p className="text-sm text-muted-foreground">
-              Marque cada conta conforme o pagamento
-            </p>
-          </div>
-          <Link to="/transactions">
-            <Button size="sm" className="hover-glow">Ver todas</Button>
-          </Link>
-        </div>
-
-        {isLoading ? (
-          <div className="space-y-2 py-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-12 animate-pulse rounded-lg bg-muted/60" />
-            ))}
-          </div>
-        ) : expense.length === 0 ? (
-          <div className="py-10 text-center">
-            <p className="text-sm text-muted-foreground">Nenhuma conta neste mês.</p>
-            <Link to="/transactions" className="mt-3 inline-block">
-              <Button size="sm" variant="outline">Adicionar conta</Button>
+      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+        <Card className="animate-rise p-6">
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h2 className="font-display text-[22px] font-bold leading-7">Contas a pagar</h2>
+              <p className="text-[12px] leading-4 text-muted-foreground">{period}</p>
+            </div>
+            <Link to="/transactions">
+              <Button variant="outline" size="sm">
+                Ver todas
+              </Button>
             </Link>
           </div>
-        ) : unpaidExpense.length === 0 ? (
-          <div className="flex items-center gap-3 rounded-lg bg-[var(--success-subtle)] px-4 py-4">
-            <CheckCircle2 className="h-5 w-5 shrink-0 text-success" />
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-foreground">Tudo pago este mês</p>
-              <p className="text-xs text-muted-foreground">
-                {paidExpense.length} conta(s) quitadas · {brl(paidExpenseTotal)}
-              </p>
+
+          {isLoading ? (
+            <div className="space-y-2 py-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-12 animate-pulse rounded-lg bg-muted" />
+              ))}
             </div>
-          </div>
-        ) : (
-          <>
-            <ul className="divide-y divide-border">
-              {checklistItems.map((t, i) => {
-                const days = differenceInCalendarDays(new Date(t.due_date + "T00:00:00"), today);
-                const isOverdue = days < 0;
-                const isToday = days === 0;
-                const dateLabel = isOverdue
-                  ? `Atrasada há ${Math.abs(days)}d`
-                  : isToday
-                    ? "Vence hoje"
-                    : days <= 6
-                      ? `Vence em ${days}d`
-                      : `Vence ${format(new Date(t.due_date + "T00:00:00"), "dd/MM")}`;
-                return (
-                  <li
-                    key={t.id}
-                    className="animate-rise group -mx-2 flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-muted/40"
-                    style={{ animationDelay: `${620 + i * 40}ms` }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={false}
-                      onChange={(e) => togglePaid.mutate({ id: t.id, paid: e.target.checked })}
-                      className="h-5 w-5 shrink-0 cursor-pointer rounded border-border accent-[oklch(0.55_0.22_260)] transition-transform active:scale-90"
-                    />
-                    <span
-                      className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                        isOverdue ? "bg-destructive" : isToday ? "bg-warning" : "bg-transparent"
-                      }`}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-foreground">{t.description}</p>
-                      <p
-                        className={`text-xs ${
-                          isOverdue
-                            ? "font-medium text-destructive"
-                            : isToday
-                              ? "font-medium text-warning"
-                              : "text-muted-foreground"
-                        }`}
-                      >
-                        {dateLabel}
-                      </p>
-                    </div>
-                    <span className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
-                      {brl(Number(t.amount))}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-
-            {hiddenUnpaidCount > 0 && (
-              <Link
-                to="/transactions"
-                className="mt-1 block px-2 py-2 text-center text-xs font-medium text-primary hover:underline"
-              >
-                + {hiddenUnpaidCount} conta(s) não paga(s)
+          ) : expense.length === 0 ? (
+            <div className="py-10 text-center">
+              <p className="text-[15px] leading-[22px] text-muted-foreground">
+                Nenhum lançamento neste mês. Adicione o primeiro para ver o resumo.
+              </p>
+              <Link to="/transactions" className="mt-4 inline-block">
+                <Button size="sm" variant="outline">
+                  Adicionar lançamento
+                </Button>
               </Link>
-            )}
-
-            {paidExpense.length > 0 && (
-              <div className="mt-3 flex items-center gap-2.5 border-t border-border px-2 pt-3 text-xs text-muted-foreground">
-                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-success" />
-                {paidExpense.length} conta(s) já paga(s) · {brl(paidExpenseTotal)}
+            </div>
+          ) : unpaidExpense.length === 0 ? (
+            <div className="flex items-center gap-3 rounded-lg bg-[var(--success-subtle)] px-4 py-4">
+              <CheckCircle2 className="h-5 w-5 shrink-0 text-positive" />
+              <div className="min-w-0">
+                <p className="text-[15px] font-bold leading-[22px]">Tudo pago neste mês</p>
+                <p className="text-[12px] leading-4 text-muted-foreground">
+                  {paidExpense.length} {paidExpense.length === 1 ? "conta paga" : "contas pagas"}:{" "}
+                  {brl(paidExpenseTotal)}
+                </p>
               </div>
-            )}
-          </>
-        )}
-      </Card>
+            </div>
+          ) : (
+            <>
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-border text-[13px] font-semibold leading-[18px] tracking-[0.2px] text-muted-foreground">
+                    <th className="w-8 py-2 pr-2">
+                      <span className="sr-only">Pago</span>
+                    </th>
+                    <th className="py-2 pr-2">Conta</th>
+                    <th className="hidden py-2 pr-2 sm:table-cell">Vencimento</th>
+                    <th className="py-2 text-right">Valor</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {checklistItems.map((t) => {
+                    const days = differenceInCalendarDays(
+                      new Date(t.due_date + "T00:00:00"),
+                      today,
+                    );
+                    const isOverdue = days < 0;
+                    const soon = days >= 0 && days <= 7;
+                    return (
+                      <tr key={t.id} className="hover:bg-muted">
+                        <td className="py-3 pr-2">
+                          <input
+                            type="checkbox"
+                            aria-label={`Marcar ${t.description} como paga`}
+                            checked={false}
+                            onChange={(e) =>
+                              togglePaid.mutate({ id: t.id, paid: e.target.checked })
+                            }
+                            className="h-5 w-5 cursor-pointer rounded-sm accent-[var(--brand)]"
+                          />
+                        </td>
+                        <td className="max-w-0 py-3 pr-2">
+                          <p className="truncate text-[15px] font-bold leading-[22px]">
+                            {t.description}
+                          </p>
+                          <p
+                            className={`text-[12px] leading-4 sm:hidden ${isOverdue ? "font-semibold text-negative" : soon ? "font-semibold text-attention" : "text-muted-foreground"}`}
+                          >
+                            {dueLabel(days)}
+                          </p>
+                        </td>
+                        <td className="hidden py-3 pr-2 sm:table-cell">
+                          <span
+                            className={`inline-flex items-center rounded-full border px-3 py-0.5 text-[12px] leading-4 ${
+                              isOverdue
+                                ? "border-negative font-semibold text-negative"
+                                : soon
+                                  ? "border-attention font-semibold text-attention"
+                                  : "border-border text-muted-foreground"
+                            }`}
+                          >
+                            {days > 7
+                              ? format(new Date(t.due_date + "T00:00:00"), "dd/MM/yyyy")
+                              : dueLabel(days)}
+                          </span>
+                        </td>
+                        <td className="num py-3 text-right text-[14px] leading-5">
+                          {brl(Number(t.amount))}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {hiddenUnpaidCount > 0 && (
+                <Link
+                  to="/transactions"
+                  className="mt-2 block py-2 text-center text-[13px] font-semibold text-primary hover:underline"
+                >
+                  Ver mais {hiddenUnpaidCount}{" "}
+                  {hiddenUnpaidCount === 1 ? "conta a pagar" : "contas a pagar"}
+                </Link>
+              )}
+              {paidExpense.length > 0 && (
+                <p className="mt-2 flex items-center gap-2 border-t border-border pt-3 text-[12px] leading-4 text-muted-foreground">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-positive" />
+                  {paidExpense.length} {paidExpense.length === 1 ? "conta paga" : "contas pagas"}:{" "}
+                  {brl(paidExpenseTotal)} ({paidRatio}% do mês)
+                </p>
+              )}
+            </>
+          )}
+        </Card>
+
+        <Card className="animate-rise p-6">
+          <h2 className="font-display text-[22px] font-bold leading-7">Resumo</h2>
+          <p className="mb-4 text-[12px] leading-4 text-muted-foreground">{period}</p>
+          {alerts.length > 0 && (
+            <div className="mb-4 rounded-lg border border-attention p-3">
+              <p className="flex items-center gap-2 text-[13px] font-semibold leading-[18px] text-attention">
+                <BellRing className="h-4 w-4" />
+                {overdue > 0
+                  ? `${overdue} ${overdue === 1 ? "conta vencida" : "contas vencidas"}`
+                  : "Vencimentos próximos"}
+              </p>
+              <ul className="mt-2 space-y-1">
+                {alerts.slice(0, 3).map((t) => {
+                  const days = differenceInCalendarDays(new Date(t.due_date + "T00:00:00"), today);
+                  return (
+                    <li key={t.id} className="text-[15px] leading-[22px]">
+                      {t.description}{" "}
+                      {days < 0
+                        ? "venceu"
+                        : days === 0
+                          ? "vence hoje"
+                          : `vence em ${days} ${days === 1 ? "dia" : "dias"}`}
+                      : <span className="num text-[14px]">{brl(Number(t.amount))}</span>.
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+          <ul className="space-y-3">
+            {topInsights.map((ins, i) => (
+              <li key={i} className="flex items-start gap-2.5 text-[15px] leading-[22px]">
+                <span
+                  className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${insightToneDot[ins.tone]}`}
+                />
+                <span className="min-w-0">{ins.text}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-6 space-y-2">
+            <div className="flex items-center justify-between text-[13px] font-semibold leading-[18px]">
+              <span>Contas pagas no mês</span>
+              <span className="num text-[14px]">{paidRatio}%</span>
+            </div>
+            <Progress value={paidRatio} className="h-2" />
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }
 
-function StatCard({
+function Indicator({
   label,
   value,
-  icon: Icon,
+  period,
   tone,
-  subtitle,
   delta,
-  deltaGoodWhenUp,
-  highlight,
-  delayMs,
-  size = "md",
+  upIsGood,
+  note,
+  progress,
 }: {
   label: string;
   value: string;
-  icon: React.ComponentType<{ className?: string }>;
-  tone: "success" | "destructive" | "warning";
-  subtitle?: string;
+  period: string;
+  tone: "positive" | "negative";
   delta?: number | null;
-  deltaGoodWhenUp?: boolean;
-  highlight?: boolean;
-  delayMs?: number;
-  size?: "md" | "lg";
+  upIsGood?: boolean;
+  note?: string;
+  progress?: number;
 }) {
-  const toneClass = {
-    success: "bg-[var(--success-subtle)] text-success",
-    destructive: "bg-[var(--destructive-subtle)] text-destructive",
-    warning: "bg-[var(--warning-subtle)] text-warning",
-  }[tone];
   const up = (delta ?? 0) > 0;
-  const good = deltaGoodWhenUp ? up : !up;
-  const isLg = size === "lg";
+  const good = upIsGood ? up : !up;
   return (
-    <Card
-      className={`animate-rise ${isLg ? "p-5 sm:p-6" : "p-4 sm:p-5"} ${highlight ? "glow-ring" : "hover-lift"}`}
-      style={{ animationDelay: `${delayMs ?? 0}ms` }}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="font-mono text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:text-xs">{label}</p>
-          <p
-            className={`mt-1.5 truncate font-extrabold tracking-tighter sm:mt-2 ${
-              isLg ? "text-2xl sm:text-3xl" : "text-lg sm:text-xl"
-            }`}
-          >
-            {value}
-          </p>
-          {delta !== null && delta !== undefined && delta !== 0 && (
-            <p className={`mt-1.5 flex items-center gap-1 text-xs ${good ? "text-success" : "text-destructive"}`}>
-              {up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-              {Math.abs(delta)}% vs mês anterior
-            </p>
-          )}
-          {subtitle && <p className="mt-1.5 text-xs text-muted-foreground">{subtitle}</p>}
-        </div>
-        <div
-          className={`flex shrink-0 items-center justify-center rounded-lg transition-transform duration-200 hover:scale-110 ${toneClass} ${
-            isLg ? "h-11 w-11 sm:h-12 sm:w-12" : "h-9 w-9 sm:h-10 sm:w-10"
-          }`}
-        >
-          <Icon className={isLg ? "h-5 w-5 sm:h-6 sm:w-6" : "h-4 w-4 sm:h-5 sm:w-5"} />
-        </div>
-      </div>
+    <Card className="animate-rise p-6">
+      <p className="text-[13px] font-semibold leading-[18px] tracking-[0.2px] text-muted-foreground">
+        {label}
+      </p>
+      <p
+        className={`num mt-2 truncate text-[32px] leading-[40px] sm:text-[40px] sm:leading-[44px] ${tone === "negative" && label === "Saldo" ? "text-negative" : ""}`}
+      >
+        {value}
+      </p>
+      {delta !== null && delta !== undefined && delta !== 0 ? (
+        <p className={`num mt-2 text-[14px] leading-5 ${good ? "text-positive" : "text-negative"}`}>
+          {up ? "▲ Acima" : "▼ Abaixo"} {Math.abs(delta)}% do mês anterior
+        </p>
+      ) : (
+        note && <p className="mt-2 text-[14px] leading-5 text-muted-foreground">{note}</p>
+      )}
+      {delta !== null && delta !== undefined && delta !== 0 && note && (
+        <p className="mt-1 text-[12px] leading-4 text-muted-foreground">{note}</p>
+      )}
+      {progress !== undefined && <Progress value={progress} className="mt-3 h-2" />}
+      <p className="mt-3 text-[12px] leading-4 text-muted-foreground">{period}</p>
     </Card>
   );
 }

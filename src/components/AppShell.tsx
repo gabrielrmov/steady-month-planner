@@ -1,3 +1,4 @@
+import { Logo, LogoMark } from "@/components/Logo";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -134,14 +135,8 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     <>
       {/* Brand */}
       <div className="flex h-16 items-center justify-between px-5">
-        <Link to="/dashboard" className="group flex items-center gap-3">
-          <div
-            className="flex h-8 w-8 items-center justify-center rounded-lg transition-transform duration-300 group-hover:scale-105"
-            style={{ background: "var(--gradient-primary)" }}
-          >
-            <Wallet className="h-4 w-4 text-primary-foreground" />
-          </div>
-          <span className="font-display text-xl font-semibold text-sidebar-foreground">Finlist</span>
+        <Link to="/dashboard" aria-label="FINLIST">
+          <Logo />
         </Link>
         <button
           type="button"
@@ -354,14 +349,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Mobile header */}
       <div className="md:hidden">
         <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-sidebar-border bg-sidebar/95 px-4 backdrop-blur">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <div
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-              style={{ background: "var(--gradient-primary)" }}
-            >
-              <Wallet className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="truncate font-display text-lg font-semibold text-sidebar-foreground">Finlist</span>
+          <div className="flex min-w-0 items-center">
+            <Logo />
           </div>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>

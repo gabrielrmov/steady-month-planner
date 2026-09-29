@@ -65,21 +65,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Finlist — Organizador financeiro mensal" },
+      { title: "FINLIST — Organizador financeiro mensal" },
       {
         name: "description",
         content:
           "Organize suas contas a pagar e receber com checklist mensal, categorias e dashboard de fluxo de caixa.",
       },
-      { property: "og:title", content: "Finlist — Organizador financeiro mensal" },
+      { property: "og:title", content: "FINLIST — Organizador financeiro mensal" },
       {
         property: "og:description",
         content:
           "Organize suas contas a pagar e receber com checklist mensal, categorias e dashboard de fluxo de caixa.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "https://steady-month-planner.dsggabriel7.workers.dev/og-image.png" }, { name: "twitter:card", content: "summary_large_image" }, { name: "twitter:image", content: "https://steady-month-planner.dsggabriel7.workers.dev/og-image.png" }, { name: "theme-color", content: "#F7F7F4" },
-      { name: "twitter:title", content: "Finlist — Organizador financeiro mensal" },
+      { property: "og:image", content: "https://steady-month-planner.dsggabriel7.workers.dev/og-image.png" }, { name: "twitter:card", content: "summary_large_image" }, { name: "twitter:image", content: "https://steady-month-planner.dsggabriel7.workers.dev/og-image.png" }, { name: "theme-color", content: "#f6f8f5" },
+      { name: "twitter:title", content: "FINLIST — Organizador financeiro mensal" },
       {
         name: "twitter:description",
         content:
@@ -92,7 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=JetBrains+Mono:wght@500&family=Manrope:wght@400;600;700&display=swap",
       },
     ],
   }),
