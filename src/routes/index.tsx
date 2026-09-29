@@ -2,6 +2,9 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
+import { CountUp } from "@/components/landing/CountUp";
+import { Reveal } from "@/components/landing/motion";
+import { useParallax, useScrollProgress, useScrolled } from "@/components/landing/use-scroll";
 import {
   BrazilDots,
   DotBars,
@@ -324,19 +327,28 @@ function HeroWidget() {
 function LayeredAccounts({ c }: { c: (typeof cases)[number] }) {
   return (
     <div className="relative mx-auto h-[330px] w-full max-w-[400px]">
-      <div className="absolute inset-x-6 top-0 rounded-lg bg-card p-3 shadow-[var(--shadow-product)]">
+      <div
+        className="animate-rise absolute inset-x-6 top-0 rounded-lg bg-card p-3 shadow-[var(--shadow-product)]"
+        style={{ animationDelay: "0ms" }}
+      >
         <div className="flex items-center justify-between text-[12px] leading-4 text-ink-muted">
           <span>{c.rows[0].n}</span>
           <span className="num">{brl(c.rows[0].c)}</span>
         </div>
       </div>
-      <div className="absolute inset-x-3 top-9 rounded-lg bg-card p-3 pb-8 shadow-[var(--shadow-product)]">
+      <div
+        className="animate-rise absolute inset-x-3 top-9 rounded-lg bg-card p-3 pb-8 shadow-[var(--shadow-product)]"
+        style={{ animationDelay: "110ms" }}
+      >
         <div className="flex items-center justify-between text-[12px] leading-4 text-ink-muted">
           <span>{c.rows[1].n}</span>
           <span className="num">{brl(c.rows[1].c)}</span>
         </div>
       </div>
-      <div className="absolute inset-x-0 top-[74px] rounded-lg bg-card p-3 shadow-[var(--shadow-widget)]">
+      <div
+        className="animate-rise absolute inset-x-0 top-[74px] rounded-lg bg-card p-3 shadow-[var(--shadow-widget)]"
+        style={{ animationDelay: "220ms" }}
+      >
         <div className="flex items-center justify-between text-[13px] font-medium leading-5">
           <span>{c.label}</span>
           <span className="text-ink-muted">•••• 0921</span>
@@ -345,6 +357,8 @@ function LayeredAccounts({ c }: { c: (typeof cases)[number] }) {
           <p className="num text-[22px] leading-7">{brl(c.value)}</p>
           <svg viewBox="0 0 240 70" className="mt-3 h-[70px] w-full" aria-hidden>
             <polyline
+              pathLength={1}
+              className="animate-draw"
               points="0,52 30,60 60,44 95,36 130,46 170,26 200,16 240,22"
               fill="none"
               stroke="#fff"
@@ -391,7 +405,7 @@ function DarkFeature({
   panel: React.ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] md:gap-16">
+    <Reveal className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] md:gap-16">
       <div className="min-w-0">
         <h3 className="text-[20px] font-medium leading-[26px] text-white">{title}</h3>
         <p className="mt-2 max-w-sm text-[14px] leading-[22px] text-[#a9b6bd]">{desc}</p>
@@ -400,7 +414,7 @@ function DarkFeature({
       <div className="min-w-0 rounded-lg border border-white/10 bg-white/[0.03] p-6 md:p-8">
         {panel}
       </div>
-    </div>
+    </Reveal>
   );
 }
 
@@ -438,18 +452,32 @@ function Landing() {
   const [tab, setTab] = useState(0);
   const [aud, setAud] = useState(0);
   const [menu, setMenu] = useState(false);
+  const scrolled = useScrolled();
+  const progressRef = useScrollProgress<HTMLDivElement>();
+  const mapRef = useParallax<HTMLDivElement>(-0.08, 80);
   const c = cases[tab];
   return (
     <div className="min-h-screen bg-background text-foreground">
       <a
         href="#recursos"
-        className="block bg-[#4b5bb4] px-6 py-2.5 text-center text-[13px] leading-[18px] text-white"
+        className="animate-fade-in block bg-[#4b5bb4] px-6 py-2.5 text-center text-[13px] leading-[18px] text-white transition-colors hover:bg-[#4453a8]"
       >
         <span className="font-medium">Novo: metas de economia com progresso mensal.</span>{" "}
         <span className="opacity-80">Veja como funciona</span> <span aria-hidden>›</span>
       </a>
 
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md">
+      <header
+        className={`sticky top-0 z-50 backdrop-blur-md transition-[background-color,box-shadow,border-color] duration-300 ${
+          scrolled
+            ? "border-b border-border bg-background/90 shadow-[var(--shadow-card)]"
+            : "border-b border-transparent bg-background/60"
+        }`}
+      >
+        <div
+          ref={progressRef}
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-primary"
+        />
         <Wrap className="flex h-[62px] items-center justify-between gap-4">
           <Link to="/" aria-label="FINLIST">
             <Logo />
@@ -459,7 +487,7 @@ function Landing() {
               <a
                 key={l.href}
                 href={l.href}
-                className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-[14px] leading-5 text-foreground hover:bg-white/70"
+                className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-[14px] leading-5 text-foreground transition-colors duration-200 hover:bg-white/80"
               >
                 {l.label}
                 {l.menu && <ChevronDown className="h-3.5 w-3.5" aria-hidden />}
@@ -490,7 +518,7 @@ function Landing() {
         {menu && (
           <nav
             aria-label="Menu"
-            className="border-t border-border bg-background px-6 pb-4 pt-2 md:hidden"
+            className="animate-rise border-t border-border bg-background px-6 pb-4 pt-2 md:hidden"
           >
             {navLinks.map((l) => (
               <a
@@ -514,7 +542,8 @@ function Landing() {
         <section className="relative overflow-hidden pb-24 pt-10 md:pb-32 md:pt-16">
           <div
             aria-hidden
-            className="pointer-events-none absolute -right-[8%] top-0 hidden h-[125%] w-[68%] lg:block"
+            ref={mapRef}
+            className="pointer-events-none absolute -right-[8%] top-0 hidden h-[125%] w-[68%] will-change-transform lg:block"
           >
             <BrazilDots className="absolute inset-0 h-full w-full" />
             <DotRoute
@@ -524,20 +553,29 @@ function Landing() {
             />
           </div>
           <Wrap className="relative">
-            <p className="inline-flex items-center gap-2 rounded-lg border border-white bg-white/80 px-3 py-1.5 text-[12px] leading-4 text-ink-muted shadow-[var(--shadow-card)] backdrop-blur-sm">
+            <p className="animate-rise inline-flex items-center gap-2 rounded-lg border border-white bg-white/80 px-3 py-1.5 text-[12px] leading-4 text-ink-muted shadow-[var(--shadow-card)] backdrop-blur-sm">
               <span className="font-semibold text-foreground">FINLIST</span> 30 dias grátis, sem
               cartão
             </p>
             <div className="mt-10 grid items-start gap-10 lg:grid-cols-2">
               <div>
-                <h1 className="text-balance font-display text-[40px] font-semibold leading-[1.08] tracking-[-0.03em] sm:text-[52px]">
+                <h1
+                  className="animate-rise text-balance font-display text-[40px] font-semibold leading-[1.08] tracking-[-0.03em] sm:text-[52px]"
+                  style={{ animationDelay: "90ms" }}
+                >
                   Organize, acompanhe e planeje o dinheiro do mês.
                 </h1>
-                <p className="mt-5 max-w-md text-[17px] leading-[26px] text-foreground/90">
+                <p
+                  className="animate-rise mt-5 max-w-md text-[17px] leading-[26px] text-foreground/90"
+                  style={{ animationDelay: "180ms" }}
+                >
                   Contas a pagar, entradas, cartões e metas em uma lista só. Para quem hoje se vira
                   com planilhas e extratos soltos.
                 </p>
-                <div className="mt-7 flex flex-wrap gap-3">
+                <div
+                  className="animate-rise mt-7 flex flex-wrap gap-3"
+                  style={{ animationDelay: "270ms" }}
+                >
                   <Link to="/auth">
                     <Button size="lg">
                       Começar teste grátis <ArrowRight className="h-4 w-4" />
@@ -554,8 +592,13 @@ function Landing() {
                   </a>
                 </div>
               </div>
-              <div className="flex justify-center lg:justify-start lg:pl-16 lg:pt-14">
-                <HeroWidget />
+              <div
+                className="animate-rise flex justify-center lg:justify-start lg:pl-16 lg:pt-14"
+                style={{ animationDelay: "420ms" }}
+              >
+                <div className="animate-float">
+                  <HeroWidget />
+                </div>
               </div>
             </div>
           </Wrap>
@@ -564,24 +607,24 @@ function Landing() {
         {/* Números */}
         <Wrap className="grid grid-cols-2 gap-x-8 gap-y-10 pb-24 lg:grid-cols-4">
           {[
-            ["30 dias", "de teste com tudo liberado"],
-            ["R$ 19", "por mês no plano Pessoal"],
+            [<CountUp key="a" to={30} suffix=" dias" />, "de teste com tudo liberado"],
+            [<CountUp key="b" to={19} prefix="R$ " />, "por mês no plano Pessoal"],
             ["OFX e CSV", "para importar o extrato do banco"],
             ["Sem fidelidade", "cancele quando quiser"],
-          ].map(([v, l]) => (
-            <div key={l}>
+          ].map(([v, l], i) => (
+            <Reveal key={l as string} delay={i * 90}>
               <p className="text-[28px] font-medium leading-[1.1] tracking-[-0.01em] text-positive">
                 {v}
               </p>
               <p className="mt-2 max-w-[200px] text-[14px] leading-5 text-ink-muted">{l}</p>
-            </div>
+            </Reveal>
           ))}
         </Wrap>
 
         {/* Confiança */}
         <section className="relative overflow-hidden pb-28">
           <Wrap className="relative grid items-center gap-10 lg:grid-cols-2">
-            <div>
+            <Reveal>
               <Tag>Tudo em ordem</Tag>
               <h2 className="mt-6 max-w-lg text-balance font-display text-[28px] font-semibold leading-[1.15] tracking-[-0.02em] sm:text-[32px]">
                 Cada conta do mês no lugar dela{" "}
@@ -599,18 +642,18 @@ function Landing() {
               >
                 Conheça os recursos <span aria-hidden>›</span>
               </a>
-            </div>
-            <div className="relative">
+            </Reveal>
+            <Reveal className="relative" delay={150}>
               <DotBars className="w-full" />
               <ExampleNote className="absolute bottom-0 right-0" />
-            </div>
+            </Reveal>
           </Wrap>
         </section>
 
         {/* Casos, com abas */}
         <section className="pb-28" id="para-quem">
           <Wrap>
-            <div className="overflow-hidden rounded-lg bg-card shadow-[var(--shadow-card)]">
+            <Reveal className="overflow-hidden rounded-lg bg-card shadow-[var(--shadow-card)]">
               <div
                 role="tablist"
                 aria-label="Exemplos"
@@ -622,7 +665,7 @@ function Landing() {
                     role="tab"
                     aria-selected={tab === i}
                     onClick={() => setTab(i)}
-                    className={`rounded-lg px-3 py-4 text-[14px] font-medium leading-5 transition-colors ${
+                    className={`rounded-lg px-3 py-4 text-[14px] font-medium leading-5 transition-[background-color,color,box-shadow,transform] duration-300 active:scale-[0.98] ${
                       tab === i
                         ? "bg-signal text-on-signal shadow-[var(--shadow-btn)]"
                         : "text-ink-muted hover:bg-muted"
@@ -633,18 +676,20 @@ function Landing() {
                 ))}
               </div>
               <div
+                key={tab}
                 role="tabpanel"
-                className="grid items-center gap-10 px-6 pb-12 pt-6 md:grid-cols-2 md:px-14"
+                className="animate-fade-in grid items-center gap-10 px-6 pb-12 pt-6 md:grid-cols-2 md:px-14"
               >
                 <div>
                   <h3 className="text-balance font-display text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] sm:text-[30px]">
                     {c.title} <span className="text-[#7c7f88]">{c.dim}</span>
                   </h3>
                   <div className="mt-5 flex flex-wrap gap-2">
-                    {c.chips.map((t) => (
+                    {c.chips.map((t, ci) => (
                       <span
                         key={t}
-                        className="rounded-lg border border-border bg-card px-3 py-1.5 text-[13px] leading-[18px] shadow-[var(--shadow-card)]"
+                        style={{ animationDelay: `${120 + ci * 70}ms` }}
+                        className="animate-rise rounded-lg border border-border bg-card px-3 py-1.5 text-[13px] leading-[18px] shadow-[var(--shadow-card)] transition-transform duration-200 hover:-translate-y-0.5"
                       >
                         {t}
                       </span>
@@ -657,14 +702,14 @@ function Landing() {
                 </div>
                 <LayeredAccounts c={c} />
               </div>
-            </div>
+            </Reveal>
           </Wrap>
         </section>
 
         {/* Feito para organizar */}
         <section id="recursos" className="pb-28">
           <Wrap className="grid items-center gap-12 lg:grid-cols-2">
-            <div className="rounded-lg bg-[#eeeff2] p-3 sm:p-5">
+            <Reveal className="rounded-lg bg-[#eeeff2] p-3 sm:p-5">
               <div className="rounded-lg bg-card p-5 shadow-[var(--shadow-product)]">
                 <p className="num text-[22px] leading-7">R$ 119,90</p>
                 <p className="mt-1 text-[12px] leading-4 text-ink-muted">
@@ -687,8 +732,8 @@ function Landing() {
                   </p>
                 ))}
               </div>
-            </div>
-            <div>
+            </Reveal>
+            <Reveal delay={140}>
               <Tag tone="blue">Feito para o dia a dia</Tag>
               <h2 className="mt-6 text-balance font-display text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] sm:text-[36px]">
                 A lista que você fazia na planilha, sem o trabalho de manter.
@@ -718,7 +763,7 @@ function Landing() {
                   </p>
                 </div>
               </div>
-            </div>
+            </Reveal>
           </Wrap>
         </section>
 
@@ -726,7 +771,7 @@ function Landing() {
         <section className="px-2 pb-24 sm:px-2.5">
           <div className="rounded-lg bg-[#011821] px-6 py-20 [background-image:radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:22px_22px] md:py-28">
             <Wrap className="!px-0 md:!px-16">
-              <div className="grid items-center gap-10 md:grid-cols-2">
+              <Reveal className="grid items-center gap-10 md:grid-cols-2">
                 <div>
                   <span className="inline-block rounded-sm bg-[#0c3242] px-2 py-1 font-mono text-[11px] uppercase leading-none tracking-[0.06em] text-[#88deeb]">
                     Recursos
@@ -740,7 +785,7 @@ function Landing() {
                   </p>
                 </div>
                 <LayerStack className="w-full" />
-              </div>
+              </Reveal>
 
               <div className="mt-24 space-y-24">
                 <DarkFeature
@@ -841,7 +886,7 @@ function Landing() {
         {/* Para quem */}
         <section className="pb-28">
           <Wrap className="grid items-center gap-12 lg:grid-cols-2">
-            <div>
+            <Reveal>
               <Tag tone="blue">FINLIST para</Tag>
               <ul className="mt-6 space-y-1">
                 {audiences.map((a, i) => (
@@ -864,8 +909,10 @@ function Landing() {
                 junta tudo no mesmo lugar. Serve tanto para a conta da casa quanto para quem também
                 tem empresa e precisa precificar serviços.
               </p>
-            </div>
-            <GlyphDots className="mx-auto w-full max-w-[460px]" />
+            </Reveal>
+            <Reveal delay={160}>
+              <GlyphDots className="mx-auto w-full max-w-[460px]" />
+            </Reveal>
           </Wrap>
         </section>
 
@@ -877,9 +924,10 @@ function Landing() {
               Tudo o que entra no seu mês
             </h2>
             <div className="mt-10 border-t border-border">
-              {groups.map((g) => (
-                <div
+              {groups.map((g, gi) => (
+                <Reveal
                   key={g.title}
+                  delay={gi * 90}
                   className="grid gap-4 border-b border-transparent py-8 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)]"
                 >
                   <h3 className="max-w-[240px] text-[16px] font-medium leading-[22px]">
@@ -889,9 +937,9 @@ function Landing() {
                     {g.items.map(([label, Icon]) => (
                       <div
                         key={label}
-                        className="flex items-center gap-3 rounded-md bg-[#eeeff2] px-3 py-2.5 text-[14px] leading-5"
+                        className="group flex items-center gap-3 rounded-md bg-[#eeeff2] px-3 py-2.5 text-[14px] leading-5 transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-white"
                       >
-                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-card shadow-[var(--shadow-card)]">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-card shadow-[var(--shadow-card)] transition-transform duration-200 group-hover:scale-110">
                           <Icon
                             className="h-3.5 w-3.5 text-[#1e4199]"
                             strokeWidth={1.75}
@@ -902,7 +950,7 @@ function Landing() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </Reveal>
               ))}
             </div>
           </Wrap>
@@ -911,15 +959,19 @@ function Landing() {
         {/* Preços */}
         <section id="precos" className="bg-card py-24">
           <Wrap>
-            <Tag tone="cyan">Preços</Tag>
-            <h2 className="mt-6 max-w-xl text-balance font-display text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] sm:text-[36px]">
-              Comece grátis. <span className="text-[#7c7f88]">Depois, um preço fixo por mês.</span>
-            </h2>
+            <Reveal>
+              <Tag tone="cyan">Preços</Tag>
+              <h2 className="mt-6 max-w-xl text-balance font-display text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] sm:text-[36px]">
+                Comece grátis.{" "}
+                <span className="text-[#7c7f88]">Depois, um preço fixo por mês.</span>
+              </h2>
+            </Reveal>
             <div className="mt-12 grid gap-5 md:grid-cols-2">
-              {plans.map((p) => (
-                <div
+              {plans.map((p, pi) => (
+                <Reveal
                   key={p.name}
-                  className={`flex flex-col rounded-lg bg-card p-7 md:p-8 ${p.highlight ? "shadow-[var(--shadow-product)] ring-1 ring-primary" : "shadow-[var(--shadow-card)]"}`}
+                  delay={pi * 120}
+                  className={`flex flex-col rounded-lg bg-card p-7 hover:-translate-y-1 hover:shadow-[var(--shadow-product)] md:p-8 ${p.highlight ? "shadow-[var(--shadow-product)] ring-1 ring-primary" : "shadow-[var(--shadow-card)]"}`}
                 >
                   <p className="text-[18px] font-medium leading-6">{p.name}</p>
                   <p className="mt-1 text-[14px] leading-5 text-ink-muted">{p.desc}</p>
@@ -947,7 +999,7 @@ function Landing() {
                       Começar teste grátis
                     </Button>
                   </Link>
-                </div>
+                </Reveal>
               ))}
             </div>
             <p className="mt-6 flex items-center gap-2 text-[13px] text-ink-muted">
@@ -960,7 +1012,7 @@ function Landing() {
         {/* Dúvidas */}
         <section id="faq" className="py-24">
           <Wrap className="grid gap-10 lg:grid-cols-[0.8fr_1.4fr]">
-            <div>
+            <Reveal>
               <Tag>Dúvidas</Tag>
               <h2 className="mt-6 font-display text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] sm:text-[36px]">
                 Perguntas frequentes
@@ -968,24 +1020,26 @@ function Landing() {
               <p className="mt-4 max-w-xs text-[14px] leading-5 text-ink-muted">
                 Não achou o que procurava? Escreva para contato@finlist.app.
               </p>
-            </div>
-            <div className="divide-y divide-border border-y border-border">
+            </Reveal>
+            <Reveal delay={120} className="divide-y divide-border border-y border-border">
               {faqs.map((f) => (
                 <details
                   key={f.q}
                   className="group py-5 [&_summary::-webkit-details-marker]:hidden"
                 >
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[16px] font-medium leading-6">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[16px] font-medium leading-6 transition-colors hover:text-primary">
                     {f.q}
                     <ChevronDown
                       className="h-4 w-4 shrink-0 text-ink-muted transition-transform group-open:rotate-180"
                       aria-hidden
                     />
                   </summary>
-                  <p className="mt-3 max-w-xl text-[14px] leading-[22px] text-ink-muted">{f.a}</p>
+                  <p className="mt-3 max-w-xl text-[14px] leading-[22px] text-ink-muted group-open:animate-rise">
+                    {f.a}
+                  </p>
                 </details>
               ))}
-            </div>
+            </Reveal>
           </Wrap>
         </section>
 
@@ -993,12 +1047,14 @@ function Landing() {
         <section className="px-2 pb-2 sm:px-2.5">
           <div className="rounded-lg bg-[#eeeff2] py-20">
             <Wrap>
-              <h2 className="font-display text-[40px] font-semibold leading-[1.05] tracking-[-0.03em] sm:text-[56px]">
-                Comece hoje mesmo
-              </h2>
-              <p className="mt-2 text-[16px] leading-6 text-ink-muted">
-                Crie a sua conta em menos de um minuto e use tudo por 30 dias.
-              </p>
+              <Reveal>
+                <h2 className="font-display text-[40px] font-semibold leading-[1.05] tracking-[-0.03em] sm:text-[56px]">
+                  Comece hoje mesmo
+                </h2>
+                <p className="mt-2 text-[16px] leading-6 text-ink-muted">
+                  Crie a sua conta em menos de um minuto e use tudo por 30 dias.
+                </p>
+              </Reveal>
               <div className="mt-10 grid gap-4 md:grid-cols-3">
                 {[
                   ["Testar grátis", "Crie a conta e cadastre o primeiro lançamento.", "/auth"],
@@ -1008,21 +1064,22 @@ function Landing() {
                     "Uma dúvida antes de começar? Escreva.",
                     "mailto:contato@finlist.app",
                   ],
-                ].map(([t, d, href]) => (
-                  <a
-                    key={t}
-                    href={href}
-                    className="group rounded-lg bg-card p-5 shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-product)]"
-                  >
-                    <p className="flex items-center justify-between text-[16px] font-medium leading-6">
-                      {t}
-                      <ArrowRight
-                        className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
-                        aria-hidden
-                      />
-                    </p>
-                    <p className="mt-2 text-[14px] leading-5 text-ink-muted">{d}</p>
-                  </a>
+                ].map(([t, d, href], i) => (
+                  <Reveal key={t} delay={i * 100}>
+                    <a
+                      href={href}
+                      className="group block rounded-lg bg-card p-5 shadow-[var(--shadow-card)] transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-product)]"
+                    >
+                      <p className="flex items-center justify-between text-[16px] font-medium leading-6">
+                        {t}
+                        <ArrowRight
+                          className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                          aria-hidden
+                        />
+                      </p>
+                      <p className="mt-2 text-[14px] leading-5 text-ink-muted">{d}</p>
+                    </a>
+                  </Reveal>
                 ))}
               </div>
             </Wrap>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 /** Decoração pesada: só renderiza no navegador, para não inflar o HTML do servidor. */
 function useMounted() {
@@ -152,7 +152,20 @@ export function BrazilDots({ className = "" }: { className?: string }) {
   return (
     <svg aria-hidden viewBox={`0 0 ${W} ${H}`} className={className}>
       {dots.map((d, i) => (
-        <circle key={i} cx={d.x} cy={d.y} r={d.r} fill={d.c} opacity={d.o} />
+        <circle
+          key={i}
+          cx={d.x}
+          cy={d.y}
+          r={d.r}
+          fill={d.c}
+          opacity={d.o}
+          style={{
+            transformBox: "fill-box",
+            transformOrigin: "center",
+            animation: "dot-in 0.7s cubic-bezier(0.22,1,0.36,1) both",
+            animationDelay: `${Math.round((d.x / W) * 1100 + (d.y / H) * 500)}ms`,
+          }}
+        />
       ))}
     </svg>
   );
@@ -176,8 +189,17 @@ export function DotRoute({
   const n = 34;
   for (let i = 0; i <= n; i++) {
     const t = i / n;
-    pts.push({ x: rd(x1 + (x2 - x1) * t), y: rd(y1 + (y2 - y1) * t - Math.sin(t * Math.PI) * 70) });
+    pts.push({
+      x: rd(x1 + (x2 - x1) * t),
+      y: rd(y1 + (y2 - y1) * t - Math.sin(t * Math.PI) * 70),
+    });
   }
+  const pop = (delay: number, dur = "0.4s") => ({
+    transformBox: "fill-box" as const,
+    transformOrigin: "center",
+    animation: `dot-in ${dur} ease-out both`,
+    animationDelay: `${delay}ms`,
+  });
   return (
     <svg aria-hidden viewBox={`0 0 ${W} ${H}`} className={className}>
       {pts.map((p, i) => (
@@ -188,10 +210,31 @@ export function DotRoute({
           r={2.4}
           fill="#111a4a"
           opacity={rd(0.25 + (i / n) * 0.55)}
+          style={pop(1300 + i * 45)}
         />
       ))}
-      <circle cx={rd(x1)} cy={rd(y1)} r={4.5} fill="#111a4a" />
-      <circle cx={rd(x2)} cy={rd(y2)} r={4.5} fill="#111a4a" />
+      {[
+        [x1, y1, 1200],
+        [x2, y2, 1300 + n * 45],
+      ].map(([x, y, d], i) => (
+        <g key={i}>
+          <circle
+            cx={rd(x)}
+            cy={rd(y)}
+            r={4.5}
+            fill="none"
+            stroke="#111a4a"
+            strokeWidth="1.5"
+            style={{
+              transformBox: "fill-box",
+              transformOrigin: "center",
+              animation: "ring-pulse 2.4s ease-out infinite",
+              animationDelay: `${d}ms`,
+            }}
+          />
+          <circle cx={rd(x)} cy={rd(y)} r={4.5} fill="#111a4a" style={pop(d, "0.5s")} />
+        </g>
+      ))}
     </svg>
   );
 }
@@ -207,25 +250,54 @@ export function DotBars({ className = "" }: { className?: string }) {
     });
   }, []);
   const mounted = useMounted();
-  if (!mounted) return null;
+  const ref = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!mounted || !el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setActive(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.25 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [mounted]);
   return (
-    <svg aria-hidden viewBox="0 0 700 330" className={className}>
-      {bars.map((b, i) => (
-        <g key={i}>
-          {Array.from({ length: b.h }).map((_, k) => (
-            <circle
-              key={k}
-              cx={b.x}
-              cy={310 - k * 10}
-              r={1.5}
-              fill="#44b48b"
-              opacity={rd(0.12 + (k / b.h) * 0.5)}
-            />
+    <div ref={ref} className={className}>
+      {mounted && (
+        <svg aria-hidden viewBox="0 0 700 330" className="w-full">
+          {bars.map((b, i) => (
+            <g
+              key={i}
+              style={{
+                transformBox: "fill-box",
+                transformOrigin: "50% 100%",
+                opacity: active ? undefined : 0,
+                animation: active ? "bar-up 0.9s cubic-bezier(0.22,1,0.36,1) both" : undefined,
+                animationDelay: `${i * 55}ms`,
+              }}
+            >
+              {Array.from({ length: b.h }).map((_, k) => (
+                <circle
+                  key={k}
+                  cx={b.x}
+                  cy={310 - k * 10}
+                  r={1.5}
+                  fill="#44b48b"
+                  opacity={rd(0.12 + (k / b.h) * 0.5)}
+                />
+              ))}
+              <circle cx={b.x} cy={310 - b.h * 10} r={4} fill="#167e6c" />
+            </g>
           ))}
-          <circle cx={b.x} cy={310 - b.h * 10} r={4} fill="#167e6c" />
-        </g>
-      ))}
-    </svg>
+        </svg>
+      )}
+    </div>
   );
 }
 
@@ -247,7 +319,7 @@ const GLYPH = [
 export function GlyphDots({ className = "" }: { className?: string }) {
   const cell = 26;
   const dots = useMemo(() => {
-    const out: { x: number; y: number; r: number; c: string; o: number }[] = [];
+    const out: { x: number; y: number; r: number; c: string; o: number; tw: number }[] = [];
     const cols = GLYPH[0].length + 4;
     const rows = GLYPH.length + 4;
     for (let r = 0; r < rows * 3; r++) {
@@ -263,10 +335,18 @@ export function GlyphDots({ className = "" }: { className?: string }) {
             y: r * (cell / 3) + 4,
             r: rd(2.2 + rnd * 2.2),
             c: rnd > 0.5 ? "#72ac3f" : "#44b48b",
-            o: 0.55 + rnd * 0.4,
+            o: rd(0.55 + rnd * 0.4),
+            tw: rnd > 0.72 ? Math.round(rnd * 4000) : -1,
           });
         } else if (rnd > 0.55) {
-          out.push({ x: c * (cell / 3) + 4, y: r * (cell / 3) + 4, r: 0.9, c: "#a9acb6", o: 0.3 });
+          out.push({
+            x: c * (cell / 3) + 4,
+            y: r * (cell / 3) + 4,
+            r: 0.9,
+            c: "#a9acb6",
+            o: 0.3,
+            tw: -1,
+          });
         }
       }
     }
@@ -277,7 +357,24 @@ export function GlyphDots({ className = "" }: { className?: string }) {
   return (
     <svg aria-hidden viewBox={`0 0 ${dots.w} ${dots.h}`} className={className}>
       {dots.out.map((d, i) => (
-        <circle key={i} cx={d.x} cy={d.y} r={d.r} fill={d.c} opacity={d.o} />
+        <circle
+          key={i}
+          cx={d.x}
+          cy={d.y}
+          r={d.r}
+          fill={d.c}
+          opacity={d.o}
+          style={
+            d.tw >= 0
+              ? {
+                  transformBox: "fill-box",
+                  transformOrigin: "center",
+                  animation: "twinkle 3.2s ease-in-out infinite",
+                  animationDelay: `${d.tw}ms`,
+                }
+              : undefined
+          }
+        />
       ))}
     </svg>
   );
@@ -285,24 +382,29 @@ export function GlyphDots({ className = "" }: { className?: string }) {
 
 /** Três camadas empilhadas (isométrico) para a seção escura. */
 export function LayerStack({ className = "" }: { className?: string }) {
-  const slab = (y: number, top: string, side: string, front: string) => (
+  const slab = (y: number, top: string, side: string, front: string, delay: number) => (
     <g transform={`translate(0 ${y})`}>
-      <polygon points="150,40 260,80 150,120 40,80" fill={top} />
-      <polygon points="40,80 150,120 150,146 40,106" fill={side} />
-      <polygon points="260,80 150,120 150,146 260,106" fill={front} />
+      <g style={{ animation: `float-y 6s ease-in-out ${delay}s infinite` }}>
+        <polygon points="150,40 260,80 150,120 40,80" fill={top} />
+        <polygon points="40,80 150,120 150,146 40,106" fill={side} />
+        <polygon points="260,80 150,120 150,146 260,106" fill={front} />
+      </g>
     </g>
   );
   return (
     <svg aria-hidden viewBox="0 0 520 260" className={className}>
-      {slab(70, "#1b3b47", "#0c242d", "#123340")}
-      {slab(35, "#284e5c", "#123340", "#1b3b47")}
-      {slab(0, "#3d6a7b", "#1b3b47", "#284e5c")}
+      {slab(70, "#1b3b47", "#0c242d", "#123340", 0)}
+      {slab(35, "#284e5c", "#123340", "#1b3b47", 0.4)}
+      {slab(0, "#3d6a7b", "#1b3b47", "#284e5c", 0.8)}
       {[
         ["Você", 66],
         ["FINLIST", 101],
         ["Seu banco", 136],
-      ].map(([label, y]) => (
-        <g key={label as string}>
+      ].map(([label, y], i) => (
+        <g
+          key={label as string}
+          style={{ animation: `fade-in 0.8s ease-out ${0.4 + i * 0.25}s both` }}
+        >
           <line
             x1="262"
             y1={(y as number) + 4}
