@@ -13,9 +13,9 @@ import { Plus, Trash2, Wallet } from "lucide-react";
 export const Route = createFileRoute("/_authenticated/categories")({
   head: () => ({
     meta: [
-      { title: "Categorias | Finlist" },
+      { title: "Categorias | FINLIST" },
       { name: "description", content: "Personalize as categorias das suas entradas e saídas." },
-      { property: "og:title", content: "Categorias | Finlist" },
+      { property: "og:title", content: "Categorias | FINLIST" },
       { property: "og:description", content: "Personalize as categorias das suas entradas e saídas." },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex" },

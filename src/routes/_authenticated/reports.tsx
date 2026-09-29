@@ -27,16 +27,16 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/reports")({
   head: () => ({
     meta: [
-      { title: "Relatórios financeiros | Finlist" },
+      { title: "Relatórios financeiros | FINLIST" },
       {
         name: "description",
         content:
           "Acompanhe a evolução das suas entradas e saídas mês a mês e descubra onde seu dinheiro está indo por categoria.",
       },
-      { property: "og:title", content: "Relatórios financeiros | Finlist" },
+      { property: "og:title", content: "Relatórios financeiros | FINLIST" },
       {
         property: "og:description",
-        content: "Evolução mensal, comparativos e gastos por categoria no Finlist.",
+        content: "Evolução mensal, comparativos e gastos por categoria no FINLIST.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -183,7 +183,7 @@ function ReportsPage() {
 
   const exportCsv = () => {
     const lines: string[] = [];
-    lines.push(`Relatório Finlist,${csvField(format(new Date(), "dd/MM/yyyy"))}`);
+    lines.push(`Relatório FINLIST,${csvField(format(new Date(), "dd/MM/yyyy"))}`);
     lines.push("");
     lines.push(["Mês", "Entradas", "Saídas", "Saldo"].map(csvField).join(","));
     for (const s of series) {

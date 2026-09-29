@@ -40,13 +40,13 @@ import {
 export const Route = createFileRoute("/_authenticated/divisao-ganhos")({
   head: () => ({
     meta: [
-      { title: "Divisão de Ganhos | Finlist" },
+      { title: "Divisão de Ganhos | FINLIST" },
       {
         name: "description",
         content:
           "Divida seus ganhos entre contas fixas, reserva de emergência, lazer, investimentos e outras categorias que você definir.",
       },
-      { property: "og:title", content: "Divisão de Ganhos | Finlist" },
+      { property: "og:title", content: "Divisão de Ganhos | FINLIST" },
       {
         property: "og:description",
         content:

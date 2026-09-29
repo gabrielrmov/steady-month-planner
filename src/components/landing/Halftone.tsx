@@ -1,6 +1,16 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+/** Decoração pesada: só renderiza no navegador, para não inflar o HTML do servidor. */
+function useMounted() {
+  const [m, setM] = useState(false);
+  useEffect(() => setM(true), []);
+  return m;
+}
 
 /** Ilustrações em meio-tom (pontos) da landing. Todas decorativas. */
+
+/** Arredonda para evitar diferenças de ponto flutuante entre servidor e navegador na hidratação. */
+const rd = (n: number) => Math.round(n * 100) / 100;
 
 const SPECTRUM = ["#d65620", "#9f7aee", "#4575cd", "#71d2f0", "#44b48b", "#f4df69"];
 
@@ -110,7 +120,7 @@ export function BrazilDots({ className = "" }: { className?: string }) {
   const H = 700;
   const dots = useMemo(() => {
     const out: { x: number; y: number; r: number; c: string; o: number }[] = [];
-    const step = 9;
+    const step = 11;
     for (let x = step / 2; x < W; x += step) {
       for (let y = step / 2; y < H; y += step) {
         const lon = LON0 + (x / W) * (LON1 - LON0);
@@ -126,17 +136,19 @@ export function BrazilDots({ className = "" }: { className?: string }) {
           out.push({
             x,
             y,
-            r: 1.3 + wobble * 1.5,
+            r: rd(1.3 + wobble * 1.5),
             c: SPECTRUM[Math.max(0, idx) % SPECTRUM.length],
-            o: 0.35 + wobble * 0.5,
+            o: rd(0.35 + wobble * 0.5),
           });
-        } else if ((Math.floor(x / step) + Math.floor(y / step)) % 2 === 0) {
+        } else if ((Math.floor(x / step) + Math.floor(y / step)) % 3 === 0) {
           out.push({ x, y, r: 0.7, c: "#a9acb6", o: 0.22 });
         }
       }
     }
     return out;
   }, []);
+  const mounted = useMounted();
+  if (!mounted) return null;
   return (
     <svg aria-hidden viewBox={`0 0 ${W} ${H}`} className={className}>
       {dots.map((d, i) => (
@@ -164,15 +176,22 @@ export function DotRoute({
   const n = 34;
   for (let i = 0; i <= n; i++) {
     const t = i / n;
-    pts.push({ x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t - Math.sin(t * Math.PI) * 70 });
+    pts.push({ x: rd(x1 + (x2 - x1) * t), y: rd(y1 + (y2 - y1) * t - Math.sin(t * Math.PI) * 70) });
   }
   return (
     <svg aria-hidden viewBox={`0 0 ${W} ${H}`} className={className}>
       {pts.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r={2.4} fill="#111a4a" opacity={0.25 + (i / n) * 0.55} />
+        <circle
+          key={i}
+          cx={p.x}
+          cy={p.y}
+          r={2.4}
+          fill="#111a4a"
+          opacity={rd(0.25 + (i / n) * 0.55)}
+        />
       ))}
-      <circle cx={x1} cy={y1} r={4.5} fill="#111a4a" />
-      <circle cx={x2} cy={y2} r={4.5} fill="#111a4a" />
+      <circle cx={rd(x1)} cy={rd(y1)} r={4.5} fill="#111a4a" />
+      <circle cx={rd(x2)} cy={rd(y2)} r={4.5} fill="#111a4a" />
     </svg>
   );
 }
@@ -187,6 +206,8 @@ export function DotBars({ className = "" }: { className?: string }) {
       return { x: 20 + i * 26, h };
     });
   }, []);
+  const mounted = useMounted();
+  if (!mounted) return null;
   return (
     <svg aria-hidden viewBox="0 0 700 330" className={className}>
       {bars.map((b, i) => (
@@ -198,7 +219,7 @@ export function DotBars({ className = "" }: { className?: string }) {
               cy={310 - k * 10}
               r={1.5}
               fill="#44b48b"
-              opacity={0.12 + (k / b.h) * 0.5}
+              opacity={rd(0.12 + (k / b.h) * 0.5)}
             />
           ))}
           <circle cx={b.x} cy={310 - b.h * 10} r={4} fill="#167e6c" />
@@ -240,7 +261,7 @@ export function GlyphDots({ className = "" }: { className?: string }) {
           out.push({
             x: c * (cell / 3) + 4,
             y: r * (cell / 3) + 4,
-            r: 2.2 + rnd * 2.2,
+            r: rd(2.2 + rnd * 2.2),
             c: rnd > 0.5 ? "#72ac3f" : "#44b48b",
             o: 0.55 + rnd * 0.4,
           });
@@ -251,6 +272,8 @@ export function GlyphDots({ className = "" }: { className?: string }) {
     }
     return { out, w: cols * cell, h: rows * cell };
   }, []);
+  const mounted = useMounted();
+  if (!mounted) return null;
   return (
     <svg aria-hidden viewBox={`0 0 ${dots.w} ${dots.h}`} className={className}>
       {dots.out.map((d, i) => (

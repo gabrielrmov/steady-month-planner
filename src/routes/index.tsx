@@ -20,6 +20,8 @@ import {
   Landmark,
   ListChecks,
   Lock,
+  Menu,
+  X,
   PiggyBank,
   Repeat,
   Wand2,
@@ -435,6 +437,7 @@ function MiniRow({ n, d, v }: { n: string; d: string; v: string }) {
 function Landing() {
   const [tab, setTab] = useState(0);
   const [aud, setAud] = useState(0);
+  const [menu, setMenu] = useState(false);
   const c = cases[tab];
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -464,6 +467,15 @@ function Landing() {
             ))}
           </nav>
           <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              aria-label={menu ? "Fechar menu" : "Abrir menu"}
+              aria-expanded={menu}
+              onClick={() => setMenu((v) => !v)}
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-white bg-white/60 md:hidden"
+            >
+              {menu ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </button>
             <Link to="/auth" className="hidden px-3 text-[14px] sm:block">
               Entrar
             </Link>
@@ -475,6 +487,26 @@ function Landing() {
             </Link>
           </div>
         </Wrap>
+        {menu && (
+          <nav
+            aria-label="Menu"
+            className="border-t border-border bg-background px-6 pb-4 pt-2 md:hidden"
+          >
+            {navLinks.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                onClick={() => setMenu(false)}
+                className="block border-b border-border py-3 text-[16px] leading-6 last:border-b-0"
+              >
+                {l.label}
+              </a>
+            ))}
+            <Link to="/auth" className="mt-3 block text-[16px] leading-6">
+              Entrar
+            </Link>
+          </nav>
+        )}
       </header>
 
       <main>

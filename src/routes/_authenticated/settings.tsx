@@ -15,15 +15,15 @@ import { Download, Sparkles, User, Crown, Lock, ArrowRight, Sun, Moon } from "lu
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
-      { title: "Configurações da conta | Finlist" },
+      { title: "Configurações da conta | FINLIST" },
       {
         name: "description",
         content: "Atualize seus dados, veja seu plano e exporte todos os seus lançamentos em CSV.",
       },
-      { property: "og:title", content: "Configurações da conta | Finlist" },
+      { property: "og:title", content: "Configurações da conta | FINLIST" },
       {
         property: "og:description",
-        content: "Perfil, plano e exportação de dados no Finlist.",
+        content: "Perfil, plano e exportação de dados no FINLIST.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -162,7 +162,7 @@ function SettingsPage() {
           <h2 className="font-bold tracking-tight">Aparência</h2>
         </div>
         <p className="mb-4 text-sm text-muted-foreground">
-          Escolha como o Finlist aparece para você. O menu lateral continua escuro nos dois modos.
+          Escolha como o FINLIST aparece para você. O menu lateral continua escuro nos dois modos.
         </p>
         <div className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted/40 p-1">
           <button

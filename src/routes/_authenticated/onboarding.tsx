@@ -12,10 +12,10 @@ import { Wallet, ArrowRight, Target, Banknote, Tag, Receipt, Sparkles } from "lu
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
     meta: [
-      { title: "Configuração inicial | Finlist" },
-      { name: "description", content: "Configure sua conta Finlist em poucos passos." },
-      { property: "og:title", content: "Configuração inicial | Finlist" },
-      { property: "og:description", content: "Configure sua conta Finlist em poucos passos." },
+      { title: "Configuração inicial | FINLIST" },
+      { name: "description", content: "Configure sua conta FINLIST em poucos passos." },
+      { property: "og:title", content: "Configuração inicial | FINLIST" },
+      { property: "og:description", content: "Configure sua conta FINLIST em poucos passos." },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex" },
     ],
@@ -105,7 +105,7 @@ function OnboardingPage() {
 
     qc.invalidateQueries({ queryKey: ["profile"] });
     setLoading(false);
-    toast.success("Tudo pronto! Bem-vindo ao Finlist.");
+    toast.success("Tudo pronto! Bem-vindo ao FINLIST.");
     if (isProIntent) {
       navigate({ to: "/settings", search: { checkout: "pro" } });
     } else {
@@ -115,7 +115,7 @@ function OnboardingPage() {
 
   const stepContent = [
     {
-      title: "Bem-vindo ao Finlist",
+      title: "Bem-vindo ao FINLIST",
       subtitle: "Vamos configurar sua conta em poucos passos.",
       icon: Wallet,
       content: (
@@ -248,7 +248,7 @@ function OnboardingPage() {
         >
           <Wallet className="h-5 w-5 text-primary-foreground" />
         </div>
-        <span className="text-xl font-semibold tracking-tight text-foreground">Finlist</span>
+        <span className="text-xl font-semibold tracking-tight text-foreground">FINLIST</span>
       </Link>
 
       <Card className="w-full max-w-lg border-border/60 bg-card p-6">

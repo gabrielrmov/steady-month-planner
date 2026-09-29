@@ -4,13 +4,13 @@ import { Wallet } from "lucide-react";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Termos de uso | Finlist" },
+      { title: "Termos de uso | FINLIST" },
       {
         name: "description",
-        content: "Termos de uso do Finlist. Regras para uso do organizador financeiro mensal.",
+        content: "Termos de uso do FINLIST. Regras para uso do organizador financeiro mensal.",
       },
-      { property: "og:title", content: "Termos de uso | Finlist" },
-      { property: "og:description", content: "Termos de uso do Finlist." },
+      { property: "og:title", content: "Termos de uso | FINLIST" },
+      { property: "og:description", content: "Termos de uso do FINLIST." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://steady-month-planner.dsggabriel7.workers.dev/terms" },
       { name: "twitter:card", content: "summary" },
@@ -32,7 +32,7 @@ function TermsPage() {
             >
               <Wallet className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-bold text-foreground">Finlist</span>
+            <span className="font-bold text-foreground">FINLIST</span>
           </Link>
           <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
             Voltar
@@ -50,7 +50,7 @@ function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">1. Aceitação dos termos</h2>
             <p className="mt-2">
-              Ao criar uma conta e usar o Finlist, você concorda com estes Termos de Uso. Se não
+              Ao criar uma conta e usar o FINLIST, você concorda com estes Termos de Uso. Se não
               concordar com alguma parte, não use o serviço.
             </p>
           </section>
@@ -58,7 +58,7 @@ function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">2. Descrição do serviço</h2>
             <p className="mt-2">
-              O Finlist é um organizador financeiro pessoal que ajuda a controlar contas,
+              O FINLIST é um organizador financeiro pessoal que ajuda a controlar contas,
               recebimentos, cartões e parcelamentos. Não somos uma instituição financeira, não
               emitimos cartões, não fazemos transferências e não intermediamos pagamentos.
             </p>
@@ -75,7 +75,7 @@ function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">4. Planos e pagamentos</h2>
             <p className="mt-2">
-              O Finlist oferece um plano gratuito e um plano pago (Pro). O plano Pro pode ser
+              O FINLIST oferece um plano gratuito e um plano pago (Pro). O plano Pro pode ser
               contratado e cancelado a qualquer momento, com cobrança recorrente mensal. Os valores
               e funcionalidades de cada plano estão descritos na página de preços.
             </p>
@@ -84,7 +84,7 @@ function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground">5. Uso permitido</h2>
             <p className="mt-2">
-              Você se compromete a usar o Finlist apenas para fins lícitos e pessoais. É proibido
+              Você se compromete a usar o FINLIST apenas para fins lícitos e pessoais. É proibido
               tentar acessar dados de outros usuários, violar a segurança da plataforma ou
               distribuir conteúdo malicioso.
             </p>
@@ -95,7 +95,7 @@ function TermsPage() {
               6. Limitação de responsabilidade
             </h2>
             <p className="mt-2">
-              O Finlist é fornecido "como está". Não nos responsabilizamos por decisões financeiras
+              O FINLIST é fornecido "como está". Não nos responsabilizamos por decisões financeiras
               tomadas com base nas informações do aplicativo. Sempre confirme seus saldos e
               pagamentos diretamente com bancos e instituições financeiras.
             </p>

@@ -13,9 +13,9 @@ import { openPluggyWidget } from "@/lib/pluggy-widget";
 export const Route = createFileRoute("/_authenticated/open-finance")({
   head: () => ({
     meta: [
-      { title: "Open Finance — conectar contas | Finlist" },
+      { title: "Open Finance — conectar contas | FINLIST" },
       { name: "description", content: "Conecte suas contas bancárias e cartões via Open Finance para lançamentos automáticos." },
-      { property: "og:title", content: "Open Finance — conectar contas | Finlist" },
+      { property: "og:title", content: "Open Finance — conectar contas | FINLIST" },
       { property: "og:description", content: "Conecte suas contas bancárias e cartões via Open Finance para lançamentos automáticos." },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex" },

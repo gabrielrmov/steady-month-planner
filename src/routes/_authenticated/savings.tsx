@@ -15,9 +15,9 @@ import { ptBR } from "date-fns/locale";
 export const Route = createFileRoute("/_authenticated/savings")({
   head: () => ({
     meta: [
-      { title: "Metas de economia | Finlist" },
+      { title: "Metas de economia | FINLIST" },
       { name: "description", content: "Defina metas de economia e acompanhe o progresso mês a mês." },
-      { property: "og:title", content: "Metas de economia | Finlist" },
+      { property: "og:title", content: "Metas de economia | FINLIST" },
       { property: "og:description", content: "Defina metas de economia e acompanhe o progresso mês a mês." },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex" },

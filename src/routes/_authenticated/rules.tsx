@@ -15,9 +15,9 @@ import { categoryForDescription, type CategoryRule } from "@/lib/automation";
 export const Route = createFileRoute("/_authenticated/rules")({
   head: () => ({
     meta: [
-      { title: "Regras de categorização | Finlist" },
+      { title: "Regras de categorização | FINLIST" },
       { name: "description", content: "Crie regras automáticas para categorizar lançamentos importados." },
-      { property: "og:title", content: "Regras de categorização | Finlist" },
+      { property: "og:title", content: "Regras de categorização | FINLIST" },
       { property: "og:description", content: "Crie regras automáticas para categorizar lançamentos importados." },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex" },

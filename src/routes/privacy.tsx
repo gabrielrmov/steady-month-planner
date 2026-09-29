@@ -4,14 +4,14 @@ import { Wallet } from "lucide-react";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacidade | Finlist" },
+      { title: "Privacidade | FINLIST" },
       {
         name: "description",
         content:
-          "Política de privacidade do Finlist. Saiba como seus dados financeiros são armazenados e protegidos.",
+          "Política de privacidade do FINLIST. Saiba como seus dados financeiros são armazenados e protegidos.",
       },
-      { property: "og:title", content: "Privacidade | Finlist" },
-      { property: "og:description", content: "Como o Finlist protege seus dados financeiros." },
+      { property: "og:title", content: "Privacidade | FINLIST" },
+      { property: "og:description", content: "Como o FINLIST protege seus dados financeiros." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://steady-month-planner.dsggabriel7.workers.dev/privacy" },
       { name: "twitter:card", content: "summary" },
@@ -33,7 +33,7 @@ function PrivacyPage() {
             >
               <Wallet className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-bold text-foreground">Finlist</span>
+            <span className="font-bold text-foreground">FINLIST</span>
           </Link>
           <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
             Voltar
@@ -64,7 +64,7 @@ function PrivacyPage() {
             <h2 className="text-lg font-semibold text-foreground">2. Como usamos seus dados</h2>
             <p className="mt-2">
               Seus dados são usados exclusivamente para exibir, organizar e permitir o gerenciamento
-              das suas finanças dentro do Finlist. Não vendemos, alugamos ou compartilhamos dados
+              das suas finanças dentro do FINLIST. Não vendemos, alugamos ou compartilhamos dados
               com terceiros para fins de marketing.
             </p>
           </section>

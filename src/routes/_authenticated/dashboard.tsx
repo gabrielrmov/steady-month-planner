@@ -284,7 +284,7 @@ function Dashboard() {
 
   if (overdue > 0) {
     insights.push({
-      text: `Você tem ${overdue} conta(s) em atraso somando ${brl(
+      text: `Você tem ${overdue} ${overdue === 1 ? "conta em atraso" : "contas em atraso"} somando ${brl(
         overdueList.reduce((s, t) => s + Number(t.amount), 0),
       )}.`,
       tone: "destructive",
@@ -641,7 +641,7 @@ function Dashboard() {
                     <th className="w-8 py-2 pr-2">
                       <span className="sr-only">Pago</span>
                     </th>
-                    <th className="py-2 pr-2">Conta</th>
+                    <th className="w-full py-2 pr-2">Conta</th>
                     <th className="hidden py-2 pr-2 sm:table-cell">Vencimento</th>
                     <th className="py-2 text-right">Valor</th>
                   </tr>
@@ -679,7 +679,7 @@ function Dashboard() {
                         </td>
                         <td className="hidden py-3 pr-2 sm:table-cell">
                           <span
-                            className={`inline-flex items-center rounded-full border px-3 py-0.5 text-[12px] leading-4 ${
+                            className={`inline-flex items-center whitespace-nowrap rounded-full border px-3 py-0.5 text-[12px] leading-4 ${
                               isOverdue
                                 ? "border-negative font-semibold text-negative"
                                 : soon
@@ -736,13 +736,8 @@ function Dashboard() {
                   const days = differenceInCalendarDays(new Date(t.due_date + "T00:00:00"), today);
                   return (
                     <li key={t.id} className="text-[15px] leading-[22px]">
-                      {t.description}{" "}
-                      {days < 0
-                        ? "venceu"
-                        : days === 0
-                          ? "vence hoje"
-                          : `vence em ${days} ${days === 1 ? "dia" : "dias"}`}
-                      : <span className="num text-[14px]">{brl(Number(t.amount))}</span>.
+                      {t.description}: {dueLabel(days).toLowerCase()},{" "}
+                      <span className="num text-[14px]">{brl(Number(t.amount))}</span>.
                     </li>
                   );
                 })}
@@ -799,7 +794,7 @@ function Indicator({
         {label}
       </p>
       <p
-        className={`num mt-2 truncate text-[32px] leading-[40px] sm:text-[40px] sm:leading-[44px] ${tone === "negative" && label === "Saldo" ? "text-negative" : ""}`}
+        className={`num mt-2 text-[26px] leading-9 sm:text-[28px] sm:leading-9 ${tone === "negative" && label === "Saldo" ? "text-negative" : ""}`}
       >
         {value}
       </p>

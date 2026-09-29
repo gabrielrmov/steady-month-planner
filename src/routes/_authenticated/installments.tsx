@@ -13,9 +13,9 @@ import { ptBR } from "date-fns/locale";
 export const Route = createFileRoute("/_authenticated/installments")({
   head: () => ({
     meta: [
-      { title: "Parcelamentos | Finlist" },
+      { title: "Parcelamentos | FINLIST" },
       { name: "description", content: "Acompanhe quanto falta para quitar cada compra parcelada por cartão." },
-      { property: "og:title", content: "Parcelamentos | Finlist" },
+      { property: "og:title", content: "Parcelamentos | FINLIST" },
       { property: "og:description", content: "Acompanhe quanto falta para quitar cada compra parcelada por cartão." },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex" },

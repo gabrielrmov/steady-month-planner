@@ -16,9 +16,9 @@ import { categoryForDescription, fingerprint, parseStatement, type CategoryRule,
 export const Route = createFileRoute("/_authenticated/import")({
   head: () => ({
     meta: [
-      { title: "Importar extratos e Open Finance | Finlist" },
+      { title: "Importar extratos e Open Finance | FINLIST" },
       { name: "description", content: "Importe OFX e CSV com deduplicação automática e prepare conexões bancárias." },
-      { property: "og:title", content: "Importar extratos e Open Finance | Finlist" },
+      { property: "og:title", content: "Importar extratos e Open Finance | FINLIST" },
       { property: "og:description", content: "Importe OFX e CSV com deduplicação automática e prepare conexões bancárias." },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex" },

@@ -11,12 +11,12 @@ import { usePlan } from "@/lib/plan";
 export const Route = createFileRoute("/_authenticated/precificacao")({
   head: () => ({
     meta: [
-      { title: "Precificação de serviços PJ | Finlist" },
+      { title: "Precificação de serviços PJ | FINLIST" },
       {
         name: "description",
         content: "Calcule quanto cobrar por serviço considerando custos fixos, pró-labore, impostos e margem de lucro.",
       },
-      { property: "og:title", content: "Precificação de serviços PJ | Finlist" },
+      { property: "og:title", content: "Precificação de serviços PJ | FINLIST" },
       {
         property: "og:description",
         content: "Calcule quanto cobrar por serviço considerando custos fixos, pró-labore, impostos e margem de lucro.",

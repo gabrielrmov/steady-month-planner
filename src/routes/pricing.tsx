@@ -6,16 +6,16 @@ import { Check, Wallet, Sparkles, ArrowRight } from "lucide-react";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Planos e preços | Finlist" },
+      { title: "Planos e preços | FINLIST" },
       {
         name: "description",
         content:
           "Comece grátis e evolua para o Pro quando precisar de relatórios avançados, cartões ilimitados e exportações.",
       },
-      { property: "og:title", content: "Planos e preços | Finlist" },
+      { property: "og:title", content: "Planos e preços | FINLIST" },
       {
         property: "og:description",
-        content: "Compare o plano gratuito e o Pro do Finlist e escolha o que cabe no seu mês.",
+        content: "Compare o plano gratuito e o Pro do FINLIST e escolha o que cabe no seu mês.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://steady-month-planner.dsggabriel7.workers.dev/pricing" },
@@ -111,7 +111,7 @@ function PricingPage() {
             >
               <Wallet className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-lg font-semibold tracking-tight text-foreground">Finlist</span>
+            <span className="text-lg font-semibold tracking-tight text-foreground">FINLIST</span>
           </Link>
           <Link to="/auth">
             <Button size="sm">Entrar</Button>
@@ -197,7 +197,7 @@ function PricingPage() {
 
       <footer className="border-t border-border px-6 py-6 text-center text-xs text-muted-foreground">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 md:flex-row">
-          <p>© {new Date().getFullYear()} Finlist</p>
+          <p>© {new Date().getFullYear()} FINLIST</p>
           <div className="flex gap-4">
             <Link to="/terms" className="hover:text-foreground">
               Termos
