@@ -582,7 +582,7 @@ function Landing() {
         {/* Faixa de fatos */}
         <section
           aria-label="FINLIST em números"
-          className="border-y border-border bg-card px-6 py-12"
+          className="border-y border-border bg-muted px-6 py-12"
         >
           <dl className="mx-auto grid max-w-6xl grid-cols-2 gap-8 lg:grid-cols-4">
             {facts.map((f) => (
@@ -655,7 +655,7 @@ function Landing() {
         </Section>
 
         {/* Recursos: blocos alternados */}
-        <Section id="recursos" className="border-t border-border bg-card">
+        <Section id="recursos" className="border-t border-border bg-muted">
           <Heading
             eyebrow="Recursos"
             title="Tudo do mês em uma lista só."
@@ -744,7 +744,7 @@ function Landing() {
         </Section>
 
         {/* Como funciona */}
-        <Section id="como-funciona" className="border-t border-border bg-card">
+        <Section id="como-funciona" className="border-t border-border bg-muted">
           <Heading eyebrow="Como funciona" title="Três passos, todo mês." />
           <ol className="mt-12 grid gap-6 md:grid-cols-3">
             {steps.map((st, i) => (
