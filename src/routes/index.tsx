@@ -1,14 +1,24 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import {
+  BrazilDots,
+  DotBars,
+  DotRoute,
+  GlyphDots,
+  LayerStack,
+} from "@/components/landing/Halftone";
+import {
   ArrowRight,
   BarChart3,
+  CalendarDays,
   Check,
   ChevronDown,
+  CreditCard,
   FileUp,
   Landmark,
+  ListChecks,
   Lock,
   PiggyBank,
   Repeat,
@@ -61,58 +71,101 @@ export const Route = createFileRoute("/")({
 /* ------------------------------------------------------------------ */
 
 const navLinks = [
-  { href: "#recursos", label: "Recursos" },
-  { href: "#como-funciona", label: "Como funciona" },
+  { href: "#recursos", label: "Recursos", menu: true },
+  { href: "#para-quem", label: "Para quem", menu: true },
   { href: "#precos", label: "Preços" },
   { href: "#faq", label: "Dúvidas" },
 ];
 
-const moreFeatures = [
+const brl = (cents: number) =>
+  (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+type Row = { name: string; cat: string; cents: number; type: "in" | "out"; status: string };
+
+const cases = [
   {
-    icon: Repeat,
-    title: "Recorrência automática",
-    desc: "Cadastre as contas fixas uma vez. O mês seguinte já nasce pronto.",
+    tab: "Autônomo",
+    lead: "Um designer que recebe por projeto",
+    title: "Saber quanto entra",
+    dim: "antes de o mês acabar.",
+    chips: ["Lançamentos", "Recebimentos", "Saldo previsto"],
+    caption:
+      "Cada recebimento fica pendente até cair. O saldo previsto mostra o que sobra se tudo entrar como combinado.",
+    label: "Saldo previsto",
+    value: 278000,
+    rows: [
+      { n: "Projeto de logo", d: "Pendente", c: 90000 },
+      { n: "Salário", d: "Recebido", c: 480000 },
+    ],
   },
   {
-    icon: BarChart3,
-    title: "Relatórios por categoria",
-    desc: "Evolução mês a mês e para onde o dinheiro está indo.",
+    tab: "Família",
+    lead: "Um casal com filhos e cartão",
+    title: "Nenhuma conta esquecida",
+    dim: "no meio do mês.",
+    chips: ["Contas a pagar", "Cartões", "Calendário"],
+    caption: "As contas fixas nascem prontas todo mês. O calendário mostra o que vence primeiro.",
+    label: "A pagar neste mês",
+    value: 318000,
+    rows: [
+      { n: "Internet", d: "Vence em 3 dias", c: 11990 },
+      { n: "Aluguel", d: "Pago", c: 145000 },
+    ],
   },
   {
-    icon: FileUp,
-    title: "Importação de extrato",
-    desc: "Traga o OFX ou CSV do banco em vez de digitar tudo.",
-  },
-  {
-    icon: Wand2,
-    title: "Regras de categorização",
-    desc: "Diga uma vez que “iFood” é alimentação e nunca mais repita.",
-  },
-  {
-    icon: PiggyBank,
-    title: "Metas de economia",
-    desc: "Acompanhe quanto já guardou e o ritmo para chegar lá.",
-  },
-  {
-    icon: Landmark,
-    title: "Open Finance",
-    desc: "Conecte sua conta bancária e acompanhe os lançamentos.",
+    tab: "Pequeno negócio",
+    lead: "Uma loja com poucos funcionários",
+    title: "Gastos da empresa",
+    dim: "separados dos pessoais.",
+    chips: ["Precificação", "Impostos", "Metas"],
+    caption: "Custo por hora, impostos e margem para precificar serviços, no plano Pessoal + PJ.",
+    label: "Meta do mês",
+    value: 80000,
+    rows: [
+      { n: "Reserva de emergência", d: "40% da meta", c: 80000 },
+      { n: "Receitas do mês", d: "Setembro de 2026", c: 1850000 },
+    ],
   },
 ];
 
-const steps = [
+const audiences = [
+  "Autônomos e freelancers",
+  "Famílias",
+  "Pequenos negócios",
+  "Quem sai da planilha",
+];
+
+const groups = [
   {
-    title: "Cadastre o seu mês",
-    desc: "Contas fixas, parcelas, cartões e recebimentos em poucos cliques — ou importe o extrato.",
+    title: "Lançamentos e contas do mês",
+    items: [
+      ["Entradas e saídas", ListChecks],
+      ["Contas a pagar", CalendarDays],
+      ["Recorrências", Repeat],
+      ["Parcelas", CreditCard],
+    ],
   },
   {
-    title: "Marque o que foi pago",
-    desc: "O checklist e o calendário mostram exatamente o que falta e o que vence primeiro.",
+    title: "Para entender o dinheiro",
+    items: [
+      ["Relatórios por categoria", BarChart3],
+      ["Metas de economia", PiggyBank],
+      ["Regras de categorização", Wand2],
+    ],
   },
   {
-    title: "Feche o mês em ordem",
-    desc: "O dashboard mostra o saldo previsto e os relatórios apontam onde dá para ajustar.",
+    title: "Para trazer o que já existe",
+    items: [
+      ["Extrato OFX e CSV", FileUp],
+      ["Open Finance", Landmark],
+    ],
   },
+] as const;
+
+const ruleLines = [
+  ['se a descrição contém "ifood"', "categoria = Alimentação"],
+  ['se a descrição contém "uber"', "categoria = Transporte"],
+  ['se a descrição contém "aluguel"', "categoria = Moradia"],
 ];
 
 const plans = [
@@ -169,804 +222,814 @@ const faqs = [
   },
 ];
 
-const brl = (cents: number) =>
-  (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
-/** Números do faixa: fatos do produto e dos planos, sem promessas. */
-const facts = [
-  { value: "30 dias", label: "de teste com tudo liberado" },
-  { value: "R$ 19", label: "por mês no plano Pessoal" },
-  { value: "OFX e CSV", label: "para importar o extrato" },
-  { value: "Mensal", label: "sem fidelidade, cancele quando quiser" },
-];
-
-type Row = { name: string; cat: string; cents: number; type: "in" | "out"; status: string };
-
-const sampleRows: Row[] = [
-  { name: "Salário", cat: "Salário", cents: 480000, type: "in", status: "Recebido" },
-  { name: "Aluguel", cat: "Moradia", cents: 145000, type: "out", status: "Pago" },
-  { name: "Internet", cat: "Moradia", cents: 11990, type: "out", status: "Vence em 3 dias" },
-  { name: "Mercado", cat: "Alimentação", cents: 62480, type: "out", status: "Pago" },
-  { name: "Projeto de logo", cat: "Freelance", cents: 90000, type: "in", status: "Pendente" },
-];
-
-const tickerRows = [
-  ...sampleRows,
-  { name: "Ônibus e metrô", cat: "Transporte", cents: 21000, type: "out", status: "Pago" },
-  { name: "Plano de saúde", cat: "Saúde", cents: 38900, type: "out", status: "Vence em 5 dias" },
-  { name: "Cinema", cat: "Lazer", cents: 7800, type: "out", status: "Pago" },
-] as Row[];
-
-const cases = [
-  {
-    tab: "Autônomo",
-    who: "Exemplo: designer que recebe por projeto",
-    title: "Saber quanto entra antes de o mês acabar.",
-    body: "Cada recebimento fica como pendente até cair. O saldo previsto mostra o que sobra se tudo entrar como combinado.",
-    rows: [
-      { label: "Entradas do mês", cents: 690000 },
-      { label: "Saídas do mês", cents: 412000 },
-      { label: "Ainda a receber", cents: 180000 },
-    ],
-    note: "Saldo previsto: R$ 2.780,00",
-  },
-  {
-    tab: "Família",
-    who: "Exemplo: casal com filhos e cartão",
-    title: "Nenhuma conta esquecida no meio do mês.",
-    body: "Contas fixas nascem prontas todo mês. O calendário mostra o que vence primeiro, sem susto.",
-    rows: [
-      { label: "Contas a pagar", cents: 318000 },
-      { label: "Já pagas", cents: 204000 },
-      { label: "Vencem nesta semana", cents: 41990 },
-    ],
-    note: "Internet vence em 3 dias: R$ 119,90.",
-  },
-  {
-    tab: "Pequeno negócio",
-    who: "Exemplo: loja com poucos funcionários",
-    title: "Gastos da empresa separados dos pessoais.",
-    body: "Precificação de serviços com custo por hora, impostos e margem, no plano Pessoal + PJ.",
-    rows: [
-      { label: "Receitas do mês", cents: 1850000 },
-      { label: "Despesas do mês", cents: 1274000 },
-      { label: "Meta de economia", cents: 200000 },
-    ],
-    note: "Meta do mês: você guardou R$ 800,00 de R$ 2.000,00.",
-  },
-];
-
 /* ------------------------------------------------------------------ */
-/* Building blocks                                                     */
+/* Peças                                                               */
 /* ------------------------------------------------------------------ */
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
+function Tag({
+  children,
+  tone = "green",
+}: {
+  children: React.ReactNode;
+  tone?: "green" | "blue" | "violet" | "cyan";
+}) {
+  const bg = {
+    green: "bg-[#e3f1ee] text-[#167e6c]",
+    blue: "bg-[#e6ecf7] text-[#1e4199]",
+    violet: "bg-[#efe9fa] text-[#521fa7]",
+    cyan: "bg-[#e0f2f6] text-[#0c6997]",
+  }[tone];
   return (
-    <p className="flex items-center gap-2 text-[12px] font-medium uppercase leading-[18px] tracking-[0.08em] text-primary">
-      <span className="h-1.5 w-1.5 rounded-full bg-[var(--chart-1)]" aria-hidden />
+    <span
+      className={`inline-block rounded-sm px-2 py-1 font-mono text-[11px] uppercase leading-none tracking-[0.06em] ${bg}`}
+    >
       {children}
+    </span>
+  );
+}
+
+function ExampleNote({ className = "" }: { className?: string }) {
+  return (
+    <p className={`font-mono text-[11px] uppercase tracking-[0.06em] text-ink-muted ${className}`}>
+      Exemplo ilustrativo
     </p>
   );
 }
 
-/** Campo de pontos em espectro, no espírito do mapa em meio-tom da Column. Decorativo. */
-function HalftoneField() {
-  const dots = useMemo(() => {
-    const cols = 64;
-    const rows = 34;
-    const stops = ["#d65620", "#9f7aee", "#4575cd", "#71d2f0", "#44b48b", "#f4df69"];
-    const out: { x: number; y: number; r: number; c: string; o: number }[] = [];
-    for (let i = 0; i < cols; i++) {
-      for (let j = 0; j < rows; j++) {
-        const nx = i / (cols - 1);
-        const ny = j / (rows - 1);
-        const land =
-          Math.sin(nx * 9 + 0.6) * Math.cos(ny * 7 - 0.4) +
-          0.55 * Math.sin(nx * 21 + ny * 5) * Math.cos(ny * 13);
-        if (land < 0.05) continue;
-        const fade =
-          Math.min(1, nx * 3.2) * Math.min(1, (1 - ny) * 2.4) * Math.min(1, ny * 4 + 0.35);
-        const t = nx * (stops.length - 1);
-        out.push({
-          x: i * 10 + 5,
-          y: j * 10 + 5,
-          r: Math.min(3.2, 0.7 + land * 1.6),
-          c: stops[Math.min(stops.length - 1, Math.round(t))],
-          o: 0.16 + 0.6 * fade,
-        });
-      }
-    }
-    return out;
-  }, []);
+function Wrap({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <svg
-      aria-hidden
-      viewBox="0 0 640 340"
-      preserveAspectRatio="xMaxYMid slice"
-      className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[62%] [mask-image:linear-gradient(to_right,transparent,black_45%)] lg:block"
-    >
-      {dots.map((d, i) => (
-        <circle key={i} cx={d.x} cy={d.y} r={d.r} fill={d.c} opacity={d.o} />
-      ))}
-    </svg>
+    <div className={`mx-auto w-full max-w-[1200px] px-6 md:px-16 ${className}`}>{children}</div>
   );
 }
 
-function ExampleTag({ className = "" }: { className?: string }) {
+function HeroWidget() {
   return (
-    <span
-      className={`rounded-sm border border-border-strong px-2 py-0.5 text-[12px] leading-4 text-ink-muted ${className}`}
-    >
-      Exemplo ilustrativo
-    </span>
-  );
-}
-
-function Money({ cents, type }: { cents: number; type?: "in" | "out" }) {
-  return (
-    <span className={`num text-[14px] leading-5 ${type === "in" ? "text-positive" : ""}`}>
-      {type === "in" ? "+ " : type === "out" ? "- " : ""}
-      {brl(cents)}
-    </span>
-  );
-}
-
-function StatusChip({ status }: { status: string }) {
-  const soon = status.startsWith("Vence");
-  return (
-    <span
-      className={`hidden rounded-full border px-3 py-0.5 text-[12px] leading-4 sm:inline-block ${
-        soon ? "border-attention font-semibold text-attention" : "border-border text-ink-muted"
-      }`}
-    >
-      {status}
-    </span>
-  );
-}
-
-function LedgerPanel({
-  rows,
-  title = "Lançamentos",
-  period = "Setembro de 2026",
-  float = false,
-}: {
-  rows: Row[];
-  title?: string;
-  period?: string;
-  float?: boolean;
-}) {
-  return (
-    <div
-      className={`rounded-lg bg-card ${float ? "shadow-[var(--shadow-widget)]" : "shadow-[var(--shadow-product)]"}`}
-    >
-      <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
-        <div>
-          <p className="font-display text-[18px] font-semibold leading-6">{title}</p>
-          <p className="text-[12px] leading-4 text-ink-muted">{period}</p>
+    <div className="w-[min(100%,340px)] rounded-lg bg-card p-3 shadow-[var(--shadow-widget)]">
+      <div className="space-y-1 px-2 pt-2">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] leading-4 text-ink-muted">Conta corrente</p>
+            <p className="num text-[15px] leading-5">R$ 4.800,00</p>
+          </div>
+          <p className="text-[11px] leading-4 text-ink-muted">Setembro de 2026</p>
         </div>
-        <ExampleTag />
+        <div className="flex items-start justify-between gap-3 pt-2">
+          <div>
+            <p className="text-[11px] leading-4 text-ink-muted">Reserva de emergência</p>
+            <p className="num text-[15px] leading-5">R$ 800,00</p>
+          </div>
+          <p className="text-[11px] leading-4 text-ink-muted">Meta</p>
+        </div>
       </div>
-      <ul className="divide-y divide-border">
-        {rows.map((r) => (
-          <li key={r.name} className="flex items-center gap-3 px-5 py-3">
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[15px] font-bold leading-[22px]">{r.name}</p>
-              <p className="text-[12px] leading-4 text-ink-muted">{r.cat}</p>
-            </div>
-            <StatusChip status={r.status} />
-            <div className="w-28 text-right">
-              <Money cents={r.cents} type={r.type} />
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 px-2 text-[11px] leading-4">
+        <span className="flex items-center gap-1.5 text-positive">
+          <Check className="h-3 w-3" aria-hidden />
+          Guardado
+        </span>
+        <span className="text-ink-muted">Exemplo ilustrativo</span>
+      </div>
+      <pre className="mt-3 overflow-hidden rounded-md bg-muted p-3 font-mono text-[10.5px] leading-[1.5] text-ink-muted [mask-image:linear-gradient(to_bottom,black_55%,transparent)]">
+        {`{
+  `}
+        <span className="text-[#167e6c]">"descricao"</span>
+        {`: `}
+        <span className="text-[#3f9a6b]">"Reserva do mês"</span>
+        {`,
+  `}
+        <span className="text-[#167e6c]">"valor"</span>
+        {`: `}
+        <span className="text-[#9f7aee]">80000</span>
+        {`,
+  `}
+        <span className="text-[#167e6c]">"tipo"</span>
+        {`: `}
+        <span className="text-[#3f9a6b]">"saida"</span>
+        {`,
+  `}
+        <span className="text-[#167e6c]">"status"</span>
+        {`: `}
+        <span className="text-[#3f9a6b]">"pago"</span>
+        {`,
+  `}
+        <span className="text-[#167e6c]">"categoria"</span>
+        {`: `}
+        <span className="text-[#3f9a6b]">"Metas"</span>
+      </pre>
     </div>
   );
 }
 
-function Section({
-  id,
-  className = "",
-  children,
-}: {
-  id?: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
+function LayeredAccounts({ c }: { c: (typeof cases)[number] }) {
   return (
-    <section id={id} className={`scroll-mt-20 px-6 py-20 md:py-28 ${className}`}>
-      <div className="mx-auto max-w-[1200px]">{children}</div>
-    </section>
-  );
-}
-
-function Heading({ eyebrow, title, desc }: { eyebrow?: string; title: string; desc?: string }) {
-  return (
-    <div className="max-w-2xl">
-      {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-      <h2 className="mt-2 text-balance font-display text-[32px] font-semibold leading-[38px] tracking-[-0.02em] md:text-[40px] md:leading-[46px]">
-        {title}
-      </h2>
-      {desc && <p className="mt-4 text-[17px] leading-[26px] text-ink-muted">{desc}</p>}
+    <div className="relative mx-auto h-[330px] w-full max-w-[400px]">
+      <div className="absolute inset-x-6 top-0 rounded-lg bg-card p-3 shadow-[var(--shadow-product)]">
+        <div className="flex items-center justify-between text-[12px] leading-4 text-ink-muted">
+          <span>{c.rows[0].n}</span>
+          <span className="num">{brl(c.rows[0].c)}</span>
+        </div>
+      </div>
+      <div className="absolute inset-x-3 top-9 rounded-lg bg-card p-3 pb-8 shadow-[var(--shadow-product)]">
+        <div className="flex items-center justify-between text-[12px] leading-4 text-ink-muted">
+          <span>{c.rows[1].n}</span>
+          <span className="num">{brl(c.rows[1].c)}</span>
+        </div>
+      </div>
+      <div className="absolute inset-x-0 top-[74px] rounded-lg bg-card p-3 shadow-[var(--shadow-widget)]">
+        <div className="flex items-center justify-between text-[13px] font-medium leading-5">
+          <span>{c.label}</span>
+          <span className="text-ink-muted">•••• 0921</span>
+        </div>
+        <div className="mt-2 rounded-md bg-signal p-4 text-on-signal">
+          <p className="num text-[22px] leading-7">{brl(c.value)}</p>
+          <svg viewBox="0 0 240 70" className="mt-3 h-[70px] w-full" aria-hidden>
+            <polyline
+              points="0,52 30,60 60,44 95,36 130,46 170,26 200,16 240,22"
+              fill="none"
+              stroke="#fff"
+              strokeWidth="2"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
+        <p className="mt-2 px-1 text-[11px] leading-4 text-ink-muted">Exemplo ilustrativo</p>
+      </div>
     </div>
   );
 }
 
-function FeatureRow({
-  eyebrow,
+function Terminal({ lines }: { lines: (string | [string, string])[] }) {
+  return (
+    <pre className="mt-6 overflow-x-auto rounded-lg border border-white/10 bg-[#03202b] p-4 font-mono text-[12px] leading-[1.6] text-[#94efb7]">
+      {lines.map((l, i) =>
+        typeof l === "string" ? (
+          <span key={i} className="block text-[#eeeff2]">
+            {l}
+          </span>
+        ) : (
+          <span key={i} className="block">
+            <span className="text-[#9db5bd]">{l[0]}</span>{" "}
+            <span className="text-[#eeeff2]">{l[1]}</span>
+          </span>
+        ),
+      )}
+    </pre>
+  );
+}
+
+function DarkFeature({
   title,
   desc,
-  points,
-  visual,
-  flip,
+  code,
+  panel,
 }: {
-  eyebrow: string;
   title: string;
   desc: string;
-  points: string[];
-  visual: React.ReactNode;
-  flip?: boolean;
+  code: React.ReactNode;
+  panel: React.ReactNode;
 }) {
   return (
-    <div className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
-      <div className={flip ? "md:order-2" : ""}>
-        <Eyebrow>{eyebrow}</Eyebrow>
-        <h3 className="mt-2 text-balance font-display text-[28px] font-semibold leading-[34px] tracking-[-0.02em] md:text-[32px] md:leading-[38px]">
-          {title}
-        </h3>
-        <p className="mt-4 text-[15px] leading-[22px] text-ink-muted">{desc}</p>
-        <ul className="mt-6 space-y-3">
-          {points.map((pt) => (
-            <li key={pt} className="flex items-start gap-3 text-[15px] leading-[22px]">
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
-              {pt}
-            </li>
-          ))}
-        </ul>
+    <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] md:gap-16">
+      <div>
+        <h3 className="text-[20px] font-medium leading-[26px] text-white">{title}</h3>
+        <p className="mt-2 max-w-sm text-[14px] leading-[22px] text-[#a9b6bd]">{desc}</p>
+        {code}
       </div>
-      <div className={flip ? "md:order-1" : ""}>{visual}</div>
+      <div className="rounded-lg border border-white/10 bg-white/[0.03] p-6 md:p-8">{panel}</div>
     </div>
   );
 }
 
-function BillsVisual() {
-  const bills = [
-    { n: "Internet", d: "Vence em 3 dias", c: 11990, soon: true },
-    { n: "Plano de saúde", d: "Vence em 5 dias", c: 38900, soon: true },
-    { n: "Aluguel", d: "Venceu há 2 dias", c: 145000, late: true },
-    { n: "Energia", d: "Vence 25/09/2026", c: 24350 },
-  ];
+function PanelChips({ items, active }: { items: string[]; active: number }) {
   return (
-    <div className="rounded-lg bg-card shadow-[var(--shadow-product)]">
-      <div className="flex items-center justify-between border-b border-border px-5 py-4">
-        <p className="font-display text-[18px] font-semibold leading-6">Contas a pagar</p>
-        <ExampleTag />
-      </div>
-      <ul className="divide-y divide-border">
-        {bills.map((b) => (
-          <li key={b.n} className="flex items-center gap-3 px-5 py-3">
-            <span className="h-5 w-5 shrink-0 rounded-sm border border-border-strong" aria-hidden />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[15px] font-bold leading-[22px]">{b.n}</p>
-              <p
-                className={`text-[12px] leading-4 ${
-                  b.late
-                    ? "font-semibold text-negative"
-                    : b.soon
-                      ? "font-semibold text-attention"
-                      : "text-ink-muted"
-                }`}
-              >
-                {b.d}
-              </p>
-            </div>
-            <Money cents={b.c} />
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function GoalVisual() {
-  const pct = 40;
-  return (
-    <div className="rounded-lg bg-signal p-6 text-on-signal shadow-[var(--shadow-product)]">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[13px] font-semibold leading-[18px] tracking-[0.2px]">
-            Meta de economia
-          </p>
-          <p className="num mt-2 text-[32px] leading-[40px] md:text-[40px] md:leading-[44px]">
-            {brl(80000)}
-          </p>
-          <p className="text-[14px] leading-5">de {brl(200000)} · Setembro de 2026</p>
+    <div
+      className="mt-8 grid gap-2"
+      style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+    >
+      {items.map((t, i) => (
+        <div
+          key={t}
+          className={`rounded-md border px-3 py-2 text-[12px] leading-4 ${i === active ? "border-white/25 bg-white/10 text-white" : "border-white/10 text-[#a9b6bd]"}`}
+        >
+          {t}
         </div>
-        <ExampleTag className="!border-on-signal !text-on-signal" />
-      </div>
-      <div
-        className="mt-6 h-3 w-full overflow-hidden rounded-lg bg-white/50"
-        role="progressbar"
-        aria-valuenow={pct}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label="Progresso da meta"
-      >
-        <div className="h-full rounded-lg bg-[#111a4a]" style={{ width: `${pct}%` }} />
-      </div>
-      <p className="mt-2 text-[14px] leading-5">
-        <span className="num font-semibold">▲ {pct}%</span> da meta. Faltam {brl(120000)} para
-        fechar o mês.
-      </p>
+      ))}
     </div>
   );
 }
 
-function ChartVisual() {
-  const months = [
-    { m: "Abr", i: 5200, o: 4100 },
-    { m: "Mai", i: 5400, o: 4700 },
-    { m: "Jun", i: 5100, o: 3900 },
-    { m: "Jul", i: 6100, o: 4800 },
-    { m: "Ago", i: 5900, o: 4300 },
-    { m: "Set", i: 6900, o: 4120 },
-  ];
-  const max = 7000;
+function MiniRow({ n, d, v }: { n: string; d: string; v: string }) {
   return (
-    <div className="rounded-lg bg-card p-6 shadow-[var(--shadow-product)]">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="font-display text-[18px] font-semibold leading-6">Entradas x saídas</p>
-          <p className="text-[12px] leading-4 text-ink-muted">Abril a setembro de 2026</p>
-        </div>
-        <ExampleTag />
+    <div className="flex items-center justify-between rounded-md bg-white/[0.06] px-4 py-3 text-white">
+      <div>
+        <p className="text-[13px] leading-5">{n}</p>
+        <p className="text-[11px] leading-4 text-[#a9b6bd]">{d}</p>
       </div>
-      <div
-        className="mt-6 flex h-44 items-end gap-3"
-        role="img"
-        aria-label="Gráfico de barras de entradas e saídas por mês"
-      >
-        {months.map((x) => (
-          <div key={x.m} className="flex flex-1 flex-col items-center gap-2">
-            <div className="flex h-36 w-full items-end justify-center gap-1">
-              <div
-                className="w-1/2 rounded-t-sm bg-[var(--chart-1)]"
-                style={{ height: `${(x.i / max) * 100}%` }}
-              />
-              <div
-                className="w-1/2 rounded-t-sm bg-[var(--chart-2)]"
-                style={{ height: `${(x.o / max) * 100}%` }}
-              />
-            </div>
-            <span className="text-[12px] leading-4 text-ink-muted">{x.m}</span>
-          </div>
-        ))}
-      </div>
-      <div className="mt-4 flex gap-5 text-[13px] font-semibold leading-[18px]">
-        <span className="flex items-center gap-2">
-          <span className="h-3 w-3 rounded-sm bg-[var(--chart-1)]" />
-          Entrou
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="h-3 w-3 rounded-sm bg-[var(--chart-2)]" />
-          Saiu
-        </span>
-      </div>
+      <span className="num text-[14px]">{v}</span>
     </div>
   );
 }
 
 function Landing() {
   const [tab, setTab] = useState(0);
+  const [aud, setAud] = useState(0);
   const c = cases[tab];
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="bg-brand-deep px-6 py-2 text-center text-[13px] font-semibold leading-[18px] text-on-brand">
-        Novo: metas de economia com progresso mensal.{" "}
-        <a href="#recursos" className="underline underline-offset-2">
-          Ver recursos
-        </a>
-      </div>
+      <a
+        href="#recursos"
+        className="block bg-[#4b5bb4] px-6 py-2.5 text-center text-[13px] leading-[18px] text-white"
+      >
+        <span className="font-medium">Novo: metas de economia com progresso mensal.</span>{" "}
+        <span className="opacity-80">Veja como funciona</span> <span aria-hidden>›</span>
+      </a>
 
-      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-[62px] max-w-[1200px] items-center justify-between gap-4 px-6">
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md">
+        <Wrap className="flex h-[62px] items-center justify-between gap-4">
           <Link to="/" aria-label="FINLIST">
             <Logo />
           </Link>
-          <nav
-            aria-label="Principal"
-            className="hidden items-center gap-8 text-[15px] text-ink-muted md:flex"
-          >
+          <nav aria-label="Principal" className="hidden items-center gap-1 md:flex">
             {navLinks.map((l) => (
-              <a key={l.href} href={l.href} className="hover:text-foreground">
+              <a
+                key={l.href}
+                href={l.href}
+                className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-[14px] leading-5 text-foreground hover:bg-white/70"
+              >
                 {l.label}
+                {l.menu && <ChevronDown className="h-3.5 w-3.5" aria-hidden />}
               </a>
             ))}
           </nav>
           <div className="flex shrink-0 items-center gap-2">
-            <Link to="/auth" className="hidden sm:block">
-              <Button variant="ghost" size="sm">
-                Entrar
-              </Button>
+            <Link to="/auth" className="hidden px-3 text-[14px] sm:block">
+              Entrar
             </Link>
-            <Link to="/auth">
-              <Button size="sm">Começar grátis</Button>
+            <Link
+              to="/auth"
+              className="flex items-center gap-1.5 rounded-lg border border-white bg-white/60 px-3.5 py-2 text-[14px] leading-5 backdrop-blur-sm"
+            >
+              Começar agora <ChevronDown className="h-3.5 w-3.5" aria-hidden />
             </Link>
           </div>
-        </div>
+        </Wrap>
       </header>
 
       <main>
         {/* Herói */}
-        <section className="relative overflow-hidden px-6 pb-20 pt-14 md:pb-28 md:pt-24">
-          <HalftoneField />
-          <div className="relative mx-auto grid max-w-[1200px] items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-            <div>
-              <p className="inline-block rounded-full border border-white bg-white/80 px-3 py-1 text-[12px] font-medium leading-[18px] text-foreground backdrop-blur-sm">
-                30 dias grátis · sem cartão de crédito
-              </p>
-              <h1 className="mt-6 text-balance font-display text-[40px] font-semibold leading-[1.1] tracking-[-0.03em] sm:text-[52px]">
-                Seu dinheiro, em ordem.
-              </h1>
-              <p className="mt-6 max-w-lg text-[17px] leading-[26px] text-ink-muted">
-                FINLIST reúne receitas, despesas, contas a pagar e metas em uma lista clara, para
-                você decidir com o dinheiro em dia.
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link to="/auth">
-                  <Button size="lg" className="w-full sm:w-auto">
-                    Começar teste grátis
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-                <a href="#recursos">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                    Ver recursos
-                  </Button>
-                </a>
-              </div>
-            </div>
-            <LedgerPanel rows={sampleRows} float />
+        <section className="relative overflow-hidden pb-24 pt-10 md:pb-32 md:pt-16">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-[8%] top-0 hidden h-[125%] w-[68%] lg:block"
+          >
+            <BrazilDots className="absolute inset-0 h-full w-full" />
+            <DotRoute
+              from={[-60.0, -3.1]}
+              to={[-46.6, -23.5]}
+              className="absolute inset-0 h-full w-full"
+            />
           </div>
-        </section>
-
-        {/* Faixa de fatos */}
-        <section aria-label="FINLIST em números" className="px-6 pb-16 pt-4">
-          <dl className="mx-auto grid max-w-[1200px] grid-cols-2 gap-x-8 gap-y-12 lg:grid-cols-4">
-            {facts.map((f) => (
-              <div key={f.label}>
-                <dt className="sr-only">{f.label}</dt>
-                <dd className="text-[28px] font-medium leading-[1.1] tracking-[-0.01em] text-positive">
-                  {f.value}
-                </dd>
-                <p className="mt-2 text-[14px] leading-5 text-ink-muted">{f.label}</p>
-              </div>
-            ))}
-          </dl>
-        </section>
-
-        {/* Casos de exemplo (abas) */}
-        <Section id="casos">
-          <Heading
-            eyebrow="Para quem é"
-            title="Do jeito que você já vive o mês."
-            desc="Três situações de exemplo. Os nomes e os valores são ilustrativos, não são clientes reais."
-          />
-          <div className="mt-10" role="tablist" aria-label="Casos de exemplo">
-            <div className="flex flex-wrap gap-2">
-              {cases.map((x, i) => (
-                <button
-                  key={x.tab}
-                  role="tab"
-                  aria-selected={tab === i}
-                  onClick={() => setTab(i)}
-                  className={`rounded-full border px-4 py-1.5 text-[13px] font-semibold leading-[18px] ${
-                    tab === i
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border-strong bg-card text-foreground hover:bg-muted"
-                  }`}
-                >
-                  {x.tab}
-                </button>
-              ))}
-            </div>
-            <div
-              role="tabpanel"
-              className="mt-6 grid gap-8 rounded-lg bg-card p-6 shadow-[var(--shadow-product)] md:grid-cols-2 md:p-10"
-            >
+          <Wrap className="relative">
+            <p className="inline-flex items-center gap-2 rounded-lg border border-white bg-white/80 px-3 py-1.5 text-[12px] leading-4 text-ink-muted shadow-[var(--shadow-card)] backdrop-blur-sm">
+              <span className="font-semibold text-foreground">FINLIST</span> 30 dias grátis, sem
+              cartão
+            </p>
+            <div className="mt-10 grid items-start gap-10 lg:grid-cols-2">
               <div>
-                <p className="text-[12px] leading-4 text-ink-muted">{c.who}</p>
-                <h3 className="mt-3 text-balance font-display text-[28px] font-semibold leading-[34px] tracking-[-0.02em]">
-                  {c.title}
-                </h3>
-                <p className="mt-4 text-[15px] leading-[22px] text-ink-muted">{c.body}</p>
-              </div>
-              <div className="rounded-lg border border-border bg-muted p-5">
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-[13px] font-semibold leading-[18px] tracking-[0.2px] text-ink-muted">
-                    Setembro de 2026
-                  </p>
-                  <ExampleTag />
+                <h1 className="text-balance font-display text-[40px] font-semibold leading-[1.08] tracking-[-0.03em] sm:text-[52px]">
+                  Organize, acompanhe e planeje o dinheiro do mês.
+                </h1>
+                <p className="mt-5 max-w-md text-[17px] leading-[26px] text-foreground/90">
+                  Contas a pagar, entradas, cartões e metas em uma lista só. Para quem hoje se vira
+                  com planilhas e extratos soltos.
+                </p>
+                <div className="mt-7 flex flex-wrap gap-3">
+                  <Link to="/auth">
+                    <Button size="lg">
+                      Começar teste grátis <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <a href="#recursos">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="border-white bg-white/60 text-foreground shadow-[var(--shadow-card)] hover:bg-white"
+                    >
+                      Ver recursos
+                    </Button>
+                  </a>
                 </div>
-                <ul className="divide-y divide-border">
-                  {c.rows.map((r) => (
-                    <li key={r.label} className="flex items-center justify-between py-3">
-                      <span className="text-[15px] leading-[22px]">{r.label}</span>
-                      <Money cents={r.cents} />
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-3 text-[15px] font-bold leading-[22px]">{c.note}</p>
+              </div>
+              <div className="flex justify-center lg:justify-start lg:pl-16 lg:pt-14">
+                <HeroWidget />
               </div>
             </div>
-          </div>
-        </Section>
+          </Wrap>
+        </section>
 
-        {/* Recursos: blocos alternados */}
-        <Section id="recursos" className="bg-card">
-          <Heading
-            eyebrow="Recursos"
-            title="Tudo do mês em uma lista só."
-            desc="Lançamentos, contas a pagar, metas e gráficos, com o valor sempre primeiro."
-          />
-          <div className="mt-16 space-y-24">
-            <FeatureRow
-              eyebrow="Lançamentos"
-              title="Registre o que entrou e o que saiu."
-              desc="Valor, categoria, data e status. Você marca como pago quando pagar, e o saldo acompanha."
-              points={[
-                "Categorias prontas: Moradia, Alimentação, Transporte, Lazer, Saúde",
-                "Crie e edite as suas",
-                "Filtre por período, tipo, categoria e status",
-              ]}
-              visual={<LedgerPanel rows={sampleRows.slice(0, 4)} period="Setembro de 2026" />}
-            />
-            <FeatureRow
-              flip
-              eyebrow="Contas a pagar"
-              title="Veja o que vence primeiro."
-              desc="Vencimentos próximos e vencidos aparecem em destaque, sempre com a palavra, nunca só com a cor."
-              points={[
-                "Alertas de vencimento",
-                "Calendário do mês",
-                "Parcelas e faturas de cartão",
-              ]}
-              visual={<BillsVisual />}
-            />
-            <FeatureRow
-              eyebrow="Metas"
-              title="Guarde um pouco todo mês."
-              desc="Defina a meta de economia e acompanhe o progresso sem cobrança nem bronca."
-              points={[
-                "Meta com valor e prazo",
-                "Progresso sempre visível",
-                "Aportes manuais quando quiser",
-              ]}
-              visual={<GoalVisual />}
-            />
-            <FeatureRow
-              flip
-              eyebrow="Gráficos"
-              title="Entenda para onde o dinheiro foi."
-              desc="Despesas por categoria e a evolução mensal de entradas e saídas, sempre com o período à vista."
-              points={[
-                "Rótulo direto nas barras",
-                "Comparativo com o mês anterior",
-                "Relatórios por categoria",
-              ]}
-              visual={<ChartVisual />}
-            />
-          </div>
-        </Section>
+        {/* Números */}
+        <Wrap className="grid grid-cols-2 gap-x-8 gap-y-10 pb-24 lg:grid-cols-4">
+          {[
+            ["30 dias", "de teste com tudo liberado"],
+            ["R$ 19", "por mês no plano Pessoal"],
+            ["OFX e CSV", "para importar o extrato do banco"],
+            ["Sem fidelidade", "cancele quando quiser"],
+          ].map(([v, l]) => (
+            <div key={l}>
+              <p className="text-[28px] font-medium leading-[1.1] tracking-[-0.01em] text-positive">
+                {v}
+              </p>
+              <p className="mt-2 max-w-[200px] text-[14px] leading-5 text-ink-muted">{l}</p>
+            </div>
+          ))}
+        </Wrap>
 
-        {/* Fita de lançamentos */}
-        <section aria-hidden className="overflow-hidden border-y border-border py-6">
-          <div className="flex w-max animate-[marquee_45s_linear_infinite] gap-4 px-2">
-            {[...tickerRows, ...tickerRows].map((r, i) => (
+        {/* Confiança */}
+        <section className="relative overflow-hidden pb-28">
+          <Wrap className="relative grid items-center gap-10 lg:grid-cols-2">
+            <div>
+              <Tag>Tudo em ordem</Tag>
+              <h2 className="mt-6 max-w-lg text-balance font-display text-[28px] font-semibold leading-[1.15] tracking-[-0.02em] sm:text-[32px]">
+                Cada conta do mês no lugar dela{" "}
+                <span className="text-[#7c7f88]">
+                  para você ver o que entrou, o que saiu e quanto sobra.
+                </span>
+              </h2>
+              <p className="mt-6 max-w-md text-[15px] leading-[22px] text-ink-muted">
+                Nada de vender ou compartilhar seus dados. Cada conta só acessa o que é dela, com
+                regras de segurança aplicadas direto no banco de dados.
+              </p>
+              <a
+                href="#recursos"
+                className="mt-6 inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-[14px] leading-5 shadow-[var(--shadow-card)]"
+              >
+                Conheça os recursos <span aria-hidden>›</span>
+              </a>
+            </div>
+            <div className="relative">
+              <DotBars className="w-full" />
+              <ExampleNote className="absolute bottom-0 right-0" />
+            </div>
+          </Wrap>
+        </section>
+
+        {/* Casos, com abas */}
+        <section className="pb-28" id="para-quem">
+          <Wrap>
+            <div className="overflow-hidden rounded-lg bg-card shadow-[var(--shadow-card)]">
               <div
-                key={i}
-                className="flex items-center gap-4 rounded-lg border border-border bg-card px-4 py-3"
+                role="tablist"
+                aria-label="Exemplos"
+                className="grid grid-cols-3 gap-3 p-3 sm:p-5"
+              >
+                {cases.map((x, i) => (
+                  <button
+                    key={x.tab}
+                    role="tab"
+                    aria-selected={tab === i}
+                    onClick={() => setTab(i)}
+                    className={`rounded-lg px-3 py-4 text-[14px] font-medium leading-5 transition-colors ${
+                      tab === i
+                        ? "bg-signal text-on-signal shadow-[var(--shadow-btn)]"
+                        : "text-ink-muted hover:bg-muted"
+                    }`}
+                  >
+                    {x.tab}
+                  </button>
+                ))}
+              </div>
+              <div
+                role="tabpanel"
+                className="grid items-center gap-10 px-6 pb-12 pt-6 md:grid-cols-2 md:px-14"
               >
                 <div>
-                  <p className="text-[15px] font-bold leading-[22px]">{r.name}</p>
-                  <p className="text-[12px] leading-4 text-ink-muted">{r.cat}</p>
+                  <h3 className="text-balance font-display text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] sm:text-[30px]">
+                    {c.title} <span className="text-[#7c7f88]">{c.dim}</span>
+                  </h3>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {c.chips.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-lg border border-border bg-card px-3 py-1.5 text-[13px] leading-[18px] shadow-[var(--shadow-card)]"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="mt-10 max-w-sm text-[15px] leading-[22px]">{c.caption}</p>
+                  <p className="mt-4 text-[14px] leading-5 text-ink-muted">
+                    {c.lead}. Nome e valores fictícios.
+                  </p>
                 </div>
-                <Money cents={r.cents} type={r.type} />
+                <LayeredAccounts c={c} />
               </div>
-            ))}
+            </div>
+          </Wrap>
+        </section>
+
+        {/* Feito para organizar */}
+        <section id="recursos" className="pb-28">
+          <Wrap className="grid items-center gap-12 lg:grid-cols-2">
+            <div className="rounded-lg bg-[#eeeff2] p-3 sm:p-5">
+              <div className="rounded-lg bg-card p-5 shadow-[var(--shadow-product)]">
+                <p className="num text-[22px] leading-7">R$ 119,90</p>
+                <p className="mt-1 text-[12px] leading-4 text-ink-muted">
+                  Internet · Conta a pagar · Vence em 3 dias
+                </p>
+                <div className="mt-6 h-1 rounded-full bg-muted">
+                  <div className="h-1 w-[22%] rounded-full bg-[#44b48b]" />
+                </div>
+                <div className="mt-2 flex justify-between text-[12px] leading-4">
+                  <span>Setembro de 2026</span>
+                  <span className="text-ink-muted">Pendente</span>
+                </div>
+              </div>
+              <div className="mt-3 rounded-md px-3 py-3 font-mono text-[11.5px] leading-[1.7] text-ink-muted">
+                <p className="mb-1 uppercase tracking-[0.06em]">Regras de categorização</p>
+                {ruleLines.map(([a, b]) => (
+                  <p key={a}>
+                    <span className="text-[#167e6c]">{a}</span> →{" "}
+                    <span className="text-foreground">{b}</span>
+                  </p>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Tag tone="blue">Feito para o dia a dia</Tag>
+              <h2 className="mt-6 text-balance font-display text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] sm:text-[36px]">
+                A lista que você fazia na planilha, sem o trabalho de manter.
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] leading-[22px] text-ink-muted">
+                Cadastre uma vez o que se repete. O mês seguinte já nasce pronto, e as regras de
+                categorização arrumam o resto.
+              </p>
+              <Link
+                to="/auth"
+                className="mt-6 inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-[14px] leading-5 shadow-[var(--shadow-card)]"
+              >
+                Testar grátis <span aria-hidden>›</span>
+              </Link>
+              <div className="mt-12 grid gap-8 sm:grid-cols-2">
+                <div>
+                  <h3 className="text-[15px] font-medium leading-[22px]">Sem julgamento</h3>
+                  <p className="mt-2 text-[14px] leading-5 text-ink-muted">
+                    FINLIST mostra o que aconteceu com o dinheiro. Não dá bronca nem promete
+                    enriquecer ninguém.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-medium leading-[22px]">Do seu tamanho</h3>
+                  <p className="mt-2 text-[14px] leading-5 text-ink-muted">
+                    Serve para a conta da casa e para quem também tem empresa. Você escolhe o plano.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Wrap>
+        </section>
+
+        {/* Seção escura */}
+        <section className="px-2 pb-24 sm:px-2.5">
+          <div className="rounded-lg bg-[#011821] px-6 py-20 [background-image:radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:22px_22px] md:py-28">
+            <Wrap className="!px-0 md:!px-16">
+              <div className="grid items-center gap-10 md:grid-cols-2">
+                <div>
+                  <span className="inline-block rounded-sm bg-[#0c3242] px-2 py-1 font-mono text-[11px] uppercase leading-none tracking-[0.06em] text-[#88deeb]">
+                    Recursos
+                  </span>
+                  <h2 className="mt-6 text-balance font-display text-[34px] font-semibold leading-[1.1] tracking-[-0.02em] text-[#88deeb] sm:text-[44px]">
+                    Blocos que se encaixam no seu mês
+                  </h2>
+                  <p className="mt-6 max-w-md text-[14px] leading-[22px] text-[#a9b6bd]">
+                    Comece pelo básico e vá ligando o que faz sentido para você: lançamentos, contas
+                    a pagar, regras, extrato e metas. Nada é obrigatório.
+                  </p>
+                </div>
+                <LayerStack className="w-full" />
+              </div>
+
+              <div className="mt-24 space-y-24">
+                <DarkFeature
+                  title="Lançamentos"
+                  desc="Valor, categoria, data e status. Marque como pago quando pagar e o saldo acompanha."
+                  code={
+                    <Terminal
+                      lines={[
+                        ["aluguel", "- R$ 1.450,00  pago"],
+                        ["internet", "- R$ 119,90  vence em 3 dias"],
+                        ["salário", "+ R$ 4.800,00  recebido"],
+                      ]}
+                    />
+                  }
+                  panel={
+                    <>
+                      <div className="space-y-2">
+                        <MiniRow n="Salário" d="Recebido" v="+ R$ 4.800,00" />
+                        <MiniRow n="Aluguel" d="Pago" v="- R$ 1.450,00" />
+                        <MiniRow n="Internet" d="Vence em 3 dias" v="- R$ 119,90" />
+                      </div>
+                      <PanelChips items={["Entradas", "Saídas", "Recorrentes"]} active={0} />
+                    </>
+                  }
+                />
+                <DarkFeature
+                  title="Regras de categorização"
+                  desc="Diga uma vez que “iFood” é alimentação e nunca mais repita."
+                  code={
+                    <Terminal
+                      lines={ruleLines.map(([a, b]) => [a, `→ ${b}`] as [string, string])}
+                    />
+                  }
+                  panel={
+                    <>
+                      <div className="space-y-2">
+                        <MiniRow n="iFood · pedido" d="Alimentação" v="- R$ 62,40" />
+                        <MiniRow n="Uber · corrida" d="Transporte" v="- R$ 21,00" />
+                      </div>
+                      <PanelChips items={["Regras", "Categorias"]} active={0} />
+                    </>
+                  }
+                />
+                <DarkFeature
+                  title="Extrato do banco"
+                  desc="Traga o OFX ou o CSV em vez de digitar tudo. Com Open Finance, conecte a conta e acompanhe os lançamentos."
+                  code={
+                    <Terminal
+                      lines={[
+                        ["arquivo", "extrato-setembro.ofx"],
+                        ["formato", "OFX"],
+                        ["lançamentos", "42 encontrados"],
+                      ]}
+                    />
+                  }
+                  panel={
+                    <>
+                      <div className="space-y-2">
+                        <MiniRow n="extrato-setembro.ofx" d="OFX · 42 lançamentos" v="Importar" />
+                        <MiniRow n="Conta conectada" d="Open Finance" v="Sincronizada" />
+                      </div>
+                      <PanelChips items={["OFX", "CSV", "Open Finance"]} active={0} />
+                    </>
+                  }
+                />
+                <DarkFeature
+                  title="Metas de economia"
+                  desc="Defina o valor e o prazo. O progresso fica sempre à vista, sem cobrança."
+                  code={
+                    <Terminal
+                      lines={[
+                        ["meta", "Reserva de emergência"],
+                        ["alvo", "R$ 2.000,00"],
+                        ["guardado", "R$ 800,00 (40%)"],
+                      ]}
+                    />
+                  }
+                  panel={
+                    <>
+                      <div className="rounded-md bg-white/[0.06] p-4 text-white">
+                        <p className="text-[12px] text-[#a9b6bd]">Reserva de emergência</p>
+                        <p className="num mt-1 text-[24px] leading-8">R$ 800,00</p>
+                        <div className="mt-4 h-1.5 rounded-full bg-white/10">
+                          <div className="h-1.5 w-[40%] rounded-full bg-[#44b48b]" />
+                        </div>
+                        <p className="mt-2 text-[12px] text-[#a9b6bd]">▲ 40% de R$ 2.000,00</p>
+                      </div>
+                      <PanelChips items={["Metas", "Progresso"]} active={0} />
+                    </>
+                  }
+                />
+              </div>
+              <ExampleNote className="mt-12 !text-[#a9b6bd]" />
+            </Wrap>
           </div>
         </section>
 
-        {/* Mais recursos */}
-        <Section>
-          <Heading eyebrow="E ainda" title="Menos digitação, mais clareza." />
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {moreFeatures.map((f) => (
-              <div
-                key={f.title}
-                className="rounded-lg border border-border bg-card p-6 shadow-[var(--shadow-card)]"
-              >
-                <f.icon className="h-6 w-6 text-primary" strokeWidth={2} aria-hidden />
-                <h3 className="mt-4 font-display text-[22px] font-semibold leading-7">{f.title}</h3>
-                <p className="mt-2 text-[15px] leading-[22px] text-ink-muted">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </Section>
+        {/* Para quem */}
+        <section className="pb-28">
+          <Wrap className="grid items-center gap-12 lg:grid-cols-2">
+            <div>
+              <Tag tone="blue">FINLIST para</Tag>
+              <ul className="mt-6 space-y-1">
+                {audiences.map((a, i) => (
+                  <li key={a}>
+                    <button
+                      onClick={() => setAud(i)}
+                      className={`block w-full rounded-lg px-4 py-2 text-left font-display text-[28px] font-medium leading-[1.2] tracking-[-0.02em] sm:text-[34px] ${
+                        aud === i
+                          ? "bg-card text-[#023247] shadow-[var(--shadow-product)]"
+                          : "text-[#a9acb6] hover:text-[#7c7f88]"
+                      }`}
+                    >
+                      {a}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-8 max-w-md text-[14px] leading-[22px]">
+                Se hoje o seu controle está em planilhas, cadernos e extratos soltos, a FINLIST
+                junta tudo no mesmo lugar. Serve tanto para a conta da casa quanto para quem também
+                tem empresa e precisa precificar serviços.
+              </p>
+            </div>
+            <GlyphDots className="mx-auto w-full max-w-[460px]" />
+          </Wrap>
+        </section>
 
-        {/* Como funciona */}
-        <Section id="como-funciona" className="bg-card">
-          <Heading eyebrow="Como funciona" title="Três passos, todo mês." />
-          <ol className="mt-12 grid gap-6 md:grid-cols-3">
-            {steps.map((st, i) => (
-              <li
-                key={st.title}
-                className="rounded-lg border border-border bg-card p-6 shadow-[var(--shadow-card)]"
-              >
-                <span className="num text-[18px] leading-6 text-primary">0{i + 1}</span>
-                <h3 className="mt-3 font-display text-[22px] font-semibold leading-7">
-                  {st.title}
-                </h3>
-                <p className="mt-2 text-[15px] leading-[22px] text-ink-muted">{st.desc}</p>
-              </li>
-            ))}
-          </ol>
-        </Section>
+        {/* Elementos */}
+        <section className="pb-28">
+          <Wrap>
+            <Tag tone="violet">Recursos</Tag>
+            <h2 className="mt-6 max-w-2xl text-balance font-display text-[34px] font-semibold leading-[1.1] tracking-[-0.02em] text-[#2a1a63] sm:text-[44px]">
+              Tudo o que entra no seu mês
+            </h2>
+            <div className="mt-10 border-t border-border">
+              {groups.map((g) => (
+                <div
+                  key={g.title}
+                  className="grid gap-4 border-b border-transparent py-8 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)]"
+                >
+                  <h3 className="max-w-[240px] text-[16px] font-medium leading-[22px]">
+                    {g.title}
+                  </h3>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {g.items.map(([label, Icon]) => (
+                      <div
+                        key={label}
+                        className="flex items-center gap-3 rounded-md bg-[#eeeff2] px-3 py-2.5 text-[14px] leading-5"
+                      >
+                        <span className="flex h-7 w-7 items-center justify-center rounded-md bg-card shadow-[var(--shadow-card)]">
+                          <Icon
+                            className="h-3.5 w-3.5 text-[#1e4199]"
+                            strokeWidth={1.75}
+                            aria-hidden
+                          />
+                        </span>
+                        {label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Wrap>
+        </section>
 
         {/* Preços */}
-        <Section id="precos">
-          <Heading
-            eyebrow="Preços"
-            title="Comece grátis. Depois, um preço justo."
-            desc="30 dias com todos os recursos liberados, sem cartão de crédito. Depois é só escolher o plano."
-          />
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
-            {plans.map((p) => (
-              <div
-                key={p.name}
-                className={`relative flex flex-col rounded-lg border bg-card p-7 shadow-[var(--shadow-card)] md:p-8 ${
-                  p.highlight ? "border-2 border-primary" : "border-border"
-                }`}
-              >
-                {p.highlight && (
-                  <span className="absolute -top-3 left-7 rounded-full bg-primary px-3 py-1 text-[12px] font-medium leading-4 text-primary-foreground">
-                    Mais completo
-                  </span>
-                )}
-                <p className="font-display text-[22px] font-semibold leading-7">{p.name}</p>
-                <p className="mt-1 text-[15px] leading-[22px] text-ink-muted">{p.desc}</p>
-                <p className="mt-6 flex items-baseline gap-1.5">
-                  <span className="text-[14px] text-ink-muted">R$</span>
-                  <span className="num text-[40px] leading-[44px]">{p.price}</span>
-                  <span className="text-[14px] text-ink-muted">/mês</span>
-                </p>
-                <ul className="mt-7 flex-1 space-y-3">
-                  {p.features.map((f) => (
-                    <li key={f} className="flex items-start gap-3 text-[15px] leading-[22px]">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link to={p.href} className="mt-8 block">
-                  <Button
-                    className="w-full"
-                    size="lg"
-                    variant={p.highlight ? "default" : "outline"}
-                  >
-                    Começar teste grátis
-                  </Button>
-                </Link>
-              </div>
-            ))}
-          </div>
-          <p className="mt-8 flex items-center justify-center gap-2 text-[14px] text-ink-muted">
-            <Lock className="h-4 w-4" aria-hidden />
-            Sem fidelidade. Cancele quando quiser.
-          </p>
-        </Section>
+        <section id="precos" className="bg-card py-24">
+          <Wrap>
+            <Tag tone="cyan">Preços</Tag>
+            <h2 className="mt-6 max-w-xl text-balance font-display text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] sm:text-[36px]">
+              Comece grátis. <span className="text-[#7c7f88]">Depois, um preço fixo por mês.</span>
+            </h2>
+            <div className="mt-12 grid gap-5 md:grid-cols-2">
+              {plans.map((p) => (
+                <div
+                  key={p.name}
+                  className={`flex flex-col rounded-lg bg-card p-7 md:p-8 ${p.highlight ? "shadow-[var(--shadow-product)] ring-1 ring-primary" : "shadow-[var(--shadow-card)]"}`}
+                >
+                  <p className="text-[18px] font-medium leading-6">{p.name}</p>
+                  <p className="mt-1 text-[14px] leading-5 text-ink-muted">{p.desc}</p>
+                  <p className="mt-6 flex items-baseline gap-1.5">
+                    <span className="text-[14px] text-ink-muted">R$</span>
+                    <span className="text-[44px] font-medium leading-[48px] tracking-[-0.02em]">
+                      {p.price}
+                    </span>
+                    <span className="text-[14px] text-ink-muted">/mês</span>
+                  </p>
+                  <ul className="mt-6 flex-1 space-y-2.5">
+                    {p.features.map((f) => (
+                      <li key={f} className="flex items-start gap-3 text-[14px] leading-5">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-positive" aria-hidden />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link to={p.href} className="mt-8 block">
+                    <Button
+                      className="w-full"
+                      size="lg"
+                      variant={p.highlight ? "default" : "outline"}
+                    >
+                      Começar teste grátis
+                    </Button>
+                  </Link>
+                </div>
+              ))}
+            </div>
+            <p className="mt-6 flex items-center gap-2 text-[13px] text-ink-muted">
+              <Lock className="h-3.5 w-3.5" aria-hidden />
+              Sem fidelidade. Cancele quando quiser.
+            </p>
+          </Wrap>
+        </section>
 
         {/* Dúvidas */}
-        <Section id="faq" className="bg-card">
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-16">
-            <Heading
-              eyebrow="Dúvidas"
-              title="Perguntas frequentes"
-              desc="Não encontrou o que procurava? Escreva para contato@finlist.app."
-            />
-            <div className="divide-y divide-border rounded-lg border border-border bg-background shadow-[var(--shadow-card)]">
+        <section id="faq" className="py-24">
+          <Wrap className="grid gap-10 lg:grid-cols-[0.8fr_1.4fr]">
+            <div>
+              <Tag>Dúvidas</Tag>
+              <h2 className="mt-6 font-display text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] sm:text-[36px]">
+                Perguntas frequentes
+              </h2>
+              <p className="mt-4 max-w-xs text-[14px] leading-5 text-ink-muted">
+                Não achou o que procurava? Escreva para contato@finlist.app.
+              </p>
+            </div>
+            <div className="divide-y divide-border border-y border-border">
               {faqs.map((f) => (
                 <details
                   key={f.q}
-                  className="group px-6 py-5 [&_summary::-webkit-details-marker]:hidden"
+                  className="group py-5 [&_summary::-webkit-details-marker]:hidden"
                 >
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[15px] font-bold leading-[22px]">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[16px] font-medium leading-6">
                     {f.q}
                     <ChevronDown
                       className="h-4 w-4 shrink-0 text-ink-muted transition-transform group-open:rotate-180"
                       aria-hidden
                     />
                   </summary>
-                  <p className="mt-3 text-[15px] leading-[22px] text-ink-muted">{f.a}</p>
+                  <p className="mt-3 max-w-xl text-[14px] leading-[22px] text-ink-muted">{f.a}</p>
                 </details>
               ))}
             </div>
-          </div>
-        </Section>
+          </Wrap>
+        </section>
 
         {/* Chamada final */}
-        <section className="px-6 pb-20">
-          <div className="mx-auto max-w-[1200px] rounded-lg bg-brand-deep px-8 py-16 text-center text-on-brand md:px-16 md:py-20">
-            <h2 className="mx-auto max-w-3xl text-balance font-display text-[32px] font-semibold leading-[38px] tracking-[-0.02em] md:text-[40px] md:leading-[46px]">
-              Comece o próximo mês sabendo quanto vai sobrar.
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-[17px] leading-[26px] opacity-80">
-              Crie sua conta em menos de um minuto e use tudo por 30 dias, de graça.
-            </p>
-            <Link
-              to="/auth"
-              className="mt-8 inline-flex h-11 items-center gap-2 rounded-lg bg-background px-6 text-[15px] font-bold text-foreground hover:bg-card"
-            >
-              Começar teste grátis
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
+        <section className="px-2 pb-2 sm:px-2.5">
+          <div className="rounded-lg bg-[#eeeff2] py-20">
+            <Wrap>
+              <h2 className="font-display text-[40px] font-semibold leading-[1.05] tracking-[-0.03em] sm:text-[56px]">
+                Comece hoje mesmo
+              </h2>
+              <p className="mt-2 text-[16px] leading-6 text-ink-muted">
+                Crie a sua conta em menos de um minuto e use tudo por 30 dias.
+              </p>
+              <div className="mt-10 grid gap-4 md:grid-cols-3">
+                {[
+                  ["Testar grátis", "Crie a conta e cadastre o primeiro lançamento.", "/auth"],
+                  ["Ver os planos", "Pessoal ou Pessoal + PJ, sem fidelidade.", "/pricing"],
+                  [
+                    "Falar com a gente",
+                    "Uma dúvida antes de começar? Escreva.",
+                    "mailto:contato@finlist.app",
+                  ],
+                ].map(([t, d, href]) => (
+                  <a
+                    key={t}
+                    href={href}
+                    className="group rounded-lg bg-card p-5 shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-product)]"
+                  >
+                    <p className="flex items-center justify-between text-[16px] font-medium leading-6">
+                      {t}
+                      <ArrowRight
+                        className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+                        aria-hidden
+                      />
+                    </p>
+                    <p className="mt-2 text-[14px] leading-5 text-ink-muted">{d}</p>
+                  </a>
+                ))}
+              </div>
+            </Wrap>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-border px-6 py-14">
-        <div className="mx-auto grid max-w-[1200px] gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+      <footer className="px-6 py-12">
+        <Wrap className="flex flex-col justify-between gap-8 !px-0 md:flex-row md:!px-16">
           <div>
             <Logo />
-            <p className="mt-4 max-w-xs text-[14px] leading-5 text-ink-muted">
+            <p className="mt-3 max-w-xs text-[13px] leading-5 text-ink-muted">
               Seu dinheiro, em ordem. FINLIST não é banco, corretora nem consultoria.
             </p>
           </div>
-          <FooterCol
-            title="Produto"
-            links={[
-              { to: "/#recursos", label: "Recursos" },
-              { to: "/#como-funciona", label: "Como funciona" },
-              { to: "/pricing", label: "Planos" },
-            ]}
-          />
-          <FooterCol
-            title="Conta"
-            links={[
-              { to: "/auth", label: "Entrar" },
-              { to: "/auth", label: "Criar conta" },
-            ]}
-          />
-          <FooterCol
-            title="Legal"
-            links={[
-              { to: "/terms", label: "Termos" },
-              { to: "/privacy", label: "Privacidade" },
-            ]}
-          />
-        </div>
-        <p className="mx-auto mt-10 max-w-[1200px] text-[12px] leading-4 text-ink-muted">
-          © {new Date().getFullYear()} FINLIST. Valores e nomes de exemplo nesta página são
-          ilustrativos.
-        </p>
+          <div className="flex gap-12 text-[14px] leading-5">
+            <ul className="space-y-2">
+              <li>
+                <Link to="/pricing">Planos</Link>
+              </li>
+              <li>
+                <Link to="/auth">Entrar</Link>
+              </li>
+            </ul>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/terms">Termos</Link>
+              </li>
+              <li>
+                <Link to="/privacy">Privacidade</Link>
+              </li>
+            </ul>
+          </div>
+        </Wrap>
+        <Wrap className="mt-8 !px-0 md:!px-16">
+          <p className="text-[12px] leading-4 text-ink-muted">
+            © {new Date().getFullYear()} FINLIST. Valores e nomes de exemplo nesta página são
+            ilustrativos.
+          </p>
+        </Wrap>
       </footer>
-    </div>
-  );
-}
-
-function FooterCol({ title, links }: { title: string; links: { to: string; label: string }[] }) {
-  return (
-    <div>
-      <p className="text-[13px] font-semibold leading-[18px] tracking-[0.2px]">{title}</p>
-      <ul className="mt-3 space-y-2">
-        {links.map((l) => (
-          <li key={l.label}>
-            <a href={l.to} className="text-[14px] leading-5 text-ink-muted hover:text-foreground">
-              {l.label}
-            </a>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
