@@ -26,7 +26,6 @@ import {
   PiggyBank,
   Sun,
   Moon,
-
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
@@ -36,13 +35,7 @@ import { usePlan, PLAN_LABEL } from "@/lib/plan";
 import { useTheme } from "@/lib/theme";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useEffect, useState, type ReactNode } from "react";
 import { QuickAdd } from "@/components/QuickAdd";
 
@@ -64,13 +57,18 @@ const groups = [
   {
     title: "Lançamentos",
     items: [
-      { to: "/transactions", label: "Contas", icon: ListChecks, tab: undefined, sub: transactionSubItems },
+      {
+        to: "/transactions",
+        label: "Contas",
+        icon: ListChecks,
+        tab: undefined,
+        sub: transactionSubItems,
+      },
       { to: "/cards", label: "Cartões", icon: CreditCard, tab: undefined },
       { to: "/installments", label: "Parcelas", icon: Hourglass, tab: undefined },
       { to: "/savings", label: "Metas de economia", icon: PiggyBank, tab: undefined },
       { to: "/open-finance", label: "Open Finance", icon: Landmark, tab: undefined },
     ],
-
   },
   {
     title: "Negócio",
@@ -259,7 +257,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-bold leading-tight text-sidebar-foreground">{firstName}</p>
+            <p className="truncate text-xs font-bold leading-tight text-sidebar-foreground">
+              {firstName}
+            </p>
             <p className="flex items-center gap-1 text-[10px] text-sidebar-foreground/45">
               <Sparkles className="h-3 w-3" />
               {plan.isTrial ? `Teste · ${plan.trialDaysLeft}d` : PLAN_LABEL[plan.plan]}
@@ -282,7 +282,11 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             className="hover-glow mt-3 flex items-center justify-center gap-2 rounded-xl border border-primary/25 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary transition-colors hover:border-primary/50"
           >
             <Sparkles className="h-3.5 w-3.5" />
-            {plan.isTrial ? `Assinar (${plan.trialDaysLeft} dias restantes)` : plan.plan === "pf" ? "Adicionar módulo PJ" : "Escolher plano"}
+            {plan.isTrial
+              ? `Assinar (${plan.trialDaysLeft} dias restantes)`
+              : plan.plan === "pf"
+                ? "Adicionar módulo PJ"
+                : "Escolher plano"}
           </Link>
         )}
       </div>
@@ -314,10 +318,7 @@ function MobileTabBar() {
               )}
             >
               <item.icon
-                className={cn(
-                  "h-5 w-5 transition-transform duration-200",
-                  active && "scale-110",
-                )}
+                className={cn("h-5 w-5 transition-transform duration-200", active && "scale-110")}
               />
               {item.label}
             </Link>
@@ -330,6 +331,7 @@ function MobileTabBar() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
   const { theme } = useTheme();
 
   // Mirror the theme on <html> so portals (dialogs, popovers, toasts) match.
@@ -354,11 +356,18 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-sidebar-foreground/60 hover:text-sidebar-foreground">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-sidebar-foreground/60 hover:text-sidebar-foreground"
+              >
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[85vw] max-w-xs border-sidebar-border bg-sidebar p-0">
+            <SheetContent
+              side="left"
+              className="w-[85vw] max-w-xs border-sidebar-border bg-sidebar p-0"
+            >
               <SheetHeader className="sr-only">
                 <SheetTitle>Menu</SheetTitle>
               </SheetHeader>
@@ -369,7 +378,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <div className="md:pl-64">
-        <main className="px-4 pb-36 pt-5 md:p-8 md:pb-8">{children}</main>
+        <main key={pathname} className="page-enter px-4 pb-36 pt-5 md:p-8 md:pb-8">
+          {children}
+        </main>
       </div>
 
       <QuickAdd />

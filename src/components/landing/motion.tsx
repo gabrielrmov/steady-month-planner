@@ -46,6 +46,7 @@ export function Reveal({
   return (
     <div
       ref={ref}
+      data-revealed={state !== "hidden"}
       className={`${cls} ${className}`}
       style={{ ...style, transitionDelay: state === "shown" ? `${delay}ms` : undefined }}
     >

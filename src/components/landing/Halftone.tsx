@@ -240,15 +240,15 @@ export function DotRoute({
 }
 
 /** Colunas de pontos crescendo, com um ponto forte no topo (evolução de exemplo). */
-export function DotBars({ className = "" }: { className?: string }) {
+export function DotBars({ className = "", lite = false }: { className?: string; lite?: boolean }) {
   const bars = useMemo(() => {
     const n = 26;
     return Array.from({ length: n }, (_, i) => {
       const t = i / (n - 1);
       const h = 4 + Math.round((t * 0.75 + 0.25 * Math.sin(i * 1.7) ** 2 * t) * 26);
       return { x: 20 + i * 26, h };
-    });
-  }, []);
+    }).filter((_, i) => !lite || i % 2 === 0);
+  }, [lite]);
   const mounted = useMounted();
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
@@ -316,7 +316,14 @@ const GLYPH = [
   "0111100000000",
 ];
 
-export function GlyphDots({ className = "" }: { className?: string }) {
+/** `lite`: no celular, sem pontos de fundo e sem cintilar (menos nós no DOM e menos repintura). */
+export function GlyphDots({
+  className = "",
+  lite = false,
+}: {
+  className?: string;
+  lite?: boolean;
+}) {
   const cell = 26;
   const dots = useMemo(() => {
     const out: { x: number; y: number; r: number; c: string; o: number; tw: number }[] = [];
@@ -336,9 +343,9 @@ export function GlyphDots({ className = "" }: { className?: string }) {
             r: rd(2.2 + rnd * 2.2),
             c: rnd > 0.5 ? "#72ac3f" : "#44b48b",
             o: rd(0.55 + rnd * 0.4),
-            tw: rnd > 0.72 ? Math.round(rnd * 4000) : -1,
+            tw: !lite && rnd > 0.72 ? Math.round(rnd * 4000) : -1,
           });
-        } else if (rnd > 0.55) {
+        } else if (!lite && rnd > 0.55) {
           out.push({
             x: c * (cell / 3) + 4,
             y: r * (cell / 3) + 4,
@@ -351,7 +358,7 @@ export function GlyphDots({ className = "" }: { className?: string }) {
       }
     }
     return { out, w: cols * cell, h: rows * cell };
-  }, []);
+  }, [lite]);
   const mounted = useMounted();
   if (!mounted) return null;
   return (

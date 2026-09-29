@@ -4,7 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { CountUp } from "@/components/landing/CountUp";
 import { Reveal } from "@/components/landing/motion";
-import { useParallax, useScrollProgress, useScrolled } from "@/components/landing/use-scroll";
+import {
+  useMediaQuery,
+  useParallax,
+  useScrollProgress,
+  useScrolled,
+  useSpotlight,
+  useTilt,
+} from "@/components/landing/use-scroll";
+import { useAnimatedNumber } from "@/lib/use-animated-number";
 import {
   BrazilDots,
   DotBars,
@@ -253,6 +261,36 @@ function Tag({
   );
 }
 
+/** Valor em reais que conta até o número final. */
+function AnimMoney({ cents, className = "" }: { cents: number; className?: string }) {
+  const v = useAnimatedNumber(cents, 1100);
+  return <span className={className}>{brl(Math.round(v))}</span>;
+}
+
+/** Quebra o texto em palavras que entram uma a uma. Renderiza igual no servidor. */
+function SplitWords({
+  text,
+  delay = 0,
+  step = 55,
+}: {
+  text: string;
+  delay?: number;
+  step?: number;
+}) {
+  return (
+    <>
+      {text.split(" ").map((w, i, arr) => (
+        <span key={i}>
+          <span className="word" style={{ animationDelay: `${delay + i * step}ms` }}>
+            {w}
+          </span>
+          {i < arr.length - 1 ? " " : null}
+        </span>
+      ))}
+    </>
+  );
+}
+
 function ExampleNote({ className = "" }: { className?: string }) {
   return (
     <p className={`font-mono text-[11px] uppercase tracking-[0.06em] text-ink-muted ${className}`}>
@@ -274,14 +312,14 @@ function HeroWidget() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[11px] leading-4 text-ink-muted">Conta corrente</p>
-            <p className="num text-[15px] leading-5">R$ 4.800,00</p>
+            <AnimMoney cents={480000} className="num block text-[15px] leading-5" />
           </div>
           <p className="text-[11px] leading-4 text-ink-muted">Setembro de 2026</p>
         </div>
         <div className="flex items-start justify-between gap-3 pt-2">
           <div>
             <p className="text-[11px] leading-4 text-ink-muted">Reserva de emergência</p>
-            <p className="num text-[15px] leading-5">R$ 800,00</p>
+            <AnimMoney cents={80000} className="num block text-[15px] leading-5" />
           </div>
           <p className="text-[11px] leading-4 text-ink-muted">Meta</p>
         </div>
@@ -354,7 +392,7 @@ function LayeredAccounts({ c }: { c: (typeof cases)[number] }) {
           <span className="text-ink-muted">•••• 0921</span>
         </div>
         <div className="mt-2 rounded-md bg-signal p-4 text-on-signal">
-          <p className="num text-[22px] leading-7">{brl(c.value)}</p>
+          <AnimMoney cents={c.value} className="num block text-[22px] leading-7" />
           <svg viewBox="0 0 240 70" className="mt-3 h-[70px] w-full" aria-hidden>
             <polyline
               pathLength={1}
@@ -377,18 +415,24 @@ function LayeredAccounts({ c }: { c: (typeof cases)[number] }) {
 function Terminal({ lines }: { lines: (string | [string, string])[] }) {
   return (
     <pre className="mt-6 overflow-x-auto rounded-lg border border-white/10 bg-[#03202b] p-4 font-mono text-[12px] leading-[1.6] text-[#94efb7]">
-      {lines.map((l, i) =>
-        typeof l === "string" ? (
-          <span key={i} className="block text-[#eeeff2]">
+      {lines.map((l, i) => {
+        const last = i === lines.length - 1;
+        const style = { "--d": `${300 + i * 420}ms` } as React.CSSProperties;
+        return typeof l === "string" ? (
+          <span
+            key={i}
+            className={`rc-type block text-[#eeeff2] ${last ? "caret" : ""}`}
+            style={style}
+          >
             {l}
           </span>
         ) : (
-          <span key={i} className="block">
+          <span key={i} className={`rc-type block ${last ? "caret" : ""}`} style={style}>
             <span className="text-[#9db5bd]">{l[0]}</span>{" "}
             <span className="text-[#eeeff2]">{l[1]}</span>
           </span>
-        ),
-      )}
+        );
+      })}
     </pre>
   );
 }
@@ -427,7 +471,8 @@ function PanelChips({ items, active }: { items: string[]; active: number }) {
       {items.map((t, i) => (
         <div
           key={t}
-          className={`rounded-md border px-3 py-2 text-[12px] leading-4 ${i === active ? "border-white/25 bg-white/10 text-white" : "border-white/10 text-[#a9b6bd]"}`}
+          style={{ "--d": `${500 + i * 90}ms` } as React.CSSProperties}
+          className={`rc rc-pop rounded-md border px-3 py-2 text-[12px] leading-4 ${i === active ? "border-white/25 bg-white/10 text-white" : "border-white/10 text-[#a9b6bd]"}`}
         >
           {t}
         </div>
@@ -436,9 +481,12 @@ function PanelChips({ items, active }: { items: string[]; active: number }) {
   );
 }
 
-function MiniRow({ n, d, v }: { n: string; d: string; v: string }) {
+function MiniRow({ n, d, v, i = 0 }: { n: string; d: string; v: string; i?: number }) {
   return (
-    <div className="flex items-center justify-between rounded-md bg-white/[0.06] px-4 py-3 text-white">
+    <div
+      className="rc flex items-center justify-between rounded-md bg-white/[0.06] px-4 py-3 text-white transition-colors duration-200 hover:bg-white/10"
+      style={{ "--d": `${250 + i * 110}ms` } as React.CSSProperties}
+    >
       <div>
         <p className="text-[13px] leading-5">{n}</p>
         <p className="text-[11px] leading-4 text-[#a9b6bd]">{d}</p>
@@ -454,6 +502,10 @@ function Landing() {
   const [menu, setMenu] = useState(false);
   const scrolled = useScrolled();
   const progressRef = useScrollProgress<HTMLDivElement>();
+  const tiltRef = useTilt<HTMLDivElement>(8);
+  const stackRef = useParallax<HTMLDivElement>(-0.05, 36);
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  useSpotlight();
   const mapRef = useParallax<HTMLDivElement>(-0.08, 80);
   const c = cases[tab];
   return (
@@ -467,10 +519,10 @@ function Landing() {
       </a>
 
       <header
-        className={`sticky top-0 z-50 backdrop-blur-md transition-[background-color,box-shadow,border-color] duration-300 ${
+        className={`sticky top-0 z-50 transition-[background-color,box-shadow,border-color] duration-300 ${
           scrolled
-            ? "border-b border-border bg-background/90 shadow-[var(--shadow-card)]"
-            : "border-b border-transparent bg-background/60"
+            ? "border-b border-border bg-background/95 shadow-[var(--shadow-card)] md:bg-background/90 md:backdrop-blur-md"
+            : "border-b border-transparent bg-background/80 md:bg-background/60 md:backdrop-blur-md"
         }`}
       >
         <div
@@ -479,7 +531,7 @@ function Landing() {
           className="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-primary"
         />
         <Wrap className="flex h-[62px] items-center justify-between gap-4">
-          <Link to="/" aria-label="FINLIST">
+          <Link to="/" aria-label="FINLIST" className="flex min-h-11 items-center">
             <Logo />
           </Link>
           <nav aria-label="Principal" className="hidden items-center gap-1 md:flex">
@@ -487,7 +539,7 @@ function Landing() {
               <a
                 key={l.href}
                 href={l.href}
-                className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-[14px] leading-5 text-foreground transition-colors duration-200 hover:bg-white/80"
+                className="nav-link flex items-center gap-1 rounded-lg px-3 py-1.5 text-[14px] leading-5 text-foreground transition-colors duration-200 hover:bg-white/80"
               >
                 {l.label}
                 {l.menu && <ChevronDown className="h-3.5 w-3.5" aria-hidden />}
@@ -500,7 +552,7 @@ function Landing() {
               aria-label={menu ? "Fechar menu" : "Abrir menu"}
               aria-expanded={menu}
               onClick={() => setMenu((v) => !v)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-white bg-white/60 md:hidden"
+              className="flex h-11 w-11 items-center justify-center rounded-lg border border-white bg-white/60 active:scale-95 md:hidden"
             >
               {menu ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
@@ -509,7 +561,7 @@ function Landing() {
             </Link>
             <Link
               to="/auth"
-              className="flex items-center gap-1.5 rounded-lg border border-white bg-white/60 px-3.5 py-2 text-[14px] leading-5 backdrop-blur-sm"
+              className="flex min-h-11 items-center gap-1.5 rounded-lg border border-white bg-white/60 px-3.5 text-[14px] leading-5 active:scale-95 md:backdrop-blur-sm"
             >
               Começar agora <ChevronDown className="h-3.5 w-3.5" aria-hidden />
             </Link>
@@ -525,12 +577,12 @@ function Landing() {
                 key={l.href}
                 href={l.href}
                 onClick={() => setMenu(false)}
-                className="block border-b border-border py-3 text-[16px] leading-6 last:border-b-0"
+                className="block border-b border-border py-3.5 text-[16px] leading-6 active:bg-muted last:border-b-0"
               >
                 {l.label}
               </a>
             ))}
-            <Link to="/auth" className="mt-3 block text-[16px] leading-6">
+            <Link to="/auth" className="mt-3 block py-2 text-[16px] leading-6">
               Entrar
             </Link>
           </nav>
@@ -545,12 +597,16 @@ function Landing() {
             ref={mapRef}
             className="pointer-events-none absolute -right-[8%] top-0 hidden h-[125%] w-[68%] will-change-transform lg:block"
           >
-            <BrazilDots className="absolute inset-0 h-full w-full" />
-            <DotRoute
-              from={[-60.0, -3.1]}
-              to={[-46.6, -23.5]}
-              className="absolute inset-0 h-full w-full"
-            />
+            {isDesktop && (
+              <>
+                <BrazilDots className="absolute inset-0 h-full w-full" />
+                <DotRoute
+                  from={[-60.0, -3.1]}
+                  to={[-46.6, -23.5]}
+                  className="absolute inset-0 h-full w-full"
+                />
+              </>
+            )}
           </div>
           <Wrap className="relative">
             <p className="animate-rise inline-flex items-center gap-2 rounded-lg border border-white bg-white/80 px-3 py-1.5 text-[12px] leading-4 text-ink-muted shadow-[var(--shadow-card)] backdrop-blur-sm">
@@ -560,10 +616,10 @@ function Landing() {
             <div className="mt-10 grid items-start gap-10 lg:grid-cols-2">
               <div>
                 <h1
-                  className="animate-rise text-balance font-display text-[40px] font-semibold leading-[1.08] tracking-[-0.03em] sm:text-[52px]"
-                  style={{ animationDelay: "90ms" }}
+                  className="text-balance font-display text-[40px] font-semibold leading-[1.08] tracking-[-0.03em] sm:text-[52px]"
+                  aria-label="Organize, acompanhe e planeje o dinheiro do mês."
                 >
-                  Organize, acompanhe e planeje o dinheiro do mês.
+                  <SplitWords text="Organize, acompanhe e planeje o dinheiro do mês." delay={80} />
                 </h1>
                 <p
                   className="animate-rise mt-5 max-w-md text-[17px] leading-[26px] text-foreground/90"
@@ -597,7 +653,9 @@ function Landing() {
                 style={{ animationDelay: "420ms" }}
               >
                 <div className="animate-float">
-                  <HeroWidget />
+                  <div ref={tiltRef} className="will-change-transform">
+                    <HeroWidget />
+                  </div>
                 </div>
               </div>
             </div>
@@ -622,7 +680,7 @@ function Landing() {
         </Wrap>
 
         {/* Confiança */}
-        <section className="relative overflow-hidden pb-28">
+        <section className="relative overflow-hidden pb-20 md:pb-28">
           <Wrap className="relative grid items-center gap-10 lg:grid-cols-2">
             <Reveal>
               <Tag>Tudo em ordem</Tag>
@@ -638,37 +696,40 @@ function Landing() {
               </p>
               <a
                 href="#recursos"
-                className="mt-6 inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-[14px] leading-5 shadow-[var(--shadow-card)]"
+                className="mt-6 inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-[14px] leading-5 shadow-[var(--shadow-card)]"
               >
                 Conheça os recursos <span aria-hidden>›</span>
               </a>
             </Reveal>
             <Reveal className="relative" delay={150}>
-              <DotBars className="w-full" />
+              <DotBars className="w-full" lite={!isDesktop} />
               <ExampleNote className="absolute bottom-0 right-0" />
             </Reveal>
           </Wrap>
         </section>
 
         {/* Casos, com abas */}
-        <section className="pb-28" id="para-quem">
+        <section className="scroll-mt-20 pb-20 md:pb-28" id="para-quem">
           <Wrap>
             <Reveal className="overflow-hidden rounded-lg bg-card shadow-[var(--shadow-card)]">
               <div
                 role="tablist"
                 aria-label="Exemplos"
-                className="grid grid-cols-3 gap-3 p-3 sm:p-5"
+                className="relative grid grid-cols-3 gap-3 p-3 sm:p-5"
               >
+                <span
+                  aria-hidden
+                  className="absolute bottom-3 left-3 top-3 w-[calc((100%-24px-24px)/3)] rounded-lg bg-signal shadow-[var(--shadow-btn)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] sm:bottom-5 sm:left-5 sm:top-5 sm:w-[calc((100%-40px-24px)/3)]"
+                  style={{ transform: `translateX(calc(${tab} * (100% + 12px)))` }}
+                />
                 {cases.map((x, i) => (
                   <button
                     key={x.tab}
                     role="tab"
                     aria-selected={tab === i}
                     onClick={() => setTab(i)}
-                    className={`rounded-lg px-3 py-4 text-[14px] font-medium leading-5 transition-[background-color,color,box-shadow,transform] duration-300 active:scale-[0.98] ${
-                      tab === i
-                        ? "bg-signal text-on-signal shadow-[var(--shadow-btn)]"
-                        : "text-ink-muted hover:bg-muted"
+                    className={`relative z-10 min-h-12 rounded-lg px-2 py-3 text-[13px] font-medium leading-5 transition-colors duration-300 active:scale-[0.98] sm:px-3 sm:py-4 sm:text-[14px] ${
+                      tab === i ? "text-on-signal" : "text-ink-muted hover:text-foreground"
                     }`}
                   >
                     {x.tab}
@@ -707,7 +768,7 @@ function Landing() {
         </section>
 
         {/* Feito para organizar */}
-        <section id="recursos" className="pb-28">
+        <section id="recursos" className="scroll-mt-20 pb-20 md:pb-28">
           <Wrap className="grid items-center gap-12 lg:grid-cols-2">
             <Reveal className="rounded-lg bg-[#eeeff2] p-3 sm:p-5">
               <div className="rounded-lg bg-card p-5 shadow-[var(--shadow-product)]">
@@ -744,7 +805,7 @@ function Landing() {
               </p>
               <Link
                 to="/auth"
-                className="mt-6 inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-[14px] leading-5 shadow-[var(--shadow-card)]"
+                className="mt-6 inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-[14px] leading-5 shadow-[var(--shadow-card)]"
               >
                 Testar grátis <span aria-hidden>›</span>
               </Link>
@@ -784,7 +845,9 @@ function Landing() {
                     a pagar, regras, extrato e metas. Nada é obrigatório.
                   </p>
                 </div>
-                <LayerStack className="w-full" />
+                <div ref={stackRef} className="will-change-transform">
+                  <LayerStack className="w-full" />
+                </div>
               </Reveal>
 
               <div className="mt-24 space-y-24">
@@ -803,9 +866,9 @@ function Landing() {
                   panel={
                     <>
                       <div className="space-y-2">
-                        <MiniRow n="Salário" d="Recebido" v="+ R$ 4.800,00" />
-                        <MiniRow n="Aluguel" d="Pago" v="- R$ 1.450,00" />
-                        <MiniRow n="Internet" d="Vence em 3 dias" v="- R$ 119,90" />
+                        <MiniRow n="Salário" d="Recebido" v="+ R$ 4.800,00" i={0} />
+                        <MiniRow n="Aluguel" d="Pago" v="- R$ 1.450,00" i={1} />
+                        <MiniRow n="Internet" d="Vence em 3 dias" v="- R$ 119,90" i={2} />
                       </div>
                       <PanelChips items={["Entradas", "Saídas", "Recorrentes"]} active={0} />
                     </>
@@ -822,8 +885,8 @@ function Landing() {
                   panel={
                     <>
                       <div className="space-y-2">
-                        <MiniRow n="iFood · pedido" d="Alimentação" v="- R$ 62,40" />
-                        <MiniRow n="Uber · corrida" d="Transporte" v="- R$ 21,00" />
+                        <MiniRow n="iFood · pedido" d="Alimentação" v="- R$ 62,40" i={0} />
+                        <MiniRow n="Uber · corrida" d="Transporte" v="- R$ 21,00" i={1} />
                       </div>
                       <PanelChips items={["Regras", "Categorias"]} active={0} />
                     </>
@@ -844,8 +907,13 @@ function Landing() {
                   panel={
                     <>
                       <div className="space-y-2">
-                        <MiniRow n="extrato-setembro.ofx" d="OFX · 42 lançamentos" v="Importar" />
-                        <MiniRow n="Conta conectada" d="Open Finance" v="Sincronizada" />
+                        <MiniRow
+                          n="extrato-setembro.ofx"
+                          d="OFX · 42 lançamentos"
+                          v="Importar"
+                          i={0}
+                        />
+                        <MiniRow n="Conta conectada" d="Open Finance" v="Sincronizada" i={1} />
                       </div>
                       <PanelChips items={["OFX", "CSV", "Open Finance"]} active={0} />
                     </>
@@ -884,19 +952,22 @@ function Landing() {
         </section>
 
         {/* Para quem */}
-        <section className="pb-28">
+        <section className="pb-20 md:pb-28">
           <Wrap className="grid items-center gap-12 lg:grid-cols-2">
             <Reveal>
               <Tag tone="blue">FINLIST para</Tag>
-              <ul className="mt-6 space-y-1">
+              <ul className="relative mt-6">
+                <span
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 h-16 rounded-lg bg-card shadow-[var(--shadow-product)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] sm:h-[68px]"
+                  style={{ transform: `translateY(${aud * 100}%)` }}
+                />
                 {audiences.map((a, i) => (
                   <li key={a}>
                     <button
                       onClick={() => setAud(i)}
-                      className={`block w-full rounded-lg px-4 py-2 text-left font-display text-[28px] font-medium leading-[1.2] tracking-[-0.02em] sm:text-[34px] ${
-                        aud === i
-                          ? "bg-card text-[#023247] shadow-[var(--shadow-product)]"
-                          : "text-[#a9acb6] hover:text-[#7c7f88]"
+                      className={`relative z-10 flex h-16 w-full items-center rounded-lg px-4 text-left font-display text-[22px] font-medium leading-[1.2] tracking-[-0.02em] transition-colors duration-300 sm:h-[68px] sm:text-[34px] ${
+                        aud === i ? "text-[#023247]" : "text-[#a9acb6] hover:text-[#7c7f88]"
                       }`}
                     >
                       {a}
@@ -911,13 +982,15 @@ function Landing() {
               </p>
             </Reveal>
             <Reveal delay={160}>
-              <GlyphDots className="mx-auto w-full max-w-[460px]" />
+              <div key={aud} className="animate-fade-in">
+                <GlyphDots className="mx-auto w-full max-w-[460px]" lite={!isDesktop} />
+              </div>
             </Reveal>
           </Wrap>
         </section>
 
         {/* Elementos */}
-        <section className="pb-28">
+        <section className="pb-20 md:pb-28">
           <Wrap>
             <Tag tone="violet">Recursos</Tag>
             <h2 className="mt-6 max-w-2xl text-balance font-display text-[34px] font-semibold leading-[1.1] tracking-[-0.02em] text-[#2a1a63] sm:text-[44px]">
@@ -934,10 +1007,11 @@ function Landing() {
                     {g.title}
                   </h3>
                   <div className="grid gap-2 sm:grid-cols-2">
-                    {g.items.map(([label, Icon]) => (
+                    {g.items.map(([label, Icon], ii) => (
                       <div
                         key={label}
-                        className="group flex items-center gap-3 rounded-md bg-[#eeeff2] px-3 py-2.5 text-[14px] leading-5 transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-white"
+                        style={{ "--d": `${150 + ii * 80}ms` } as React.CSSProperties}
+                        className="rc group spotlight flex items-center gap-3 rounded-md bg-[#eeeff2] px-3 py-2.5 text-[14px] leading-5 transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-white"
                       >
                         <span className="flex h-7 w-7 items-center justify-center rounded-md bg-card shadow-[var(--shadow-card)] transition-transform duration-200 group-hover:scale-110">
                           <Icon
@@ -957,7 +1031,7 @@ function Landing() {
         </section>
 
         {/* Preços */}
-        <section id="precos" className="bg-card py-24">
+        <section id="precos" className="scroll-mt-20 bg-card py-16 md:py-24">
           <Wrap>
             <Reveal>
               <Tag tone="cyan">Preços</Tag>
@@ -971,7 +1045,7 @@ function Landing() {
                 <Reveal
                   key={p.name}
                   delay={pi * 120}
-                  className={`flex flex-col rounded-lg bg-card p-7 hover:-translate-y-1 hover:shadow-[var(--shadow-product)] md:p-8 ${p.highlight ? "shadow-[var(--shadow-product)] ring-1 ring-primary" : "shadow-[var(--shadow-card)]"}`}
+                  className={`spotlight flex flex-col rounded-lg bg-card p-7 hover:-translate-y-1 hover:shadow-[var(--shadow-product)] md:p-8 ${p.highlight ? "shadow-[var(--shadow-product)] ring-1 ring-primary" : "shadow-[var(--shadow-card)]"}`}
                 >
                   <p className="text-[18px] font-medium leading-6">{p.name}</p>
                   <p className="mt-1 text-[14px] leading-5 text-ink-muted">{p.desc}</p>
@@ -983,9 +1057,17 @@ function Landing() {
                     <span className="text-[14px] text-ink-muted">/mês</span>
                   </p>
                   <ul className="mt-6 flex-1 space-y-2.5">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-start gap-3 text-[14px] leading-5">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-positive" aria-hidden />
+                    {p.features.map((f, fi) => (
+                      <li
+                        key={f}
+                        className="rc flex items-start gap-3 text-[14px] leading-5"
+                        style={{ "--d": `${250 + fi * 80}ms` } as React.CSSProperties}
+                      >
+                        <Check
+                          className="rc rc-pop mt-0.5 h-4 w-4 shrink-0 text-positive"
+                          style={{ "--d": `${330 + fi * 80}ms` } as React.CSSProperties}
+                          aria-hidden
+                        />
                         {f}
                       </li>
                     ))}
@@ -1010,7 +1092,7 @@ function Landing() {
         </section>
 
         {/* Dúvidas */}
-        <section id="faq" className="py-24">
+        <section id="faq" className="scroll-mt-20 py-16 md:py-24">
           <Wrap className="grid gap-10 lg:grid-cols-[0.8fr_1.4fr]">
             <Reveal>
               <Tag>Dúvidas</Tag>
@@ -1023,18 +1105,15 @@ function Landing() {
             </Reveal>
             <Reveal delay={120} className="divide-y divide-border border-y border-border">
               {faqs.map((f) => (
-                <details
-                  key={f.q}
-                  className="group py-5 [&_summary::-webkit-details-marker]:hidden"
-                >
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[16px] font-medium leading-6 transition-colors hover:text-primary">
+                <details key={f.q} className="group [&_summary::-webkit-details-marker]:hidden">
+                  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-[16px] font-medium leading-6 transition-colors hover:text-primary active:text-primary">
                     {f.q}
                     <ChevronDown
                       className="h-4 w-4 shrink-0 text-ink-muted transition-transform group-open:rotate-180"
                       aria-hidden
                     />
                   </summary>
-                  <p className="mt-3 max-w-xl text-[14px] leading-[22px] text-ink-muted group-open:animate-rise">
+                  <p className="mt-3 max-w-xl text-[14px] leading-[22px] text-ink-muted group-open:animate-rise mb-5">
                     {f.a}
                   </p>
                 </details>
@@ -1068,7 +1147,7 @@ function Landing() {
                   <Reveal key={t} delay={i * 100}>
                     <a
                       href={href}
-                      className="group block rounded-lg bg-card p-5 shadow-[var(--shadow-card)] transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-product)]"
+                      className="group spotlight block rounded-lg bg-card p-5 shadow-[var(--shadow-card)] transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-product)]"
                     >
                       <p className="flex items-center justify-between text-[16px] font-medium leading-6">
                         {t}
@@ -1088,38 +1167,40 @@ function Landing() {
       </main>
 
       <footer className="px-6 py-12">
-        <Wrap className="flex flex-col justify-between gap-8 !px-0 md:flex-row md:!px-16">
-          <div>
-            <Logo />
-            <p className="mt-3 max-w-xs text-[13px] leading-5 text-ink-muted">
-              Seu dinheiro, em ordem. FINLIST não é banco, corretora nem consultoria.
+        <Reveal>
+          <Wrap className="flex flex-col justify-between gap-8 !px-0 md:flex-row md:!px-16">
+            <div>
+              <Logo />
+              <p className="mt-3 max-w-xs text-[13px] leading-5 text-ink-muted">
+                Seu dinheiro, em ordem. FINLIST não é banco, corretora nem consultoria.
+              </p>
+            </div>
+            <div className="flex gap-12 text-[14px] leading-5">
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/pricing">Planos</Link>
+                </li>
+                <li>
+                  <Link to="/auth">Entrar</Link>
+                </li>
+              </ul>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/terms">Termos</Link>
+                </li>
+                <li>
+                  <Link to="/privacy">Privacidade</Link>
+                </li>
+              </ul>
+            </div>
+          </Wrap>
+          <Wrap className="mt-8 !px-0 md:!px-16">
+            <p className="text-[12px] leading-4 text-ink-muted">
+              © {new Date().getFullYear()} FINLIST. Valores e nomes de exemplo nesta página são
+              ilustrativos.
             </p>
-          </div>
-          <div className="flex gap-12 text-[14px] leading-5">
-            <ul className="space-y-2">
-              <li>
-                <Link to="/pricing">Planos</Link>
-              </li>
-              <li>
-                <Link to="/auth">Entrar</Link>
-              </li>
-            </ul>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/terms">Termos</Link>
-              </li>
-              <li>
-                <Link to="/privacy">Privacidade</Link>
-              </li>
-            </ul>
-          </div>
-        </Wrap>
-        <Wrap className="mt-8 !px-0 md:!px-16">
-          <p className="text-[12px] leading-4 text-ink-muted">
-            © {new Date().getFullYear()} FINLIST. Valores e nomes de exemplo nesta página são
-            ilustrativos.
-          </p>
-        </Wrap>
+          </Wrap>
+        </Reveal>
       </footer>
     </div>
   );

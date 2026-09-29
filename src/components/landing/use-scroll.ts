@@ -58,3 +58,60 @@ export function useScrollProgress<T extends HTMLElement>() {
   }, []);
   return ref;
 }
+
+/** true quando a media query casa (só no navegador; no servidor é false). */
+export function useMediaQuery(query: string) {
+  const [match, setMatch] = useState(false);
+  useEffect(() => {
+    const m = window.matchMedia(query);
+    const on = () => setMatch(m.matches);
+    on();
+    m.addEventListener("change", on);
+    return () => m.removeEventListener("change", on);
+  }, [query]);
+  return match;
+}
+
+/** Inclina o elemento em 3D seguindo o mouse. Só liga onde há mouse e sem "reduzir movimento". */
+export function useTilt<T extends HTMLElement>(max = 7) {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const move = (e: MouseEvent) => {
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      el.style.transform = `perspective(900px) rotateY(${px * max}deg) rotateX(${-py * max}deg) translateZ(0)`;
+    };
+    const leave = () => {
+      el.style.transform = "";
+    };
+    el.style.transition = "transform 0.25s ease-out";
+    el.addEventListener("mousemove", move);
+    el.addEventListener("mouseleave", leave);
+    return () => {
+      el.removeEventListener("mousemove", move);
+      el.removeEventListener("mouseleave", leave);
+    };
+  }, [max]);
+  return ref;
+}
+
+/** Atualiza --mx/--my nos elementos .spotlight sob o mouse (um único listener). */
+export function useSpotlight() {
+  useEffect(() => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    const on = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement | null)?.closest?.(".spotlight") as HTMLElement | null;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+      el.style.setProperty("--my", `${e.clientY - r.top}px`);
+    };
+    document.addEventListener("mousemove", on, { passive: true });
+    return () => document.removeEventListener("mousemove", on);
+  }, []);
+}

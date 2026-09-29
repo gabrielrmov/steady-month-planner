@@ -384,6 +384,216 @@ shadow. No lift, no glow. */
   animation: draw-line 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
 }
 
+/* Filhos que entram quando o pai (Reveal) aparece. Pausado até data-revealed="true". */
+.rc {
+  animation: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both paused;
+  animation-delay: var(--d, 0ms);
+}
+
+[data-revealed="true"] .rc {
+  animation-play-state: running;
+}
+
+.rc-fade {
+  animation-name: fade-in;
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.rc-pop {
+  animation-name: pop-in;
+  animation-duration: 0.5s;
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes type-line {
+  from {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0.4;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+
+.rc-type {
+  animation: type-line 0.7s steps(28, end) both paused;
+  animation-delay: var(--d, 0ms);
+}
+
+[data-revealed="true"] .rc-type {
+  animation-play-state: running;
+}
+
+.caret::after {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: currentColor;
+  animation: caret 1s steps(1) infinite;
+}
+
+/* Palavras do título entrando uma a uma. */
+@keyframes word-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+.word {
+  display: inline-block;
+  animation: word-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Brilho que varre o botão primário no hover (só onde há mouse). */
+@media (hover: hover) and (pointer: fine) {
+  .btn-shine {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-shine::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-120%) skewX(-18deg);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+    transition: transform 0.7s ease;
+  }
+
+  .btn-shine:hover::after {
+    transform: translateX(120%) skewX(-18deg);
+  }
+
+  /* Holofote que segue o mouse dentro de cartões. */
+  .spotlight {
+    position: relative;
+  }
+
+  .spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: radial-gradient(
+      220px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(30, 65, 153, 0.09),
+      transparent 70%
+    );
+  }
+
+  .spotlight:hover::before {
+    opacity: 1;
+  }
+
+  /* Sublinhado que cresce nos links do menu. */
+  .nav-link {
+    position: relative;
+  }
+
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 3px;
+    height: 1.5px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .nav-link:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+/* Entrada das telas do app: a página faz fade e as listas entram em cascata. */
+@media (prefers-reduced-motion: no-preference) {
+  .page-enter {
+    animation: fade-in 0.35s ease-out both;
+  }
+
+  .page-enter ul > li,
+  .page-enter tbody > tr {
+    animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .page-enter ul > li:nth-child(2),
+  .page-enter tbody > tr:nth-child(2) {
+    animation-delay: 40ms;
+  }
+  .page-enter ul > li:nth-child(3),
+  .page-enter tbody > tr:nth-child(3) {
+    animation-delay: 80ms;
+  }
+  .page-enter ul > li:nth-child(4),
+  .page-enter tbody > tr:nth-child(4) {
+    animation-delay: 120ms;
+  }
+  .page-enter ul > li:nth-child(5),
+  .page-enter tbody > tr:nth-child(5) {
+    animation-delay: 160ms;
+  }
+  .page-enter ul > li:nth-child(6),
+  .page-enter tbody > tr:nth-child(6) {
+    animation-delay: 200ms;
+  }
+  .page-enter ul > li:nth-child(7),
+  .page-enter tbody > tr:nth-child(7) {
+    animation-delay: 240ms;
+  }
+  .page-enter ul > li:nth-child(8),
+  .page-enter tbody > tr:nth-child(8) {
+    animation-delay: 280ms;
+  }
+  .page-enter ul > li:nth-child(n + 9),
+  .page-enter tbody > tr:nth-child(n + 9) {
+    animation-delay: 320ms;
+  }
+}
+
+/* Mobile: toque mais responsivo, sem realce cinza e sem atraso de duplo toque. */
+a,
+button,
+summary,
+[role="tab"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
