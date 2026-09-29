@@ -267,7 +267,7 @@ function ImportPage() {
                     <span className="text-muted-foreground">{t.date.split("-").reverse().join("/")}</span>{" "}
                     {t.description}
                   </span>
-                  <span className={t.type === "income" ? "text-success" : "text-destructive"}>
+                  <span className={`num ${t.type === "income" ? "text-success" : "text-destructive"}`}>
                     {t.type === "income" ? "+" : "-"}
                     {brl(t.amount)}
                   </span>

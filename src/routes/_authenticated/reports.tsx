@@ -272,7 +272,7 @@ function ReportsPage() {
                 <span className="text-sm text-muted-foreground">{c.label}</span>
                 <c.icon className={`h-4 w-4 ${c.tone}`} />
               </div>
-              <p className="mt-2 text-2xl font-extrabold tracking-tighter">{brl(c.value)}</p>
+              <p className="num mt-2 text-2xl">{brl(c.value)}</p>
             </Card>
           ))}
         </div>
@@ -385,7 +385,7 @@ function ReportsPage() {
                     <span className="h-3 w-3 rounded-full" style={{ background: c.color }} />
                     {c.name}
                   </span>
-                  <span className="font-medium">{brl(c.value)}</span>
+                  <span className="num text-sm">{brl(c.value)}</span>
                 </li>
               ))}
             </ul>

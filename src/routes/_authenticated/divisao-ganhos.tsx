@@ -440,7 +440,7 @@ function IncomeSplitPage() {
                   %
                 </span>
               </div>
-              <span className="w-28 text-right text-sm font-semibold">
+              <span className="num w-28 text-right text-sm">
                 {brl((amount * Number(r.percentage || 0)) / 100)}
               </span>
               <Button variant="ghost" size="icon" className="group" onClick={() => del.mutate(r.id)}>

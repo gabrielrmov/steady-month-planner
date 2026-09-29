@@ -259,7 +259,7 @@ function TransactionsPage() {
                     <CreditCard className="h-3.5 w-3.5" />
                   </div>
                   <h3 className="font-bold tracking-tight">{group.name}</h3>
-                  <span className="ml-auto text-sm font-semibold">{brl(total)}</span>
+                  <span className="num ml-auto text-sm">{brl(total)}</span>
                 </div>
                 <TxList items={group.items} loading={false} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} onEdit={handleEdit} showInstallment />
               </div>
@@ -370,7 +370,7 @@ function TxList({
               </div>
               {/* Ações e valor em linha própria no mobile */}
               <div className="mt-2 flex items-center justify-between gap-2 sm:hidden">
-                <span className={`text-sm font-semibold ${incomeMode ? "text-success" : ""} ${paid ? "line-through text-muted-foreground" : ""}`}>
+                <span className={`num text-sm ${incomeMode ? "text-success" : ""} ${paid ? "line-through text-muted-foreground" : ""}`}>
                   {brl(Number(t.amount))}
                 </span>
                 <div className="flex items-center">
@@ -399,7 +399,7 @@ function TxList({
                 </div>
               </div>
             </div>
-            <span className={`hidden text-sm font-semibold sm:inline ${incomeMode ? "text-success" : ""} ${paid ? "line-through text-muted-foreground" : ""}`}>
+            <span className={`num hidden text-sm sm:inline ${incomeMode ? "text-success" : ""} ${paid ? "line-through text-muted-foreground" : ""}`}>
               {brl(Number(t.amount))}
             </span>
             <div className="hidden items-center sm:flex">

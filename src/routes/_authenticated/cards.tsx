@@ -254,7 +254,7 @@ function CardsPage() {
                   <span className="text-xs text-muted-foreground">
                     Fatura de <span className="capitalize">{format(currentInvoice, "MMMM", { locale: ptBR })}</span>
                   </span>
-                  <span className="text-sm font-semibold">{brl(total)}</span>
+                  <span className="num text-sm">{brl(total)}</span>
                 </div>
                 {limitValue !== null && (
                   <div className="mt-2 space-y-1">
@@ -264,7 +264,7 @@ function CardsPage() {
                     />
                     <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                       <span>{usagePct?.toFixed(0)}% do limite</span>
-                      <span>{brl(limitValue)}</span>
+                      <span className="num">{brl(limitValue)}</span>
                     </div>
                   </div>
                 )}

@@ -124,8 +124,8 @@ function SavingsPage() {
         <Card className="animate-rise p-5" style={{ animationDelay: "60ms" }}>
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Total guardado em {goals.length} meta(s)</span>
-            <span className="font-semibold">
-              {brl(totalSaved)} <span className="font-normal text-muted-foreground">/ {brl(totalTarget)}</span>
+            <span className="num">
+              {brl(totalSaved)} <span className="text-muted-foreground">/ {brl(totalTarget)}</span>
             </span>
           </div>
           <Progress value={totalTarget > 0 ? Math.min(100, (totalSaved / totalTarget) * 100) : 0} className="mt-2" />
@@ -268,8 +268,8 @@ function GoalCard({
 
       <div className="space-y-1.5">
         <div className="flex items-baseline justify-between text-sm">
-          <span className="font-semibold">{brl(current)}</span>
-          <span className="text-xs text-muted-foreground">de {brl(target)}</span>
+          <span className="num text-sm">{brl(current)}</span>
+          <span className="text-xs text-muted-foreground">de <span className="num">{brl(target)}</span></span>
         </div>
         <Progress
           value={pct}

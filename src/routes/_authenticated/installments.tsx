@@ -143,7 +143,7 @@ function InstallmentsPage() {
                 <CreditCard className="h-4 w-4" />
               </div>
               <h2 className="text-lg font-bold tracking-tight">{card?.name ?? "Sem cartão"}</h2>
-              <span className="ml-auto text-sm text-muted-foreground">Restam {brl(totalRemaining)}</span>
+              <span className="ml-auto text-sm text-muted-foreground">Restam <span className="num">{brl(totalRemaining)}</span></span>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {[...groups.values()].map((items, j) => {
@@ -166,7 +166,7 @@ function InstallmentsPage() {
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold">{first.description}</p>
                         <p className="text-xs text-muted-foreground">
-                          {total}× de {brl(perInstallment)}
+                          {total}× de <span className="num">{brl(perInstallment)}</span>
                         </p>
                       </div>
                       <div className="text-right">
@@ -182,7 +182,7 @@ function InstallmentsPage() {
                       <span>
                         {paidCount}/{total} pagas
                       </span>
-                      <span>{brl(remainingValue)} restantes</span>
+                      <span><span className="num">{brl(remainingValue)}</span> restantes</span>
                     </div>
                     {nextPending && (
                       <p className="text-[11px] text-muted-foreground">

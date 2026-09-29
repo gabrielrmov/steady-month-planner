@@ -149,8 +149,8 @@ function Pricing() {
             <p className="font-mono text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Preço sugerido do serviço
             </p>
-            <p className="mt-2 text-4xl font-bold tracking-tight">{brl(price)}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{brl(pricePerHour)} por hora trabalhada</p>
+            <p className="num mt-2 text-4xl">{brl(price)}</p>
+            <p className="mt-1 text-xs text-muted-foreground"><span className="num">{brl(pricePerHour)}</span> por hora trabalhada</p>
           </Card>
 
           <Card className="animate-rise divide-y divide-border p-6" style={{ animationDelay: "240ms" }}>
@@ -179,7 +179,7 @@ function Row({ label, value, strong }: { label: string; value: string; strong?: 
   return (
     <div className="flex items-center justify-between py-2.5 text-sm">
       <span className="text-muted-foreground">{label}</span>
-      <span className={strong ? "font-bold" : "font-semibold"}>{value}</span>
+      <span className={`num ${strong ? "text-base" : ""}`}>{value}</span>
     </div>
   );
 }

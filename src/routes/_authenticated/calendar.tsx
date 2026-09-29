@@ -139,8 +139,8 @@ function CalendarPage() {
                     {expense > 0 && <span className="h-1.5 w-1.5 rounded-full bg-destructive" />}
                   </div>
                   <div className="hidden space-y-0.5 sm:block">
-                    {income > 0 && <div className="truncate text-[10px] font-medium text-success">+{brl(income)}</div>}
-                    {expense > 0 && <div className="truncate text-[10px] font-medium text-destructive">-{brl(expense)}</div>}
+                    {income > 0 && <div className="truncate num text-[10px] text-success">+{brl(income)}</div>}
+                    {expense > 0 && <div className="truncate num text-[10px] text-destructive">-{brl(expense)}</div>}
                   </div>
                 </button>
               );
@@ -173,7 +173,7 @@ function CalendarPage() {
                     {t.status === "paid" ? " · pago" : ""}
                   </p>
                 </div>
-                <span className={`text-xs font-semibold ${t.type === "income" ? "text-success" : "text-destructive"}`}>
+                <span className={`num text-xs ${t.type === "income" ? "text-success" : "text-destructive"}`}>
                   {t.type === "income" ? "+" : "-"}{brl(Number(t.amount))}
                 </span>
               </div>
