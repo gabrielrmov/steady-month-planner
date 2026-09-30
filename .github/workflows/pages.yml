@@ -24,12 +24,12 @@ jobs:
       PAGES_BASE: "/${{ github.event.repository.name }}/"
       # Chaves PÚBLICAS do Supabase (publishable): já vão no JavaScript do navegador.
       # Nunca coloque aqui a service role nem segredos do Pluggy.
-      SUPABASE_URL: "https://gfhpntggfwjlnsvwfthn.supabase.co"
-      SUPABASE_PUBLISHABLE_KEY: "sb_publishable_PIZEV29sNkctrhpcd0A3Sg_yigIZ5ec"
-      SUPABASE_PROJECT_ID: "gfhpntggfwjlnsvwfthn"
-      VITE_SUPABASE_URL: "https://gfhpntggfwjlnsvwfthn.supabase.co"
-      VITE_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_PIZEV29sNkctrhpcd0A3Sg_yigIZ5ec"
-      VITE_SUPABASE_PROJECT_ID: "gfhpntggfwjlnsvwfthn"
+      SUPABASE_URL: "https://cpkwwehyikqxdqlrogys.supabase.co"
+      SUPABASE_PUBLISHABLE_KEY: "sb_publishable_48buaPYkVetS6nBbyA1l_g_i8qYszGw"
+      SUPABASE_PROJECT_ID: "cpkwwehyikqxdqlrogys"
+      VITE_SUPABASE_URL: "https://cpkwwehyikqxdqlrogys.supabase.co"
+      VITE_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_48buaPYkVetS6nBbyA1l_g_i8qYszGw"
+      VITE_SUPABASE_PROJECT_ID: "cpkwwehyikqxdqlrogys"
     steps:
       - uses: actions/checkout@v4
 
