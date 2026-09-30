@@ -10,7 +10,7 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
  * Hospedagem no GitHub Pages (arquivos estáticos): o workflow define GITHUB_PAGES=true.
  *  - nitro desligado: não há servidor, só o site estático em dist/client;
  *  - modo SPA: gera _shell.html, usado como 404.html para abrir rotas do app (/dashboard...);
- *  - pré-renderização: as páginas públicas (/, /pricing, /terms, /privacy, /auth) viram HTML pronto,
+ *  - pré-renderização: as páginas públicas (/, /pricing, /terms, /privacy, /auth) viram HTML pronto (pricing.html etc.),
  *    com título, metas e JSON-LD, para buscadores e assistentes de IA;
  *  - base: caminho público do site (ex.: /steady-month-planner/). O roteador o deriva sozinho.
  * Sem a variável, o build e o dev continuam como antes.
@@ -28,7 +28,7 @@ export default defineConfig({
           prerender: {
             enabled: true,
             crawlLinks: true,
-            autoSubfolderIndex: true,
+            autoSubfolderIndex: false, // /pricing.html (servido em /pricing, sem 301 para /pricing/)
             failOnError: true,
           },
         }
