@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { withBase } from "@/lib/base";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/lib/theme";
@@ -78,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Organize suas contas a pagar e receber com checklist mensal, categorias e dashboard de fluxo de caixa.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "https://steady-month-planner.dsggabriel7.workers.dev/og-image.png" }, { name: "twitter:card", content: "summary_large_image" }, { name: "twitter:image", content: "https://steady-month-planner.dsggabriel7.workers.dev/og-image.png" }, { name: "theme-color", content: "#f6f6f8" },
+      { property: "og:image", content: "https://gabrielrmov.github.io/steady-month-planner/og-image.png" }, { name: "twitter:card", content: "summary_large_image" }, { name: "twitter:image", content: "https://gabrielrmov.github.io/steady-month-planner/og-image.png" }, { name: "theme-color", content: "#f6f6f8" },
       { name: "twitter:title", content: "FINLIST — Organizador financeiro mensal" },
       {
         name: "twitter:description",
@@ -87,7 +88,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
     links: [
-      { rel: "stylesheet", href: appCss }, { rel: "icon", type: "image/svg+xml", href: "/icon.svg" }, { rel: "icon", href: "/favicon.ico", sizes: "any" }, { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "stylesheet", href: appCss }, { rel: "icon", type: "image/svg+xml", href: withBase("/icon.svg") }, { rel: "icon", href: withBase("/favicon.ico"), sizes: "any" }, { rel: "apple-touch-icon", href: withBase("/apple-touch-icon.png") },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
       {

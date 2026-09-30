@@ -1,11 +1,12 @@
 /**
  * SEO central: metas, canonical, Open Graph e Schema.org (JSON-LD) de todas as páginas públicas.
  *
- * Ao ligar um domínio próprio, troque SITE_URL aqui e os três arquivos estáticos em /public
- * (robots.txt, sitemap.xml e llms.txt), que não podem importar este módulo.
+ * Endereço atual: GitHub Pages de projeto. Ao ligar um domínio próprio (ou mudar o nome do repositório),
+ * troque SITE_URL aqui e as URLs dos três arquivos estáticos em /public (robots.txt, sitemap.xml e
+ * llms.txt), que não podem importar este módulo. Com domínio próprio, também defina PAGES_BASE=/ no workflow.
  */
 
-export const SITE_URL = "https://steady-month-planner.dsggabriel7.workers.dev";
+export const SITE_URL = "https://gabrielrmov.github.io/steady-month-planner";
 export const SITE_NAME = "FINLIST";
 export const CONTACT_EMAIL = "contato@finlist.app";
 export const OG_IMAGE = `${SITE_URL}/og-image.png`;

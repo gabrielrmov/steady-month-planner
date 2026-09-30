@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Wallet } from "lucide-react";
 import { seo } from "@/lib/seo";
+import { withBase } from "@/lib/base";
 
 export const Route = createFileRoute("/auth")({
   head: () =>
@@ -73,7 +74,7 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}${isProIntent ? "/auth?plan=pro" : ""}`,
+        redirectTo: `${window.location.origin}${withBase(isProIntent ? "/auth?plan=pro" : "/")}`,
       },
     });
     setLoading(false);

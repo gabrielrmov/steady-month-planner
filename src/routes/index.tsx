@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
+import { withBase } from "@/lib/base";
 import { CountUp } from "@/components/landing/CountUp";
 import { Reveal } from "@/components/landing/motion";
 import {
@@ -1168,7 +1169,7 @@ function Landing() {
                 ].map(([t, d, href], i) => (
                   <Reveal key={t} delay={i * 100}>
                     <a
-                      href={href}
+                      href={withBase(href)}
                       className="group spotlight block rounded-lg bg-card p-5 shadow-[var(--shadow-card)] transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-product)]"
                     >
                       <p className="flex items-center justify-between text-[16px] font-medium leading-6">

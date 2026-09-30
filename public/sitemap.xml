@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://steady-month-planner.dsggabriel7.workers.dev/</loc>
+    <loc>https://gabrielrmov.github.io/steady-month-planner/</loc>
     <lastmod>2026-09-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://steady-month-planner.dsggabriel7.workers.dev/pricing</loc>
+    <loc>https://gabrielrmov.github.io/steady-month-planner/pricing</loc>
     <lastmod>2026-09-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://steady-month-planner.dsggabriel7.workers.dev/terms</loc>
+    <loc>https://gabrielrmov.github.io/steady-month-planner/terms</loc>
     <lastmod>2026-09-30</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://steady-month-planner.dsggabriel7.workers.dev/privacy</loc>
+    <loc>https://gabrielrmov.github.io/steady-month-planner/privacy</loc>
     <lastmod>2026-09-30</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
