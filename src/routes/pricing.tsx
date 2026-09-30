@@ -2,27 +2,39 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Check, Wallet, Sparkles, ArrowRight } from "lucide-react";
+import {
+  breadcrumbLd,
+  faqLd,
+  organizationLd,
+  seo,
+  softwareLd,
+  webPageLd,
+  websiteLd,
+} from "@/lib/seo";
 
 export const Route = createFileRoute("/pricing")({
-  head: () => ({
-    meta: [
-      { title: "Planos e preços | FINLIST" },
-      {
-        name: "description",
-        content:
-          "Comece grátis e evolua para o Pro quando precisar de relatórios avançados, cartões ilimitados e exportações.",
-      },
-      { property: "og:title", content: "Planos e preços | FINLIST" },
-      {
-        property: "og:description",
-        content: "Compare o plano gratuito e o Pro do FINLIST e escolha o que cabe no seu mês.",
-      },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://steady-month-planner.dsggabriel7.workers.dev/pricing" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [{ rel: "canonical", href: "https://steady-month-planner.dsggabriel7.workers.dev/pricing" }],
-  }),
+  head: () =>
+    seo({
+      title: "Planos e preços do FINLIST: a partir de R$ 19/mês",
+      description:
+        "Teste grátis por 30 dias, sem cartão. Depois, R$ 19/mês no plano Pessoal ou R$ 39/mês no Pessoal + PJ, com precificação de serviços. Sem fidelidade.",
+      path: "/pricing",
+      jsonLd: [
+        organizationLd(),
+        websiteLd(),
+        softwareLd(),
+        webPageLd({
+          path: "/pricing",
+          name: "Planos e preços do FINLIST",
+          description: "Compare o teste grátis, o plano Pessoal e o Pessoal + PJ.",
+        }),
+        breadcrumbLd([
+          { name: "Início", path: "/" },
+          { name: "Planos e preços", path: "/pricing" },
+        ]),
+        faqLd(faqs),
+      ],
+    }),
   component: PricingPage,
 });
 

@@ -1,3 +1,6 @@
+# FINLIST — robots.txt
+# Páginas públicas: liberadas. Área logada do app: fora do rastreamento.
+
 User-agent: *
 Allow: /
 Disallow: /dashboard
@@ -9,7 +12,32 @@ Disallow: /categories
 Disallow: /rules
 Disallow: /import
 Disallow: /reports
+Disallow: /savings
 Disallow: /settings
 Disallow: /onboarding
+Disallow: /open-finance
+Disallow: /precificacao
+Disallow: /divisao-ganhos
+
+# Buscadores e assistentes de IA podem ler as páginas públicas.
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# A tela de login (/auth) é rastreável, mas marcada com noindex nas próprias metatags.
 
 Sitemap: https://steady-month-planner.dsggabriel7.workers.dev/sitemap.xml

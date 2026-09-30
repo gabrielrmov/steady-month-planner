@@ -37,45 +37,28 @@ import {
   Repeat,
   Wand2,
 } from "lucide-react";
+import { faqLd, organizationLd, seo, softwareLd, webPageLd, websiteLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "FINLIST — Controle financeiro mensal para PF e PJ" },
-      {
-        name: "description",
-        content:
-          "Checklist mensal de contas, cartões, parcelas, relatórios e precificação de serviços PJ. Teste grátis por 30 dias, sem cartão.",
-      },
-      { property: "og:title", content: "FINLIST — Controle financeiro mensal para PF e PJ" },
-      {
-        property: "og:description",
-        content:
-          "Checklist mensal, cartões, parcelas, relatórios e precificação PJ. Teste grátis por 30 dias.",
-      },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://steady-month-planner.dsggabriel7.workers.dev/" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [{ rel: "canonical", href: "https://steady-month-planner.dsggabriel7.workers.dev/" }],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "SoftwareApplication",
-          name: "FINLIST",
-          applicationCategory: "FinanceApplication",
-          operatingSystem: "Web",
-          url: "https://steady-month-planner.dsggabriel7.workers.dev/",
-          offers: [
-            { "@type": "Offer", price: "19", priceCurrency: "BRL", name: "Pessoal (PF)" },
-            { "@type": "Offer", price: "39", priceCurrency: "BRL", name: "Pessoal + PJ" },
-          ],
+  head: () =>
+    seo({
+      title: "FINLIST — Controle financeiro mensal para PF e PJ",
+      description:
+        "Organize contas a pagar, entradas, cartões e metas em uma lista só. Dashboard financeiro com checklist mensal para PF e PJ. Teste grátis por 30 dias, sem cartão.",
+      path: "/",
+      jsonLd: [
+        organizationLd(),
+        websiteLd(),
+        softwareLd(),
+        webPageLd({
+          path: "/",
+          name: "FINLIST — Controle financeiro mensal para PF e PJ",
+          description:
+            "Dashboard de gestão financeira com checklist mensal de contas, cartões, metas e relatórios.",
         }),
-      },
-    ],
-  }),
+        faqLd(faqs),
+      ],
+    }),
   component: Landing,
 });
 
@@ -591,7 +574,10 @@ function Landing() {
 
       <main>
         {/* Herói */}
-        <section className="relative overflow-hidden pb-24 pt-10 md:pb-32 md:pt-16">
+        <section
+          aria-labelledby="hero-titulo"
+          className="relative overflow-hidden pb-24 pt-10 md:pb-32 md:pt-16"
+        >
           <div
             aria-hidden
             ref={mapRef}
@@ -616,6 +602,7 @@ function Landing() {
             <div className="mt-10 grid items-start gap-10 lg:grid-cols-2">
               <div>
                 <h1
+                  id="hero-titulo"
                   className="text-balance font-display text-[40px] font-semibold leading-[1.08] tracking-[-0.03em] sm:text-[52px]"
                   aria-label="Organize, acompanhe e planeje o dinheiro do mês."
                 >
@@ -680,11 +667,14 @@ function Landing() {
         </Wrap>
 
         {/* Confiança */}
-        <section className="relative overflow-hidden pb-20 md:pb-28">
+        <section aria-labelledby="ordem-titulo" className="relative overflow-hidden pb-20 md:pb-28">
           <Wrap className="relative grid items-center gap-10 lg:grid-cols-2">
             <Reveal>
               <Tag>Tudo em ordem</Tag>
-              <h2 className="mt-6 max-w-lg text-balance font-display text-[28px] font-semibold leading-[1.15] tracking-[-0.02em] sm:text-[32px]">
+              <h2
+                id="ordem-titulo"
+                className="mt-6 max-w-lg text-balance font-display text-[28px] font-semibold leading-[1.15] tracking-[-0.02em] sm:text-[32px]"
+              >
                 Cada conta do mês no lugar dela{" "}
                 <span className="text-[#7c7f88]">
                   para você ver o que entrou, o que saiu e quanto sobra.
@@ -709,8 +699,15 @@ function Landing() {
         </section>
 
         {/* Casos, com abas */}
-        <section className="scroll-mt-20 pb-20 md:pb-28" id="para-quem">
+        <section
+          className="scroll-mt-20 pb-20 md:pb-28"
+          id="para-quem"
+          aria-labelledby="casos-titulo"
+        >
           <Wrap>
+            <h2 id="casos-titulo" className="sr-only">
+              Para quem é o FINLIST: exemplos de uso
+            </h2>
             <Reveal className="overflow-hidden rounded-lg bg-card shadow-[var(--shadow-card)]">
               <div
                 role="tablist"
@@ -768,7 +765,7 @@ function Landing() {
         </section>
 
         {/* Feito para organizar */}
-        <section id="recursos" className="scroll-mt-20 pb-20 md:pb-28">
+        <section id="recursos" aria-labelledby="dia-titulo" className="scroll-mt-20 pb-20 md:pb-28">
           <Wrap className="grid items-center gap-12 lg:grid-cols-2">
             <Reveal className="rounded-lg bg-[#eeeff2] p-3 sm:p-5">
               <div className="rounded-lg bg-card p-5 shadow-[var(--shadow-product)]">
@@ -796,7 +793,10 @@ function Landing() {
             </Reveal>
             <Reveal delay={140}>
               <Tag tone="blue">Feito para o dia a dia</Tag>
-              <h2 className="mt-6 text-balance font-display text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] sm:text-[36px]">
+              <h2
+                id="dia-titulo"
+                className="mt-6 text-balance font-display text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] sm:text-[36px]"
+              >
                 A lista que você fazia na planilha, sem o trabalho de manter.
               </h2>
               <p className="mt-4 max-w-md text-[15px] leading-[22px] text-ink-muted">
@@ -829,7 +829,7 @@ function Landing() {
         </section>
 
         {/* Seção escura */}
-        <section className="px-2 pb-24 sm:px-2.5">
+        <section aria-labelledby="blocos-titulo" className="px-2 pb-24 sm:px-2.5">
           <div className="rounded-lg bg-[#011821] px-6 py-20 [background-image:radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:22px_22px] md:py-28">
             <Wrap className="!px-0 md:!px-16">
               <Reveal className="grid items-center gap-10 md:grid-cols-2">
@@ -837,7 +837,10 @@ function Landing() {
                   <span className="inline-block rounded-sm bg-[#0c3242] px-2 py-1 font-mono text-[11px] uppercase leading-none tracking-[0.06em] text-[#88deeb]">
                     Recursos
                   </span>
-                  <h2 className="mt-6 text-balance font-display text-[34px] font-semibold leading-[1.1] tracking-[-0.02em] text-[#88deeb] sm:text-[44px]">
+                  <h2
+                    id="blocos-titulo"
+                    className="mt-6 text-balance font-display text-[34px] font-semibold leading-[1.1] tracking-[-0.02em] text-[#88deeb] sm:text-[44px]"
+                  >
                     Blocos que se encaixam no seu mês
                   </h2>
                   <p className="mt-6 max-w-md text-[14px] leading-[22px] text-[#a9b6bd]">
@@ -952,9 +955,12 @@ function Landing() {
         </section>
 
         {/* Para quem */}
-        <section className="pb-20 md:pb-28">
+        <section aria-labelledby="publico-titulo" className="pb-20 md:pb-28">
           <Wrap className="grid items-center gap-12 lg:grid-cols-2">
             <Reveal>
+              <h2 id="publico-titulo" className="sr-only">
+                Para quem é a FINLIST
+              </h2>
               <Tag tone="blue">FINLIST para</Tag>
               <ul className="relative mt-6">
                 <span
@@ -990,10 +996,13 @@ function Landing() {
         </section>
 
         {/* Elementos */}
-        <section className="pb-20 md:pb-28">
+        <section aria-labelledby="recursos-titulo" className="pb-20 md:pb-28">
           <Wrap>
             <Tag tone="violet">Recursos</Tag>
-            <h2 className="mt-6 max-w-2xl text-balance font-display text-[34px] font-semibold leading-[1.1] tracking-[-0.02em] text-[#2a1a63] sm:text-[44px]">
+            <h2
+              id="recursos-titulo"
+              className="mt-6 max-w-2xl text-balance font-display text-[34px] font-semibold leading-[1.1] tracking-[-0.02em] text-[#2a1a63] sm:text-[44px]"
+            >
               Tudo o que entra no seu mês
             </h2>
             <div className="mt-10 border-t border-border">
@@ -1031,11 +1040,18 @@ function Landing() {
         </section>
 
         {/* Preços */}
-        <section id="precos" className="scroll-mt-20 bg-card py-16 md:py-24">
+        <section
+          id="precos"
+          aria-labelledby="precos-titulo"
+          className="scroll-mt-20 bg-card py-16 md:py-24"
+        >
           <Wrap>
             <Reveal>
               <Tag tone="cyan">Preços</Tag>
-              <h2 className="mt-6 max-w-xl text-balance font-display text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] sm:text-[36px]">
+              <h2
+                id="precos-titulo"
+                className="mt-6 max-w-xl text-balance font-display text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] sm:text-[36px]"
+              >
                 Comece grátis.{" "}
                 <span className="text-[#7c7f88]">Depois, um preço fixo por mês.</span>
               </h2>
@@ -1047,7 +1063,7 @@ function Landing() {
                   delay={pi * 120}
                   className={`spotlight flex flex-col rounded-lg bg-card p-7 hover:-translate-y-1 hover:shadow-[var(--shadow-product)] md:p-8 ${p.highlight ? "shadow-[var(--shadow-product)] ring-1 ring-primary" : "shadow-[var(--shadow-card)]"}`}
                 >
-                  <p className="text-[18px] font-medium leading-6">{p.name}</p>
+                  <h3 className="text-[18px] font-medium leading-6">{p.name}</h3>
                   <p className="mt-1 text-[14px] leading-5 text-ink-muted">{p.desc}</p>
                   <p className="mt-6 flex items-baseline gap-1.5">
                     <span className="text-[14px] text-ink-muted">R$</span>
@@ -1092,11 +1108,14 @@ function Landing() {
         </section>
 
         {/* Dúvidas */}
-        <section id="faq" className="scroll-mt-20 py-16 md:py-24">
+        <section id="faq" aria-labelledby="faq-titulo" className="scroll-mt-20 py-16 md:py-24">
           <Wrap className="grid gap-10 lg:grid-cols-[0.8fr_1.4fr]">
             <Reveal>
               <Tag>Dúvidas</Tag>
-              <h2 className="mt-6 font-display text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] sm:text-[36px]">
+              <h2
+                id="faq-titulo"
+                className="mt-6 font-display text-[30px] font-semibold leading-[1.12] tracking-[-0.02em] sm:text-[36px]"
+              >
                 Perguntas frequentes
               </h2>
               <p className="mt-4 max-w-xs text-[14px] leading-5 text-ink-muted">
@@ -1123,11 +1142,14 @@ function Landing() {
         </section>
 
         {/* Chamada final */}
-        <section className="px-2 pb-2 sm:px-2.5">
+        <section aria-labelledby="cta-titulo" className="px-2 pb-2 sm:px-2.5">
           <div className="rounded-lg bg-[#eeeff2] py-20">
             <Wrap>
               <Reveal>
-                <h2 className="font-display text-[40px] font-semibold leading-[1.05] tracking-[-0.03em] sm:text-[56px]">
+                <h2
+                  id="cta-titulo"
+                  className="font-display text-[40px] font-semibold leading-[1.05] tracking-[-0.03em] sm:text-[56px]"
+                >
                   Comece hoje mesmo
                 </h2>
                 <p className="mt-2 text-[16px] leading-6 text-ink-muted">
@@ -1175,7 +1197,7 @@ function Landing() {
                 Seu dinheiro, em ordem. FINLIST não é banco, corretora nem consultoria.
               </p>
             </div>
-            <div className="flex gap-12 text-[14px] leading-5">
+            <nav aria-label="Rodapé" className="flex gap-12 text-[14px] leading-5">
               <ul className="space-y-2">
                 <li>
                   <Link to="/pricing">Planos</Link>
@@ -1191,8 +1213,11 @@ function Landing() {
                 <li>
                   <Link to="/privacy">Privacidade</Link>
                 </li>
+                <li>
+                  <a href="mailto:contato@finlist.app">Contato</a>
+                </li>
               </ul>
-            </div>
+            </nav>
           </Wrap>
           <Wrap className="mt-8 !px-0 md:!px-16">
             <p className="text-[12px] leading-4 text-ink-muted">

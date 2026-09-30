@@ -1,23 +1,27 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Wallet } from "lucide-react";
+import { breadcrumbLd, organizationLd, seo, webPageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/privacy")({
-  head: () => ({
-    meta: [
-      { title: "Privacidade | FINLIST" },
-      {
-        name: "description",
-        content:
-          "Política de privacidade do FINLIST. Saiba como seus dados financeiros são armazenados e protegidos.",
-      },
-      { property: "og:title", content: "Privacidade | FINLIST" },
-      { property: "og:description", content: "Como o FINLIST protege seus dados financeiros." },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://steady-month-planner.dsggabriel7.workers.dev/privacy" },
-      { name: "twitter:card", content: "summary" },
-    ],
-        links: [{ rel: "canonical", href: "https://steady-month-planner.dsggabriel7.workers.dev/privacy" }],
-  }),
+  head: () =>
+    seo({
+      title: "Política de privacidade | FINLIST",
+      description:
+        "Como o FINLIST coleta, usa e protege seus dados financeiros, quais são os seus direitos e como falar com a gente.",
+      path: "/privacy",
+      jsonLd: [
+        organizationLd(),
+        webPageLd({
+          path: "/privacy",
+          name: "Política de privacidade do FINLIST",
+          description: "Como o FINLIST armazena e protege seus dados financeiros.",
+        }),
+        breadcrumbLd([
+          { name: "Início", path: "/" },
+          { name: "Política de privacidade", path: "/privacy" },
+        ]),
+      ],
+    }),
   component: PrivacyPage,
 });
 

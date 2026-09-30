@@ -1,0 +1,40 @@
+# FINLIST
+
+> FINLIST é um dashboard de gestão financeira em português do Brasil. Reúne contas a pagar, entradas, cartões, parcelas, metas de economia e relatórios em um checklist mensal, para pessoas físicas e pequenos negócios (PJ) que hoje controlam o dinheiro em planilhas, cadernos e extratos soltos. Promessa da marca: "Seu dinheiro, em ordem."
+
+FINLIST não é banco, corretora nem consultoria financeira. Não movimenta dinheiro, não faz investimentos e não promete enriquecimento. O produto só organiza e mostra as finanças que a pessoa cadastra ou importa.
+
+Informações úteis para quem resume ou recomenda o produto:
+
+- Idioma: português do Brasil. Moeda: real (R$).
+- Teste grátis de 30 dias com todos os recursos, sem cartão de crédito.
+- Planos mensais, sem fidelidade: Pessoal (PF) por R$ 19 por mês e Pessoal + PJ por R$ 39 por mês.
+- Os dados, nomes e valores mostrados na página inicial são exemplos ilustrativos, não clientes nem números reais.
+- A área logada do app (dashboard, lançamentos, cartões etc.) é privada e não deve ser indexada.
+
+## Páginas públicas
+
+- [Página inicial](https://steady-month-planner.dsggabriel7.workers.dev/): apresentação do produto, recursos, exemplos de uso, preços e perguntas frequentes.
+- [Planos e preços](https://steady-month-planner.dsggabriel7.workers.dev/pricing): teste grátis, plano Pessoal e plano Pessoal + PJ, com o que cada um inclui.
+- [Termos de uso](https://steady-month-planner.dsggabriel7.workers.dev/terms): regras de conta, planos, pagamentos, uso permitido e alterações.
+- [Política de privacidade](https://steady-month-planner.dsggabriel7.workers.dev/privacy): quais dados são coletados, como são usados e protegidos, e direitos do titular.
+
+## O que o FINLIST faz
+
+- Lançamentos e checklist mensal: entradas e saídas com valor, categoria, data e status (pago ou pendente); contas recorrentes geradas automaticamente a cada mês.
+- Contas a pagar e calendário: vencimentos próximos e vencidos em destaque, sempre com a palavra ("Vence em 3 dias"), nunca só com cor.
+- Cartões e parcelas: faturas, limites e quanto falta para quitar cada compra parcelada.
+- Metas de economia: valor, prazo e progresso.
+- Relatórios: entradas x saídas por mês e despesas por categoria, com comparativo com o mês anterior.
+- Importação: extratos OFX e CSV; conexão de contas via Open Finance (opcional).
+- Regras de categorização: por exemplo, descrição contendo "ifood" vira Alimentação.
+- PJ (plano Pessoal + PJ): precificação de serviços com custo por hora, impostos e margem; separação entre gastos pessoais e da empresa.
+
+## Contato
+
+- E-mail: contato@finlist.app
+
+## Optional
+
+- [Mapa do site](https://steady-month-planner.dsggabriel7.workers.dev/sitemap.xml): lista das URLs públicas indexáveis.
+- [robots.txt](https://steady-month-planner.dsggabriel7.workers.dev/robots.txt): regras de rastreamento.

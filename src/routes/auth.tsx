@@ -6,23 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Wallet } from "lucide-react";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({
-    meta: [
-      { title: "Entrar | FINLIST" },
-      {
-        name: "description",
-        content: "Acesse o FINLIST para organizar contas a pagar, receber, cartões e parcelas do mês.",
-      },
-      { property: "og:title", content: "Entrar | FINLIST" },
-      { property: "og:description", content: "Acesse o FINLIST e organize suas contas do mês." },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://steady-month-planner.dsggabriel7.workers.dev/auth" },
-      { name: "twitter:card", content: "summary" },
-    ],
-    links: [{ rel: "canonical", href: "https://steady-month-planner.dsggabriel7.workers.dev/auth" }],
-  }),
+  head: () =>
+    seo({
+      title: "Entrar no FINLIST",
+      description:
+        "Acesse sua conta FINLIST para organizar contas a pagar, entradas, cartões e metas do mês.",
+      path: "/auth",
+      noindex: true,
+    }),
   component: AuthPage,
 });
 

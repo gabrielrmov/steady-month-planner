@@ -1,22 +1,27 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Wallet } from "lucide-react";
+import { breadcrumbLd, organizationLd, seo, webPageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/terms")({
-  head: () => ({
-    meta: [
-      { title: "Termos de uso | FINLIST" },
-      {
-        name: "description",
-        content: "Termos de uso do FINLIST. Regras para uso do organizador financeiro mensal.",
-      },
-      { property: "og:title", content: "Termos de uso | FINLIST" },
-      { property: "og:description", content: "Termos de uso do FINLIST." },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://steady-month-planner.dsggabriel7.workers.dev/terms" },
-      { name: "twitter:card", content: "summary" },
-    ],
-        links: [{ rel: "canonical", href: "https://steady-month-planner.dsggabriel7.workers.dev/terms" }],
-  }),
+  head: () =>
+    seo({
+      title: "Termos de uso | FINLIST",
+      description:
+        "Termos de uso do FINLIST: regras de conta e segurança, planos e pagamentos, uso permitido, alterações e contato.",
+      path: "/terms",
+      jsonLd: [
+        organizationLd(),
+        webPageLd({
+          path: "/terms",
+          name: "Termos de uso do FINLIST",
+          description: "Regras para uso do organizador financeiro FINLIST.",
+        }),
+        breadcrumbLd([
+          { name: "Início", path: "/" },
+          { name: "Termos de uso", path: "/terms" },
+        ]),
+      ],
+    }),
   component: TermsPage,
 });
 
