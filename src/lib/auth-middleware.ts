@@ -1,6 +1,6 @@
 import { createMiddleware } from "@tanstack/react-start";
 import { QueryBuilder } from "@/integrations/supabase/builder";
-import type { QueryRequest } from "./query";
+import type { QueryRequest } from "@/server/query";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -11,9 +11,9 @@ import type { QueryRequest } from "./query";
  */
 export const requireAuth = createMiddleware({ type: "function" }).server(async ({ next }) => {
   const { getRequest } = await import("@tanstack/react-start/server");
-  const { getSessionUser } = await import("./session");
-  const { getDb } = await import("./db");
-  const { runQuery } = await import("./query");
+  const { getSessionUser } = await import("@/server/session");
+  const { getDb } = await import("@/server/db");
+  const { runQuery } = await import("@/server/query");
 
   const request = getRequest();
   const user = request ? await getSessionUser(request) : null;
