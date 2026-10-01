@@ -30,6 +30,11 @@ import { Route as AuthenticatedRulesRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedSavingsRouteImport } from './routes/_authenticated/savings'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTransactionsRouteImport } from './routes/_authenticated/transactions'
+import { Route as ApiDbRouteImport } from './routes/api.db'
+import { Route as ApiAuthCallbackRouteImport } from './routes/api.auth.callback'
+import { Route as ApiAuthGoogleRouteImport } from './routes/api.auth.google'
+import { Route as ApiAuthSessionRouteImport } from './routes/api.auth.session'
+import { Route as ApiAuthSignoutRouteImport } from './routes/api.auth.signout'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -140,6 +145,31 @@ const AuthenticatedTransactionsRoute =
     path: '/transactions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiDbRoute = ApiDbRouteImport.update({
+  id: '/api/db',
+  path: '/api/db',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthCallbackRoute = ApiAuthCallbackRouteImport.update({
+  id: '/api/auth/callback',
+  path: '/api/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthGoogleRoute = ApiAuthGoogleRouteImport.update({
+  id: '/api/auth/google',
+  path: '/api/auth/google',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSessionRoute = ApiAuthSessionRouteImport.update({
+  id: '/api/auth/session',
+  path: '/api/auth/session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSignoutRoute = ApiAuthSignoutRouteImport.update({
+  id: '/api/auth/signout',
+  path: '/api/auth/signout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -162,6 +192,11 @@ export interface FileRoutesByFullPath {
   '/savings': typeof AuthenticatedSavingsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
+  '/api/db': typeof ApiDbRoute
+  '/api/auth/callback': typeof ApiAuthCallbackRoute
+  '/api/auth/google': typeof ApiAuthGoogleRoute
+  '/api/auth/session': typeof ApiAuthSessionRoute
+  '/api/auth/signout': typeof ApiAuthSignoutRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -184,6 +219,11 @@ export interface FileRoutesByTo {
   '/savings': typeof AuthenticatedSavingsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
+  '/api/db': typeof ApiDbRoute
+  '/api/auth/callback': typeof ApiAuthCallbackRoute
+  '/api/auth/google': typeof ApiAuthGoogleRoute
+  '/api/auth/session': typeof ApiAuthSessionRoute
+  '/api/auth/signout': typeof ApiAuthSignoutRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -208,6 +248,11 @@ export interface FileRoutesById {
   '/_authenticated/savings': typeof AuthenticatedSavingsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
+  '/api/db': typeof ApiDbRoute
+  '/api/auth/callback': typeof ApiAuthCallbackRoute
+  '/api/auth/google': typeof ApiAuthGoogleRoute
+  '/api/auth/session': typeof ApiAuthSessionRoute
+  '/api/auth/signout': typeof ApiAuthSignoutRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -232,6 +277,11 @@ export interface FileRouteTypes {
     | '/savings'
     | '/settings'
     | '/transactions'
+    | '/api/db'
+    | '/api/auth/callback'
+    | '/api/auth/google'
+    | '/api/auth/session'
+    | '/api/auth/signout'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -254,6 +304,11 @@ export interface FileRouteTypes {
     | '/savings'
     | '/settings'
     | '/transactions'
+    | '/api/db'
+    | '/api/auth/callback'
+    | '/api/auth/google'
+    | '/api/auth/session'
+    | '/api/auth/signout'
   id:
     | '__root__'
     | '/'
@@ -277,6 +332,11 @@ export interface FileRouteTypes {
     | '/_authenticated/savings'
     | '/_authenticated/settings'
     | '/_authenticated/transactions'
+    | '/api/db'
+    | '/api/auth/callback'
+    | '/api/auth/google'
+    | '/api/auth/session'
+    | '/api/auth/signout'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -286,6 +346,11 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
+  ApiDbRoute: typeof ApiDbRoute
+  ApiAuthCallbackRoute: typeof ApiAuthCallbackRoute
+  ApiAuthGoogleRoute: typeof ApiAuthGoogleRoute
+  ApiAuthSessionRoute: typeof ApiAuthSessionRoute
+  ApiAuthSignoutRoute: typeof ApiAuthSignoutRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -437,6 +502,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTransactionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/db': {
+      id: '/api/db'
+      path: '/api/db'
+      fullPath: '/api/db'
+      preLoaderRoute: typeof ApiDbRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/callback': {
+      id: '/api/auth/callback'
+      path: '/api/auth/callback'
+      fullPath: '/api/auth/callback'
+      preLoaderRoute: typeof ApiAuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/google': {
+      id: '/api/auth/google'
+      path: '/api/auth/google'
+      fullPath: '/api/auth/google'
+      preLoaderRoute: typeof ApiAuthGoogleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/session': {
+      id: '/api/auth/session'
+      path: '/api/auth/session'
+      fullPath: '/api/auth/session'
+      preLoaderRoute: typeof ApiAuthSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/signout': {
+      id: '/api/auth/signout'
+      path: '/api/auth/signout'
+      fullPath: '/api/auth/signout'
+      preLoaderRoute: typeof ApiAuthSignoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -486,17 +586,12 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
+  ApiDbRoute: ApiDbRoute,
+  ApiAuthCallbackRoute: ApiAuthCallbackRoute,
+  ApiAuthGoogleRoute: ApiAuthGoogleRoute,
+  ApiAuthSessionRoute: ApiAuthSessionRoute,
+  ApiAuthSignoutRoute: ApiAuthSignoutRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

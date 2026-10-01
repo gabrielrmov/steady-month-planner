@@ -3,14 +3,19 @@
  * Só monta a descrição JSON da consulta; quem executa é o `exec` recebido
  * (o navegador manda para /api/db; o servidor roda direto no PostgreSQL).
  */
+import type { Database } from "./types";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export type DbError = { message: string; code?: string; details?: string | null };
-export type Result = { data: any; error: DbError | null; count: number | null };
+export type Result<D = any> = { data: D; error: DbError | null; count: number | null };
+type Tables = Database["public"]["Tables"];
+/** Linha tipada pelo types.ts quando a tabela consta lá; colunas/embeds fora dele ficam como any. */
+export type RowOf<T extends string> = (T extends keyof Tables ? Tables[T]["Row"] : unknown) & Record<string, any>;
 export type Filter = { col: string; op: string; val?: unknown; not?: boolean };
 export type QueryRequestJson = Record<string, unknown>;
 
-export class QueryBuilder implements PromiseLike<Result> {
+export class QueryBuilder<R = any, D = R[]> implements PromiseLike<Result<D>> {
   private action: "select" | "insert" | "update" | "delete" = "select";
   private columns: string | undefined;
   private returning = false;
@@ -80,13 +85,13 @@ export class QueryBuilder implements PromiseLike<Result> {
     this.limitN = n;
     return this;
   }
-  single() {
+  single(): QueryBuilder<R, R> {
     this.singleMode = "single";
-    return this;
+    return this as unknown as QueryBuilder<R, R>;
   }
-  maybeSingle() {
+  maybeSingle(): QueryBuilder<R, R | null> {
     this.singleMode = "maybe";
-    return this;
+    return this as unknown as QueryBuilder<R, R | null>;
   }
 
   private run(): Promise<Result> {
@@ -105,11 +110,11 @@ export class QueryBuilder implements PromiseLike<Result> {
     });
   }
 
-  then<R1 = Result, R2 = never>(
-    onfulfilled?: ((value: Result) => R1 | PromiseLike<R1>) | null,
+  then<R1 = Result<D>, R2 = never>(
+    onfulfilled?: ((value: Result<D>) => R1 | PromiseLike<R1>) | null,
     onrejected?: ((reason: any) => R2 | PromiseLike<R2>) | null,
   ): PromiseLike<R1 | R2> {
-    return this.run().then(onfulfilled, onrejected);
+    return (this.run() as Promise<Result<D>>).then(onfulfilled, onrejected);
   }
 }
 

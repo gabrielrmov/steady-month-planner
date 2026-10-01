@@ -4,7 +4,7 @@
  * que usa PostgreSQL. Autenticação por cookie de sessão (HttpOnly) — o navegador não guarda token.
  */
 import { withBase } from "@/lib/base";
-import { QueryBuilder, type DbError, type QueryRequestJson, type Result } from "./builder";
+import { QueryBuilder, type DbError, type QueryRequestJson, type Result, type RowOf } from "./builder";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -82,8 +82,11 @@ async function loadSession(): Promise<Session | null> {
 }
 
 const auth = {
-  async getSession(): Promise<{ data: { session: Session | null }; error: null }> {
-    return { data: { session: await loadSession() }, error: null };
+  async getSession(): Promise<
+    { data: { session: Session }; error: null } | { data: { session: null }; error: DbError | null }
+  > {
+    const session = await loadSession();
+    return session ? { data: { session }, error: null } : { data: { session: null }, error: null };
   },
   async getUser() {
     const s = await loadSession();
@@ -102,11 +105,11 @@ const auth = {
   },
   onAuthStateChange(cb: (event: AuthEvent, session: Session | null) => void) {
     listeners.add(cb);
-    return { data: { subscription: { unsubscribe: () => listeners.delete(cb) } } };
+    return { data: { subscription: { unsubscribe: () => void listeners.delete(cb) } } };
   },
 };
 
 export const supabase = {
-  from: (table: string) => new QueryBuilder(table, exec),
+  from: <T extends string>(table: T) => new QueryBuilder<RowOf<T>>(table, exec),
   auth,
 };

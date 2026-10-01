@@ -2,6 +2,8 @@ import { createMiddleware } from "@tanstack/react-start";
 import { QueryBuilder } from "@/integrations/supabase/builder";
 import type { QueryRequest } from "./query";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * Exige usuário logado (cookie de sessão) nas server functions e entrega
  * `context.supabase` (mesma API das telas, mas rodando direto no banco) e `context.userId`.
@@ -18,7 +20,7 @@ export const requireAuth = createMiddleware({ type: "function" }).server(async (
   if (!user) throw new Error("Unauthorized: sessão ausente ou expirada");
   const supabase = {
     from: (table: string) =>
-      new QueryBuilder(table, async (req) => {
+      new QueryBuilder<Record<string, any>>(table, async (req) => {
         const r = await runQuery(getDb(), user.id, req as unknown as QueryRequest);
         return { data: r.data, count: r.count, error: r.error };
       }),
