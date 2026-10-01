@@ -1,0 +1,29 @@
+# Blueprint do Render: site + API Node no mesmo serviço, banco no Neon.
+# Os valores secretos (sync: false) são preenchidos no painel do Render, nunca neste arquivo.
+services:
+  - type: web
+    name: finlist
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: DEPLOY_TARGET
+        value: node
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: PLUGGY_CLIENT_ID
+        sync: false
+      - key: PLUGGY_CLIENT_SECRET
+        sync: false
