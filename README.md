@@ -7,48 +7,57 @@ FINLIST não é banco, corretora nem consultoria.
 
 ## Stack
 
-- TanStack Start (React 19) e TanStack Router
-- Supabase (autenticação e Postgres, com RLS)
+- TanStack Start (React 19) e TanStack Router, com servidor Node (Nitro)
+- PostgreSQL (Neon) acessado pelo próprio servidor (`pg`); login com Google (OAuth + PKCE) e sessão em cookie assinado (`jose`)
 - Tailwind CSS 4, Radix UI e Recharts
 - Open Finance via Pluggy (opcional)
 
+Como os dados chegam ao banco: as telas usam `supabase.from(...)` (`src/integrations/supabase/client.ts`),
+um cliente compatível que envia a consulta para `/api/db`. O servidor (`src/server/query.ts`) só aceita
+as tabelas e colunas conhecidas, usa parâmetros SQL e **restringe toda consulta ao usuário da sessão**
+(é isso que substitui o antigo RLS). Testes: `npm run test:server` (PGlite).
+
 ## Como rodar
 
-Requer Node.js e Bun (ou npm).
+Requer Node.js 22+.
 
 ```sh
 git clone https://github.com/gabrielrmov/steady-month-planner.git
 cd steady-month-planner
 cp .env.example .env   # preencha os valores (veja abaixo)
-bun install            # ou: npm install
-bun run dev            # ou: npm run dev
+npm install
+npm run db:schema      # cria as tabelas no banco apontado por NEON_DATABASE_URL (.env.migracao)
+npm run dev
 ```
 
-Outros comandos: `npm run build`, `npm run lint`, `npm run format`.
+Outros comandos: `npm run build` (com `DEPLOY_TARGET=node`), `npm start`, `npm run lint`, `npm run test:server`.
 
 ## Variáveis de ambiente
 
 O arquivo `.env` não é versionado. Use o `.env.example` como modelo.
 
-| Variável                                                                         | Onde usa    | Observação                                           |
-| -------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------- |
-| `SUPABASE_URL`, `SUPABASE_PROJECT_ID`                                            | servidor    | do projeto Supabase                                  |
-| `SUPABASE_PUBLISHABLE_KEY`                                                       | servidor    | chave `sb_publishable_...`, feita para ser pública   |
-| `VITE_SUPABASE_URL`, `VITE_SUPABASE_PROJECT_ID`, `VITE_SUPABASE_PUBLISHABLE_KEY` | navegador   | os mesmos valores, com prefixo `VITE_`               |
-| `SUPABASE_SERVICE_ROLE_KEY`                                                      | só servidor | dá acesso total ao banco. Nunca exponha nem versione |
-| `PLUGGY_CLIENT_ID`, `PLUGGY_CLIENT_SECRET`                                       | só servidor | necessárias só para o Open Finance                   |
+| Variável                                   | Observação                                                              |
+| ------------------------------------------ | ----------------------------------------------------------------------- |
+| `DATABASE_URL`                             | string de conexão do PostgreSQL (Neon, "pooled")                        |
+| `SESSION_SECRET`                           | 32+ caracteres aleatórios; assina o cookie de sessão                    |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | cliente OAuth "Aplicativo da Web" do Google Cloud                       |
+| `APP_URL`                                  | endereço público, sem barra final (ex.: `https://finlist.onrender.com`) |
+| `PLUGGY_CLIENT_ID`, `PLUGGY_CLIENT_SECRET` | só para o Open Finance                                                  |
+
+No Google Cloud, o cliente precisa da origem `APP_URL` e do redirecionamento `APP_URL/api/auth/callback`.
 
 ## Banco de dados
 
-As migrações estão em `supabase/migrations`. Para aplicá-las no seu projeto:
+O schema está em `db/schema.sql` (idempotente; inclui os gatilhos que criam perfil, categorias padrão e
+o teste de 30 dias para cada novo usuário). `db/migrate-data.mjs` copiou os dados do Supabase para o Neon
+(uso único, já executado); o histórico antigo continua em `supabase/migrations`.
 
-```sh
-supabase link --project-ref <seu-project-ref>
-supabase db push
-```
+## Deploy (Render)
 
-Para login com Google, configure o provedor em Supabase Dashboard > Authentication > Providers >
-Google, com as credenciais OAuth do seu próprio app.
+O `render.yaml` descreve o serviço web (site e API juntos). Cada push na branch configurada faz novo deploy.
+O plano grátis dorme após inatividade, e a primeira visita pode levar cerca de 50 s.
+
+Cuidado ao mexer no histórico publicado: há sincronização com o Lovable, então evite force push, rebase e amend.
 
 ## Design
 
@@ -63,7 +72,7 @@ Os tokens ficam em `src/styles.css`, e a landing em `src/routes/index.tsx`.
 ## Deploy (GitHub Pages)
 
 O site é publicado como arquivos estáticos pelo GitHub Pages, a cada push na `main`
-(workflow em `.github/workflows/pages.yml`). Endereço: `https://gabrielrmov.github.io/steady-month-planner/`.
+(workflow em `.github/workflows/pages.yml`). Endereço: `https://finlist.onrender.com/`.
 
 **Ativar uma vez:** no repositório, `Settings > Pages > Build and deployment > Source: GitHub Actions`.
 Em repositório privado, o Pages exige plano GitHub Pro, Team ou Enterprise.

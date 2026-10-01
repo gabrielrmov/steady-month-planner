@@ -14,10 +14,10 @@ Informações úteis para quem resume ou recomenda o produto:
 
 ## Páginas públicas
 
-- [Página inicial](https://gabrielrmov.github.io/steady-month-planner/): apresentação do produto, recursos, exemplos de uso, preços e perguntas frequentes.
-- [Planos e preços](https://gabrielrmov.github.io/steady-month-planner/pricing): teste grátis, plano Pessoal e plano Pessoal + PJ, com o que cada um inclui.
-- [Termos de uso](https://gabrielrmov.github.io/steady-month-planner/terms): regras de conta, planos, pagamentos, uso permitido e alterações.
-- [Política de privacidade](https://gabrielrmov.github.io/steady-month-planner/privacy): quais dados são coletados, como são usados e protegidos, e direitos do titular.
+- [Página inicial](https://finlist.onrender.com/): apresentação do produto, recursos, exemplos de uso, preços e perguntas frequentes.
+- [Planos e preços](https://finlist.onrender.com/pricing): teste grátis, plano Pessoal e plano Pessoal + PJ, com o que cada um inclui.
+- [Termos de uso](https://finlist.onrender.com/terms): regras de conta, planos, pagamentos, uso permitido e alterações.
+- [Política de privacidade](https://finlist.onrender.com/privacy): quais dados são coletados, como são usados e protegidos, e direitos do titular.
 
 ## O que o FINLIST faz
 
@@ -36,5 +36,5 @@ Informações úteis para quem resume ou recomenda o produto:
 
 ## Optional
 
-- [Mapa do site](https://gabrielrmov.github.io/steady-month-planner/sitemap.xml): lista das URLs públicas indexáveis.
-- [robots.txt](https://gabrielrmov.github.io/steady-month-planner/robots.txt): regras de rastreamento.
+- [Mapa do site](https://finlist.onrender.com/sitemap.xml): lista das URLs públicas indexáveis.
+- [robots.txt](https://finlist.onrender.com/robots.txt): regras de rastreamento.

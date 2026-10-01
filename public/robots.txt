@@ -30,4 +30,4 @@ Disallow: /divisao-ganhos
 # A tela de login (/auth) é rastreável, mas marcada com noindex nas próprias metatags.
 # Resumo do site para assistentes de IA: /llms.txt
 
-Sitemap: https://gabrielrmov.github.io/steady-month-planner/sitemap.xml
+Sitemap: https://finlist.onrender.com/sitemap.xml
