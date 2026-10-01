@@ -26,7 +26,12 @@ jobs:
             exit 1
           }
       - name: Build (servidor Node)
-        run: npm run build
+        run: |
+          npm run build > build.log 2>&1 || {
+            msg=$(tail -c 5000 build.log | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
+            echo "::error title=build::$msg"
+            exit 1
+          }
         env:
           DEPLOY_TARGET: node
       - name: Servidor sobe e responde
