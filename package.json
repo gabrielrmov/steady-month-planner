@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "start": "node .output/server/index.mjs",
-    "test:server": "node --test src/server/",
+    "test:server": "node --experimental-strip-types --test src/server/*.test.ts",
     "db:schema": "node db/migrate-data.mjs --schema",
     "db:migrate": "node db/migrate-data.mjs"
   },
