@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireAuth as requireSupabaseAuth } from "@/server/auth-middleware";
 import { pluggyApiKey, pluggyConfigured, pluggyConnectToken, fetchItemTransactions } from "@/lib/pluggy.server";
 import { categoryForDescription, fingerprint, type PureRule } from "@/lib/categorize";
 

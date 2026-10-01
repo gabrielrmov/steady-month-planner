@@ -16,9 +16,11 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
  * Sem a variável, o build e o dev continuam como antes.
  */
 const pages = process.env.GITHUB_PAGES === "true";
+/** Hospedagem própria (Node + PostgreSQL): o build gera .output/server/index.mjs (npm start). */
+const node = process.env.DEPLOY_TARGET === "node";
 
 export default defineConfig({
-  ...(pages ? { nitro: false } : {}),
+  ...(pages ? { nitro: false } : node ? { nitro: { preset: "node-server" } } : {}),
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     server: { entry: "server" },

@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Wallet } from "lucide-react";
 import { seo } from "@/lib/seo";
-import { withBase } from "@/lib/base";
 
 export const Route = createFileRoute("/auth")({
   head: () =>
@@ -66,19 +65,21 @@ function AuthPage() {
     });
   }, [navigate, isProIntent]);
 
+  useEffect(() => {
+    const err = new URLSearchParams(window.location.search).get("error");
+    if (err) toast.error("Não foi possível entrar com o Google. Tente de novo.");
+  }, []);
+
   const handleGoogle = async () => {
-    // Direct Supabase OAuth (no third-party proxy). Configure the Google
-    // provider (Client ID/Secret + redirect URL) in your Supabase project's
-    // Authentication > Providers settings for this to work.
     setLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}${withBase(isProIntent ? "/auth?plan=pro" : "/")}`,
-      },
+      options: { plan: isProIntent ? "pro" : undefined },
     });
-    setLoading(false);
-    if (error) return toast.error(error.message ?? "Falha no login");
+    if (error) {
+      setLoading(false);
+      toast.error(error.message ?? "Falha no login");
+    }
   };
 
   return (

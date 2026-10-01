@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci || npm install --no-audit --no-fund
+      - name: Testes do servidor (PGlite)
+        run: node --experimental-strip-types --test src/server/
+      - name: Tipos
+        run: npx tsc --noEmit
+      - name: Build (servidor Node)
+        run: npm run build
+        env:
+          DEPLOY_TARGET: node
+      - name: Servidor sobe e responde
+        run: |
+          test -f .output/server/index.mjs
+          DATABASE_URL=postgres://x:x@127.0.0.1:1/x SESSION_SECRET=0123456789012345678901234567890123456789 PORT=3111 node .output/server/index.mjs &
+          sleep 4
+          curl -sf http://127.0.0.1:3111/ | grep -qi finlist
+          curl -sf http://127.0.0.1:3111/api/auth/session -o /dev/null -w '%{http_code}\n' || true
+          curl -s -X POST http://127.0.0.1:3111/api/db -H 'content-type: application/json' -d '{}' -o /dev/null -w 'db sem sessão: %{http_code}\n'
