@@ -93,7 +93,7 @@ function useProfile() {
         .eq("id", uid)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      return data as { id: string; full_name: string | null; email: string | null } | null;
     },
   });
 }
