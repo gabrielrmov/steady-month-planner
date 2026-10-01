@@ -3,15 +3,12 @@
  * Só monta a descrição JSON da consulta; quem executa é o `exec` recebido
  * (o navegador manda para /api/db; o servidor roda direto no PostgreSQL).
  */
-import type { Database } from "./types";
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export type DbError = { message: string; code?: string; details?: string | null };
 export type Result<D = any> = { data: D; error: DbError | null; count: number | null };
-type Tables = Database["public"]["Tables"];
-/** Linha tipada pelo types.ts quando a tabela consta lá; colunas/embeds fora dele ficam como any. */
-export type RowOf<T extends string> = (T extends keyof Tables ? Tables[T]["Row"] : unknown) & Record<string, any>;
+/** Linhas chegam como objetos soltos; cada tela as converte para o seu tipo (`as Category[]`). */
+export type RowOf<_T extends string = string> = Record<string, any>;
 export type Filter = { col: string; op: string; val?: unknown; not?: boolean };
 export type QueryRequestJson = Record<string, unknown>;
 
