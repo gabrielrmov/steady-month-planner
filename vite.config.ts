@@ -24,7 +24,12 @@ const cloudflare = {
   cloudflare: {
     nodeCompat: true,
     deployConfig: true,
-    wrangler: { name: "finlist", compatibility_date: "2025-09-01", observability: { enabled: true } },
+    wrangler: {
+      name: "finlist",
+      compatibility_date: "2025-09-01",
+      keep_vars: true, // variáveis e segredos do painel sobrevivem a cada deploy
+      observability: { enabled: true },
+    },
   },
 } as const;
 
