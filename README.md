@@ -52,10 +52,17 @@ O schema está em `db/schema.sql` (idempotente; inclui os gatilhos que criam per
 o teste de 30 dias para cada novo usuário). `db/migrate-data.mjs` copiou os dados do Supabase para o Neon
 (uso único, já executado); o histórico antigo continua em `supabase/migrations`.
 
-## Deploy (Render)
+## Deploy (Cloudflare Workers)
 
-O `render.yaml` descreve o serviço web (site e API juntos). Cada push na branch configurada faz novo deploy.
-O plano grátis dorme após inatividade, e a primeira visita pode levar cerca de 50 s.
+O site e a API rodam no mesmo Worker (`finlist`). O build (`npm run build`) gera `.output/server` com o
+`wrangler.json`; o Cloudflare (Workers Builds) faz o deploy a cada push na branch de produção.
+O acesso ao banco usa o driver HTTP da Neon (`@neondatabase/serverless`), que funciona no Worker.
+
+Variáveis de execução (Worker → Settings → Variables and secrets, como **Secret**): `DATABASE_URL`,
+`SESSION_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `APP_URL`
+(e `PLUGGY_CLIENT_ID`/`PLUGGY_CLIENT_SECRET` para o Open Finance).
+
+Alternativa em servidor Node (Render, VPS): `DEPLOY_TARGET=node npm run build` e `npm start`; veja `render.yaml`.
 
 Cuidado ao mexer no histórico publicado: há sincronização com o Lovable, então evite force push, rebase e amend.
 
