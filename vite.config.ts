@@ -18,9 +18,18 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 const pages = process.env.GITHUB_PAGES === "true";
 /** Hospedagem própria (Node + PostgreSQL): o build gera .output/server/index.mjs (npm start). */
 const node = process.env.DEPLOY_TARGET === "node";
+/** Padrão: Cloudflare Workers (site + API no mesmo Worker). O wrangler.json sai em .output/server. */
+const cloudflare = {
+  preset: "cloudflare-module",
+  cloudflare: {
+    nodeCompat: true,
+    deployConfig: true,
+    wrangler: { name: "finlist", compatibility_date: "2025-09-01", observability: { enabled: true } },
+  },
+} as const;
 
 export default defineConfig({
-  ...(pages ? { nitro: false } : node ? { nitro: { preset: "node-server" } } : {}),
+  ...(pages ? { nitro: false } : { nitro: node ? { preset: "node-server" } : cloudflare }),
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     server: { entry: "server" },

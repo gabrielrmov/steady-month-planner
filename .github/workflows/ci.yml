@@ -25,6 +25,21 @@ jobs:
             echo "::error title=tsc::$msg"
             exit 1
           }
+      - name: Build (Cloudflare Workers)
+        run: |
+          npm run build > build-cf.log 2>&1 || {
+            msg=$(tail -c 5000 build-cf.log | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
+            echo "::error title=build-cloudflare::$msg"
+            exit 1
+          }
+          ls .output/server | head -20
+          test -f .output/server/wrangler.json || { echo "::error title=wrangler::wrangler.json não foi gerado"; exit 1; }
+          cat .output/server/wrangler.json
+          npx wrangler deploy --dry-run --config .output/server/wrangler.json > wrangler.log 2>&1 || {
+            msg=$(tail -c 4000 wrangler.log | sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g')
+            echo "::error title=wrangler-dry-run::$msg"
+            exit 1
+          }
       - name: Build (servidor Node)
         run: |
           npm run build > build.log 2>&1 || {
