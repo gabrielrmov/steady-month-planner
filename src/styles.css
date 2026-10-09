@@ -685,12 +685,37 @@ component's own variant. */
     color-scheme: dark;
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Comportamento de app: toque rápido, sem menu de segurar e sem seleção acidental em controles. */
+  a,
+  button,
+  [role="button"],
+  label,
+  summary {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+  }
+
+  @media (display-mode: standalone) {
+    nav,
+    header,
+    button {
+      -webkit-user-select: none;
+      user-select: none;
+    }
   }
 
   /* Display headlines: tight, confident, never decorative. */

@@ -70,7 +70,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "FINLIST" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+      { name: "format-detection", content: "telephone=no" },
       { title: "FINLIST — Organizador financeiro mensal" },
       {
         name: "description",
@@ -93,7 +98,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
     links: [
-      { rel: "stylesheet", href: appCss }, { rel: "icon", type: "image/svg+xml", href: withBase("/icon.svg") }, { rel: "icon", href: withBase("/favicon.ico"), sizes: "any" }, { rel: "apple-touch-icon", href: withBase("/apple-touch-icon.png") },
+      { rel: "stylesheet", href: appCss }, { rel: "icon", type: "image/svg+xml", href: withBase("/icon.svg") }, { rel: "icon", href: withBase("/favicon.ico"), sizes: "any" }, { rel: "apple-touch-icon", href: withBase("/apple-touch-icon.png") }, { rel: "manifest", href: withBase("/manifest.webmanifest") },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
       {
