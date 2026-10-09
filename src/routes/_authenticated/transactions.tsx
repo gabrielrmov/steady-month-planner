@@ -227,15 +227,13 @@ function TransactionsPage() {
         className="animate-rise"
         style={{ animationDelay: "120ms" }}
       >
-        <div className="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0">
-          <TabsList className="w-max sm:flex-wrap">
-            <TabsTrigger value="recurring">Recorrentes ({recurring.length})</TabsTrigger>
-            <TabsTrigger value="sporadic">Esporádicos ({sporadic.length})</TabsTrigger>
-            <TabsTrigger value="cards">Cartões ({cardExpenses.length})</TabsTrigger>
-            <TabsTrigger value="income">A receber ({incomes.length - received.length})</TabsTrigger>
-            <TabsTrigger value="received">Recebidos ({received.length})</TabsTrigger>
-          </TabsList>
-        </div>
+        <TabsList className="grid h-auto w-full grid-cols-6 gap-2 bg-transparent p-0 sm:inline-flex sm:h-11 sm:w-auto sm:gap-0 sm:rounded-full sm:bg-muted sm:p-1">
+          <TabCell value="recurring" label="Recorrentes" count={recurring.length} span="col-span-2" />
+          <TabCell value="sporadic" label="Esporádicos" count={sporadic.length} span="col-span-2" />
+          <TabCell value="cards" label="Cartões" count={cardExpenses.length} span="col-span-2" />
+          <TabCell value="income" label="A receber" count={incomes.length - received.length} span="col-span-3" />
+          <TabCell value="received" label="Recebidos" count={received.length} span="col-span-3" />
+        </TabsList>
 
         <TabsContent value="recurring" className="mt-4">
           <TxList items={recurring} loading={isLoading} onToggle={togglePaid.mutate} onDelete={del.mutate} onDeleteGroup={delGroup.mutate} onEdit={handleEdit} />
@@ -275,6 +273,30 @@ function TransactionsPage() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+function TabCell({
+  value,
+  label,
+  count,
+  span,
+}: {
+  value: string;
+  label: string;
+  count: number;
+  span: string;
+}) {
+  return (
+    <TabsTrigger
+      value={value}
+      className={`${span} h-auto flex-col gap-0.5 rounded-2xl bg-card px-2 py-2.5 shadow-[var(--soft)] ring-1 ring-black/5 data-[state=active]:bg-[#111a4a] data-[state=active]:text-white data-[state=active]:shadow-[var(--soft)] sm:col-span-1 sm:flex-row sm:gap-1 sm:rounded-full sm:bg-transparent sm:px-4 sm:py-1.5 sm:shadow-none sm:ring-0 sm:data-[state=active]:bg-card sm:data-[state=active]:text-foreground sm:data-[state=active]:shadow-[var(--shadow-card)] dark:ring-white/10`}
+    >
+      <span className="text-[12px] font-medium leading-4 sm:text-sm sm:font-semibold">{label}</span>
+      <span className="num text-[18px] font-bold leading-5 sm:text-sm sm:font-semibold sm:before:content-['('] sm:after:content-[')']">
+        {count}
+      </span>
+    </TabsTrigger>
   );
 }
 
