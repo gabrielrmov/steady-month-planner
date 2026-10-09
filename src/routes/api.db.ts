@@ -25,7 +25,21 @@ export const Route = createFileRoute("/api/db")({
         }
         const { getDb } = await import("@/server/db");
         const { runQuery } = await import("@/server/query");
-        const result = await runQuery(getDb(), user.id, body as import("@/server/query").QueryRequest);
+        const req = body as import("@/server/query").QueryRequest;
+        const result = await runQuery(getDb(), user.id, req);
+        if (result.error) {
+          // Sem valores nem dados do usuário: só a forma da consulta e o erro.
+          console.error(
+            "[db] consulta falhou",
+            JSON.stringify({
+              table: req?.table,
+              action: req?.action,
+              columns: req?.columns,
+              filters: req?.filters?.map((f) => `${f.not ? "not " : ""}${f.col} ${f.op}`),
+              error: result.error,
+            }),
+          );
+        }
         return json(result);
       },
     },
