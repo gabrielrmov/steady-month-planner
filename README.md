@@ -41,7 +41,7 @@ O arquivo `.env` não é versionado. Use o `.env.example` como modelo.
 | `DATABASE_URL`                             | string de conexão do PostgreSQL (Neon, "pooled")                        |
 | `SESSION_SECRET`                           | 32+ caracteres aleatórios; assina o cookie de sessão                    |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | cliente OAuth "Aplicativo da Web" do Google Cloud                       |
-| `APP_URL`                                  | endereço público, sem barra final (ex.: `https://finlist.onrender.com`) |
+| `APP_URL`                                  | endereço público, sem barra final (ex.: `https://finlist.dsggabriel7.workers.dev`) |
 | `PLUGGY_CLIENT_ID`, `PLUGGY_CLIENT_SECRET` | só para o Open Finance                                                  |
 
 No Google Cloud, o cliente precisa da origem `APP_URL` e do redirecionamento `APP_URL/api/auth/callback`.
@@ -79,7 +79,7 @@ Os tokens ficam em `src/styles.css`, e a landing em `src/routes/index.tsx`.
 ## Deploy (GitHub Pages)
 
 O site é publicado como arquivos estáticos pelo GitHub Pages, a cada push na `main`
-(workflow em `.github/workflows/pages.yml`). Endereço: `https://finlist.onrender.com/`.
+(workflow em `.github/workflows/pages.yml`). Endereço: `https://finlist.dsggabriel7.workers.dev/`.
 
 **Ativar uma vez:** no repositório, `Settings > Pages > Build and deployment > Source: GitHub Actions`.
 Em repositório privado, o Pages exige plano GitHub Pro, Team ou Enterprise.

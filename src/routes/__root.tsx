@@ -79,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Organize suas contas a pagar e receber com checklist mensal, categorias e dashboard de fluxo de caixa.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "https://finlist.onrender.com/og-image.png" }, { name: "twitter:card", content: "summary_large_image" }, { name: "twitter:image", content: "https://finlist.onrender.com/og-image.png" }, { name: "theme-color", content: "#f6f6f8" },
+      { property: "og:image", content: "https://finlist.dsggabriel7.workers.dev/og-image.png" }, { name: "twitter:card", content: "summary_large_image" }, { name: "twitter:image", content: "https://finlist.dsggabriel7.workers.dev/og-image.png" }, { name: "theme-color", content: "#f6f6f8" },
       { name: "twitter:title", content: "FINLIST — Organizador financeiro mensal" },
       {
         name: "twitter:description",

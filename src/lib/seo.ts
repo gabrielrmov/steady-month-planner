@@ -1,12 +1,12 @@
 /**
  * SEO central: metas, canonical, Open Graph e Schema.org (JSON-LD) de todas as páginas públicas.
  *
- * Endereço atual: Render. Ao ligar um domínio próprio, troque SITE_URL aqui, as URLs dos três arquivos
+ * Endereço atual: Cloudflare Workers (workers.dev). Ao ligar um domínio próprio, troque SITE_URL aqui, as URLs dos três arquivos
  * estáticos em /public (robots.txt, sitemap.xml e llms.txt), que não podem importar este módulo,
- * e a variável APP_URL no Render (e o redirecionamento no Google Cloud).
+ * e a variável APP_URL no Worker (e o redirecionamento no Google Cloud).
  */
 
-export const SITE_URL = "https://finlist.onrender.com";
+export const SITE_URL = "https://finlist.dsggabriel7.workers.dev";
 export const SITE_NAME = "FINLIST";
 export const CONTACT_EMAIL = "contato@finlist.app";
 export const OG_IMAGE = `${SITE_URL}/og-image.png`;
