@@ -211,7 +211,7 @@ function ReportsPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="animate-rise flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-[28px] font-semibold sm:text-[34px]">Relatórios</h1>
+          <h1 className="text-[26px] font-bold tracking-tight sm:text-[32px]">Relatórios</h1>
           <p className="text-sm text-muted-foreground">Últimos {monthsBack} meses</p>
         </div>
         <div className="flex items-center gap-2">
@@ -334,8 +334,8 @@ function ReportsPage() {
                   }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="entrada" name="Entradas" fill="var(--success)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="saida" name="Saídas" fill="var(--destructive)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="entrada" name="Entradas" fill="#10a37f" radius={[10, 10, 4, 4]} maxBarSize={22} />
+                <Bar dataKey="saida" name="Saídas" fill="#5b6cff" radius={[10, 10, 4, 4]} maxBarSize={22} />
               </BarChart>
             </ResponsiveContainer>
           </div>

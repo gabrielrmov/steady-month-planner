@@ -15,7 +15,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Repeat2, CreditCard, Pencil, Inbox, Search, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, Repeat2, CreditCard, Pencil, Inbox, Search, X, MoreVertical } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const tabSchema = z.object({
   tab: z.enum(["recurring", "sporadic", "cards", "income", "received"]).optional(),
@@ -160,7 +161,7 @@ function TransactionsPage() {
     <div className="mx-auto max-w-5xl space-y-5">
       <div className="animate-rise space-y-3 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:space-y-0">
         <div className="min-w-0">
-          <h1 className="font-display truncate text-[28px] font-semibold sm:text-[34px]">Contas</h1>
+          <h1 className="truncate text-[26px] font-bold tracking-tight sm:text-[32px]">Contas</h1>
           <p className="text-sm text-muted-foreground">Gerencie contas a pagar e receber</p>
         </div>
         <div className="flex items-center gap-2">
@@ -328,104 +329,89 @@ function TxList({
   if (items.length === 0)
     return <EmptyState message="Nada por aqui neste mês." />;
   return (
-    <Card className="animate-rise divide-y divide-border">
+    <Card className="animate-rise divide-y divide-border overflow-hidden">
       {items.map((t, i) => {
         const paid = t.status === "paid";
         const isInstallment = !!(t.installment_total && t.installment_total > 1);
         const hasGroup = !!t.purchase_group_id;
+        const color = t.categories?.color ?? "#64748B";
         return (
           <div
             key={t.id}
-            className="animate-rise group flex items-start gap-3 p-3 transition-all duration-150 hover:translate-x-0.5 hover:bg-muted/40 sm:items-center sm:p-4"
+            className="animate-rise group flex items-center gap-3 px-3 py-3 transition-colors duration-150 hover:bg-muted/50 sm:gap-4 sm:px-5 sm:py-3.5"
             style={{ animationDelay: `${Math.min(i, 10) * 35}ms` }}
           >
             <input
               type="checkbox"
               checked={paid}
+              aria-label={paid ? `Desmarcar ${t.description}` : `Marcar ${t.description} como ${incomeMode ? "recebida" : "paga"}`}
               onChange={(e) => onToggle({ id: t.id, paid: e.target.checked })}
-              className="mt-1 h-5 w-5 shrink-0 cursor-pointer rounded border-border accent-[var(--brand)] transition-transform active:scale-90 sm:mt-0"
+              className="h-[22px] w-[22px] shrink-0 cursor-pointer appearance-none rounded-full border-2 border-border-strong bg-transparent transition-colors checked:border-[#10a37f] checked:bg-[#10a37f] hover:border-[#10a37f]"
             />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <p className={`truncate text-sm font-medium ${paid ? "line-through text-muted-foreground" : ""}`}>
+            <span
+              className="hidden h-10 w-10 shrink-0 place-items-center rounded-full text-[14px] font-bold sm:grid"
+              style={{ background: `${color}22`, color }}
+              aria-hidden="true"
+            >
+              {t.description.charAt(0).toUpperCase()}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <p className={`truncate text-[15px] font-semibold ${paid ? "text-muted-foreground line-through" : ""}`}>
                   {t.description}
                   {showInstallment && isInstallment && (
-                    <span className="ml-1 text-xs text-muted-foreground">
+                    <span className="ml-1 text-xs font-normal text-muted-foreground">
                       ({t.installment_number}/{t.installment_total})
                     </span>
                   )}
                 </p>
                 {t.is_recurring && <Repeat2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
               </div>
-              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                 <span>{format(new Date(t.due_date + "T00:00:00"), "dd/MM/yyyy")}</span>
                 {t.categories && (
                   <span
-                    className="rounded-full px-2 py-0.5 text-[10px] font-medium"
-                    style={{ backgroundColor: t.categories.color + "22", color: t.categories.color }}
+                    className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                    style={{ backgroundColor: color + "22", color }}
                   >
                     {t.categories.name}
                   </span>
                 )}
               </div>
-              {/* Ações e valor em linha própria no mobile */}
-              <div className="mt-2 flex items-center justify-between gap-2 sm:hidden">
-                <span className={`num text-sm ${incomeMode ? "text-success" : ""} ${paid ? "line-through text-muted-foreground" : ""}`}>
-                  {brl(Number(t.amount))}
-                </span>
-                <div className="flex items-center">
-                  <Button variant="ghost" size="icon" className="group" onClick={() => onEdit(t)} title="Editar">
-                    <Pencil className="h-4 w-4 text-muted-foreground transition-transform duration-150 group-hover:scale-110" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="group" onClick={() => onDelete(t.id)} title="Excluir este">
-                    <Trash2 className="h-4 w-4 text-muted-foreground transition-transform duration-150 group-hover:scale-110" />
-                  </Button>
-                  {hasGroup && (
-                    <Button
-                      variant="ghost"
-                      className="group"
-                      size="icon"
-                      onClick={() => {
-                        const msg = isInstallment
-                          ? `Remover todas as ${t.installment_total} parcelas desta compra?`
-                          : "Remover esta conta de todos os meses?";
-                        if (confirm(msg)) onDeleteGroup(t.purchase_group_id!);
-                      }}
-                      title="Excluir de todos os meses"
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive transition-transform duration-150 group-hover:scale-110" />
-                    </Button>
-                  )}
-                </div>
-              </div>
             </div>
-            <span className={`num hidden text-sm sm:inline ${incomeMode ? "text-success" : ""} ${paid ? "line-through text-muted-foreground" : ""}`}>
+            <span
+              className={`num shrink-0 text-[15px] font-semibold ${incomeMode ? "text-success" : ""} ${paid ? "text-muted-foreground line-through" : ""}`}
+            >
               {brl(Number(t.amount))}
             </span>
-            <div className="hidden items-center sm:flex">
-              <Button variant="ghost" size="icon" className="group" onClick={() => onEdit(t)} title="Editar">
-                <Pencil className="h-4 w-4 text-muted-foreground transition-transform duration-150 group-hover:scale-110" />
-              </Button>
-              <Button variant="ghost" size="icon" className="group" onClick={() => onDelete(t.id)} title="Excluir este">
-                <Trash2 className="h-4 w-4 text-muted-foreground transition-transform duration-150 group-hover:scale-110" />
-              </Button>
-              {hasGroup && (
-                <Button
-                  variant="ghost"
-                  className="group"
-                  size="icon"
-                  onClick={() => {
-                    const msg = isInstallment
-                      ? `Remover todas as ${t.installment_total} parcelas desta compra?`
-                      : "Remover esta conta de todos os meses?";
-                    if (confirm(msg)) onDeleteGroup(t.purchase_group_id!);
-                  }}
-                  title="Excluir de todos os meses"
-                >
-                  <Trash2 className="h-4 w-4 text-destructive transition-transform duration-150 group-hover:scale-110" />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="-mr-1 h-10 w-10 shrink-0 rounded-full" aria-label={`Ações de ${t.description}`}>
+                  <MoreVertical className="h-4 w-4 text-muted-foreground" />
                 </Button>
-              )}
-            </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-52 rounded-2xl p-1.5">
+                <DropdownMenuItem className="rounded-xl py-2.5" onSelect={() => onEdit(t)}>
+                  <Pencil className="mr-2 h-4 w-4" /> Editar
+                </DropdownMenuItem>
+                <DropdownMenuItem className="rounded-xl py-2.5" onSelect={() => onDelete(t.id)}>
+                  <Trash2 className="mr-2 h-4 w-4" /> Excluir este
+                </DropdownMenuItem>
+                {hasGroup && (
+                  <DropdownMenuItem
+                    className="rounded-xl py-2.5 text-destructive focus:text-destructive"
+                    onSelect={() => {
+                      const msg = isInstallment
+                        ? `Remover todas as ${t.installment_total} parcelas desta compra?`
+                        : "Remover esta conta de todos os meses?";
+                      if (confirm(msg)) onDeleteGroup(t.purchase_group_id!);
+                    }}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Excluir de todos os meses
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         );
       })}

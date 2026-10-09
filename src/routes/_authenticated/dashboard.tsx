@@ -607,7 +607,7 @@ function Dashboard() {
                 }`}
               >
                 <span className="text-[11px] font-semibold uppercase tracking-wide opacity-80">
-                  {format(w.d, "EEE", { locale: ptBR }).replace(".", "")}
+                  {format(w.d, "EEE", { locale: ptBR }).replace(".", "").slice(0, 3)}
                 </span>
                 <span className="num text-[18px] font-semibold leading-none sm:text-[22px]">
                   {format(w.d, "d")}
@@ -996,7 +996,7 @@ function Kpi({
   const id = `k-${label}`;
   return (
     <div
-      className="animate-rise rounded-3xl bg-card p-5 shadow-[var(--soft)] ring-1 ring-black/5 transition-transform duration-300 hover:-translate-y-0.5 sm:p-6 dark:ring-white/10"
+      className="animate-rise rounded-3xl bg-card p-4 shadow-[var(--soft)] ring-1 ring-black/5 transition-transform duration-300 hover:-translate-y-0.5 sm:p-6 dark:ring-white/10"
       style={{ animationDelay: `${index * 90}ms` }}
     >
       <div className="flex items-center justify-between">
@@ -1005,8 +1005,8 @@ function Kpi({
           {icon}
         </span>
       </div>
-      <Money value={value} className="mt-4 block whitespace-nowrap text-[24px] font-semibold leading-none sm:text-[28px]" />
-      <div className="mt-3 flex items-center gap-2">
+      <Money value={value} className="mt-3 block whitespace-nowrap text-[21px] font-semibold leading-none sm:mt-4 sm:text-[28px]" />
+      <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1">
         {delta !== null && delta !== 0 && (
           <span
             className={`num shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold ${good ? "bg-[#e8f8f2] text-[#0b7a5c] dark:bg-[#0b2f27] dark:text-[#7be0c0]" : "bg-[#ffe9ea] text-[#b4232a] dark:bg-[#3a1215] dark:text-[#ff9aa0]"}`}
@@ -1014,9 +1014,9 @@ function Kpi({
             {up ? "▲" : "▼"} {Math.abs(delta)}%
           </span>
         )}
-        {note && <span className="truncate text-[12px] text-muted-foreground">{note}</span>}
+        {note && <span className="text-[11.5px] leading-4 text-muted-foreground sm:text-[12px]">{note}</span>}
       </div>
-      <div className="mt-3 h-10 w-full" aria-hidden="true">
+      <div className="mt-3 hidden h-10 w-full sm:block" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data.map((v) => ({ v }))} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
             <defs>

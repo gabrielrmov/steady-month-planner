@@ -111,7 +111,7 @@ function CategoriesPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="animate-rise">
-        <h1 className="font-display text-[28px] font-semibold sm:text-[34px]">Categorias</h1>
+        <h1 className="text-[26px] font-bold tracking-tight sm:text-[32px]">Categorias</h1>
         <p className="text-sm text-muted-foreground">
           Organize suas contas por tipo e defina orçamentos mensais para acompanhar gastos
         </p>

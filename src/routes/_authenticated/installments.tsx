@@ -77,7 +77,7 @@ function InstallmentsPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="animate-rise flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-[28px] font-semibold sm:text-[34px]">Parcelas em aberto</h1>
+          <h1 className="text-[26px] font-bold tracking-tight sm:text-[32px]">Parcelas em aberto</h1>
           <p className="text-sm text-muted-foreground">Acompanhe quanto falta para quitar cada compra parcelada</p>
         </div>
       </div>

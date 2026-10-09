@@ -157,7 +157,7 @@ function ImportPage() {
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Importar & Open Finance</h1>
+          <h1 className="text-[26px] font-bold tracking-tight sm:text-[32px]">Importar & Open Finance</h1>
           <p className="text-sm text-muted-foreground">
             Traga seus lançamentos automaticamente do extrato do banco ou da fatura do cartão.
           </p>

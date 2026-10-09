@@ -121,7 +121,7 @@ function CardsPage() {
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="animate-rise flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="font-display text-[28px] font-semibold sm:text-[34px]">Cartões</h1>
+          <h1 className="text-[26px] font-bold tracking-tight sm:text-[32px]">Cartões</h1>
           <p className="text-sm text-muted-foreground">Cadastre seus cartões para organizar as compras parceladas</p>
         </div>
         <div className="flex items-center gap-2">
