@@ -32,7 +32,14 @@ test("insere com user_id forçado, embed e isolamento entre usuários", async ()
     table: "transactions", action: "insert", returning: true, single: "single", columns: "*",
     values: { description: "Cinema", amount: 50, type: "expense", due_date: "2026-10-05", category_id: cat.id, user_id: b },
   });
-  assert.equal(ins.error?.code, "42703", "user_id vindo do cliente é recusado");
+  assert.equal(ins.error?.code, "42501", "user_id de outro usuário é recusado");
+  const own = await runQuery(db, a, {
+    table: "transactions", action: "insert", returning: true, single: "single", columns: "*",
+    values: { description: "Próprio", amount: 5, type: "expense", due_date: "2026-10-06", user_id: a },
+  });
+  assert.equal(own.error, null, "o próprio user_id (como as telas enviam) é aceito");
+  assert.equal((own.data as { user_id: string }).user_id, a);
+  await runQuery(db, a, { table: "transactions", action: "delete", filters: [{ col: "description", op: "eq", val: "Próprio" }] });
   const ok = await runQuery(db, a, {
     table: "transactions", action: "insert", returning: true, single: "single", columns: "*",
     values: { description: "Cinema", amount: 50, type: "expense", due_date: "2026-10-05", category_id: cat.id },

@@ -219,6 +219,17 @@ function writableColumns(table: string, cols: Map<string, Set<string>>): Set<str
   return out;
 }
 
+/**
+ * As telas mandam `user_id` em inserções. O servidor sempre grava o usuário da sessão; por isso o
+ * próprio id é aceito e descartado, e o de outra pessoa é recusado.
+ */
+function dropOwnScope(row: Record<string, unknown>, scope: string, uid: string): Record<string, unknown> {
+  if (!(scope in row) || scope === "id") return row;
+  if (row[scope] !== uid) throw new QueryError("Operação não permitida para outro usuário", "42501");
+  const { [scope]: _drop, ...rest } = row;
+  return rest;
+}
+
 function shape(rows: Record<string, unknown>[], req: QueryRequest): unknown {
   if (req.single) {
     if (rows.length === 1) return rows[0];
@@ -278,7 +289,9 @@ async function execute(db: Queryable, uid: string, req: QueryRequest): Promise<Q
       : "";
 
   if (req.action === "insert") {
-    const rows = Array.isArray(req.values) ? req.values : req.values ? [req.values] : [];
+    const rows = (Array.isArray(req.values) ? req.values : req.values ? [req.values] : []).map((r) =>
+      dropOwnScope(r, def.scope, uid),
+    );
     if (rows.length === 0) return { data: req.returning ? [] : null, count: null, error: null };
     if (rows.length > MAX_ROWS) throw new QueryError("Linhas demais em uma inserção", "54000");
     const writable = writableColumns(req.table, cols);
@@ -313,7 +326,7 @@ async function execute(db: Queryable, uid: string, req: QueryRequest): Promise<Q
   }
 
   if (req.action === "update") {
-    const patch = (Array.isArray(req.values) ? req.values[0] : req.values) ?? {};
+    const patch = dropOwnScope((Array.isArray(req.values) ? req.values[0] : req.values) ?? {}, def.scope, uid);
     const writable = writableColumns(req.table, cols);
     const keys = Object.keys(patch);
     if (keys.length === 0) throw new QueryError("Nada para atualizar", "22023");
