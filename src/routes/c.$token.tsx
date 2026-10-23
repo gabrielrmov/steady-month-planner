@@ -261,7 +261,10 @@ function DecisionCard({
 
 function ProposalView({ share, events, name, setName, send }: ViewProps) {
   const [text, setText] = useState("");
-  const blocks = useMemo(() => proposalBlocks(share.data as ProposalData, share.brand), [share]);
+  const blocks = useMemo(
+    () => proposalBlocks(share.data as ProposalData, share.brand, { web: true }),
+    [share],
+  );
   const thread = events.filter((e) => e.type === "comment" || e.type === "reply");
   return (
     <>

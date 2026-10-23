@@ -8,17 +8,28 @@ import { brl, dateBR } from "./format.ts";
 import { safeHttpUrl, safeLogo } from "./safe.ts";
 
 export type DocBlock =
-  | { t: "cover"; logo: string; brand: string; title: string; to: string; meta: string }
+  | { t: "header"; logo: string; name: string; lines: string[] }
+  | { t: "hero"; kicker: string; title: string; meta: { label: string; value: string }[] }
   | { t: "heading"; text: string }
   | { t: "title"; text: string; muted?: boolean }
   | { t: "p"; text: string }
   | { t: "party"; label: string; text: string }
   | { t: "ul"; items: string[] }
-  | { t: "price"; text: string }
+  | { t: "invest"; total: string; terms: string; pix: string }
   | { t: "note"; text: string }
+  | { t: "accept"; left: string; right: string }
   | { t: "sign"; labels: string[] };
 
-export type Brand = { name?: string; logo?: string; doc?: string; phone?: string; email?: string };
+export type Brand = {
+  name?: string;
+  logo?: string;
+  doc?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  city?: string;
+  pix?: string;
+};
 
 export { safeHttpUrl, safeLogo };
 
@@ -43,29 +54,63 @@ const lines = (s: string | null | undefined) =>
     .map((x) => x.trim())
     .filter(Boolean);
 
-export function proposalBlocks(d: ProposalData, brand: Brand = {}): DocBlock[] {
+export type ProposalOptions = {
+  /** Número exibido (ex.: PROP-20261023-AB12). */
+  number?: string;
+  /** Na página do cliente não há linha de assinatura: ele aprova pelos botões. */
+  web?: boolean;
+};
+
+export function proposalBlocks(
+  d: ProposalData,
+  brand: Brand = {},
+  opts: ProposalOptions = {},
+): DocBlock[] {
+  const who =
+    [d.client_name, d.company].filter((x, i, a) => x && a.indexOf(x) === i).join(" · ") ||
+    "Cliente";
   const out: DocBlock[] = [
     {
-      t: "cover",
+      t: "header",
       logo: safeLogo(brand.logo),
-      brand: brand.name || "Sua empresa",
+      name: brand.name || "Sua empresa",
+      lines: [brand.doc, brand.address, brand.city, brand.phone, brand.email].filter(
+        (x): x is string => !!x,
+      ),
+    },
+    {
+      t: "hero",
+      kicker: "PROPOSTA COMERCIAL",
       title: d.title || "Proposta Comercial",
-      to: d.company || d.client_name || "Cliente",
-      meta: [dateBR(d.proposal_date), d.validity ? `válida por ${d.validity}` : ""]
-        .filter(Boolean)
-        .join(" · "),
+      meta: [
+        { label: "Para", value: who },
+        { label: "Data", value: dateBR(d.proposal_date) },
+        { label: "Válida por", value: d.validity ?? "" },
+        { label: "Nº", value: opts.number ?? "" },
+      ].filter((m) => m.value),
     },
   ];
-  if (d.client_name) out.push({ t: "p", text: `Olá, ${d.client_name}.` });
   if (d.intro) out.push({ t: "p", text: d.intro });
+  else if (d.client_name) out.push({ t: "p", text: `Olá, ${d.client_name}.` });
   if (d.scope_of_work)
     out.push({ t: "heading", text: "Escopo" }, { t: "p", text: d.scope_of_work });
   if (lines(d.deliverables).length)
-    out.push({ t: "heading", text: "Entregáveis" }, { t: "ul", items: lines(d.deliverables) });
+    out.push(
+      { t: "heading", text: "O que está incluído" },
+      { t: "ul", items: lines(d.deliverables) },
+    );
   if (d.timeline) out.push({ t: "heading", text: "Prazos" }, { t: "p", text: d.timeline });
-  out.push({ t: "heading", text: "Investimento" }, { t: "price", text: brl(d.price) });
-  if (d.payment_terms) out.push({ t: "p", text: d.payment_terms });
-  if (d.notes) out.push({ t: "heading", text: "Observações" }, { t: "p", text: d.notes });
+  out.push(
+    { t: "heading", text: "Investimento" },
+    { t: "invest", total: brl(d.price), terms: d.payment_terms ?? "", pix: brand.pix ?? "" },
+  );
+  if (d.notes) out.push({ t: "heading", text: "Condições" }, { t: "p", text: d.notes });
+  if (!opts.web)
+    out.push({
+      t: "accept",
+      left: brand.name || "Contratada",
+      right: d.company || d.client_name || "Contratante",
+    });
   const foot = [brand.name, brand.doc, brand.phone, brand.email].filter(Boolean).join(" · ");
   if (foot) out.push({ t: "note", text: foot });
   return out;
@@ -214,20 +259,34 @@ export function renderBlocks(blocks: DocBlock[]): ReactNode {
     blocks.map((b, i) => {
       const key = `${b.t}-${i}`;
       switch (b.t) {
-        case "cover":
+        case "header":
           return h(
             "div",
-            { key, className: "doc-cover" },
-            b.logo ? h("img", { className: "doc-logo", src: b.logo, alt: "" }) : null,
-            h("small", null, b.brand),
+            { key, className: "doc-header" },
+            h(
+              "div",
+              { className: "doc-brand" },
+              b.logo ? h("img", { className: "doc-logo", src: b.logo, alt: "" }) : null,
+              h("b", null, b.name),
+            ),
+            h(
+              "div",
+              { className: "doc-issuer" },
+              b.lines.map((l, j) => h("span", { key: j }, l)),
+            ),
+          );
+        case "hero":
+          return h(
+            "div",
+            { key, className: "doc-hero" },
+            h("small", null, b.kicker),
             h("h2", null, b.title),
             h(
-              "p",
+              "dl",
               null,
-              "Para ",
-              h("b", null, b.to),
-              b.meta ? h("br") : null,
-              b.meta ? h("small", null, b.meta) : null,
+              b.meta.map((m) =>
+                h("div", { key: m.label }, h("dt", null, m.label), h("dd", null, m.value)),
+              ),
             ),
           );
         case "heading":
@@ -244,10 +303,28 @@ export function renderBlocks(blocks: DocBlock[]): ReactNode {
             { key },
             b.items.map((x, j) => h("li", { key: j }, x)),
           );
-        case "price":
-          return h("div", { key, className: "doc-price" }, b.text);
+        case "invest":
+          return h(
+            "div",
+            { key, className: "doc-invest" },
+            h("div", { className: "doc-price" }, b.total),
+            b.terms ? h("p", null, h("b", null, "Forma de pagamento: "), b.terms) : null,
+            b.pix ? h("p", null, h("b", null, "Chave Pix: "), b.pix) : null,
+          );
         case "note":
           return h("div", { key, className: "doc-note" }, b.text);
+        case "accept":
+          return h(
+            "div",
+            { key, className: "doc-accept" },
+            h(
+              "p",
+              null,
+              h("b", null, "De acordo."),
+              " Ao assinar, as partes aprovam o escopo, os prazos e o investimento desta proposta.",
+            ),
+            h("div", { className: "doc-sign" }, h("div", null, b.left), h("div", null, b.right)),
+          );
         case "sign":
           return h(
             "div",

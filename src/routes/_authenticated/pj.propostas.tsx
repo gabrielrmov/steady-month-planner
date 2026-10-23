@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -27,12 +28,21 @@ import {
 } from "@/lib/pj/data";
 import { ShareDialog } from "@/components/pj/ShareDialog";
 import { proposalBlocks, renderBlocks } from "@/lib/pj/doc";
+import { kitSummary } from "@/lib/pj/calc";
+import {
+  PROPOSAL_TYPES,
+  fillProposal,
+  proposalNumber,
+  suggestPrice,
+  type ProposalType,
+} from "@/lib/pj/proposal-templates";
 import { brl, today, toNumber } from "@/lib/pj/format";
 import { printElement } from "@/lib/pj/print";
 import { setPrefill, takePrefill } from "@/lib/pj/prefill";
 import {
   PROPOSAL_STATUS,
   type PjClient,
+  type PjEquipment,
   type PjProposal,
   type ProposalStatus,
 } from "@/lib/pj/types";
@@ -68,19 +78,109 @@ function PropostasPage() {
   const del = useDeleteRow("pj_proposals", "Proposta removida");
   const navigate = useNavigate();
   const paper = useRef<HTMLDivElement>(null);
-  const [d, setD] = useState<Draft>(() => ({
-    ...blank(),
-    ...(takePrefill<Draft>("proposal") ?? {}),
-  }));
+  const equipment = useRows<PjEquipment>("pj_equipment");
+  // Campos que você mexeu à mão: o preenchimento automático não sobrescreve.
+  const [touched, setTouched] = useState<Set<string>>(new Set());
+  const [type, setType] = useState<ProposalType>("Conteúdo mensal");
+  const [qty, setQty] = useState(4);
+  const [d, setD] = useState<Draft>(() => {
+    const pre = takePrefill<Draft>("proposal") ?? {};
+    return { ...blank(), ...pre };
+  });
+  const prefilled = useRef<string[]>([]);
   const [listOpen, setListOpen] = useState(false);
   const [mode, setMode] = useState<"edit" | "preview">("edit");
   const [busy, setBusy] = useState(false);
   const [share, setShare] = useState<ShareRow | null>(null);
 
-  const set = <K extends keyof PjProposal>(k: K, v: PjProposal[K] | null) =>
+  const set = <K extends keyof PjProposal>(k: K, v: PjProposal[K] | null) => {
     setD((x) => ({ ...x, [k]: v }));
+    setTouched((t) => new Set(t).add(k));
+  };
+
+  const priceCtx = useMemo(
+    () => ({
+      desiredIncome: profile.data?.desired_income,
+      fixedCosts: profile.data?.fixed_costs,
+      billableHours: profile.data?.billable_hours,
+      taxRate: profile.data?.tax_rate,
+      kitMonthly: kitSummary(equipment.data ?? []).monthly,
+    }),
+    [profile.data, equipment.data],
+  );
+  const suggestion = useMemo(() => suggestPrice(type, priceCtx, qty), [type, priceCtx, qty]);
+
+  /** Preenche tudo para o tipo escolhido; só mexe no que você não editou (ou em tudo, com force). */
+  function refill(
+    next: { type?: ProposalType; qty?: number; name?: string | null; company?: string | null },
+    force = false,
+  ) {
+    const t = next.type ?? type;
+    const q = next.qty ?? qty;
+    const f = fillProposal(
+      t,
+      { name: next.name ?? d.client_name, company: next.company ?? d.company },
+      { name: profile.data?.full_name, company: profile.data?.company },
+      q,
+    );
+    const price = suggestPrice(t, priceCtx, q).price;
+    const keep = force ? new Set<string>() : touched;
+    setD((x) => {
+      const out: Draft = { ...x };
+      for (const [k, v] of Object.entries(f))
+        if (!keep.has(k)) (out as Record<string, unknown>)[k] = v;
+      if (!keep.has("price")) out.price = price;
+      return out;
+    });
+    if (force) setTouched(new Set());
+  }
+
+  // Primeira abertura: com o perfil carregado, a proposta já nasce preenchida (respeitando o que veio do CRM/orçamento).
+  const started = useRef(false);
+  useEffect(() => {
+    if (started.current || !profile.data || equipment.isLoading) return;
+    started.current = true;
+    const pre = Object.keys(d).filter(
+      (k) =>
+        ![
+          "title",
+          "proposal_date",
+          "validity",
+          "client_name",
+          "company",
+          "intro",
+          "scope_of_work",
+          "deliverables",
+          "timeline",
+          "price",
+          "payment_terms",
+          "notes",
+          "status",
+        ].includes(k) ||
+        (d as Record<string, unknown>)[k] !== (blank() as Record<string, unknown>)[k],
+    );
+    prefilled.current = pre;
+    setTouched(new Set(pre.filter((k) => k !== "status")));
+    const keep = new Set(pre);
+    const f = fillProposal(
+      type,
+      { name: d.client_name, company: d.company },
+      { name: profile.data.full_name, company: profile.data.company },
+      qty,
+    );
+    setD((x) => {
+      const out: Draft = { ...x };
+      for (const [k, v] of Object.entries(f))
+        if (!keep.has(k)) (out as Record<string, unknown>)[k] = v;
+      if (!keep.has("price")) out.price = suggestion.price;
+      return out;
+    });
+  }, [profile.data, equipment.isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
   const brand = useMemo(() => (profile.data ? brandOf(profile.data) : {}), [profile.data]);
-  const blocks = useMemo(() => proposalBlocks(d, brand), [d, brand]);
+  const blocks = useMemo(
+    () => proposalBlocks(d, brand, { number: proposalNumber(d.proposal_date, d.id) }),
+    [d, brand],
+  );
 
   async function save(silent = false): Promise<PjProposal | null> {
     if (!d.title?.trim()) {
@@ -181,22 +281,36 @@ function PropostasPage() {
     }
   }
 
-  function pdf() {
-    if (!printElement(paper.current, d.title || "Proposta"))
-      toast.error("Libere os pop-ups para gerar o PDF");
+  async function pdf() {
+    // Salva primeiro: o PDF sai com o número da proposta.
+    const row = await save(true);
+    if (!row) return;
+    setMode("preview");
+    setTimeout(() => {
+      const name = [d.title, d.company || d.client_name].filter(Boolean).join(" - ");
+      if (!printElement(paper.current, name || "Proposta"))
+        toast.error("Libere os pop-ups para gerar o PDF");
+    }, 150);
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Propostas"
-        subtitle="Preencha e veja a proposta ao vivo. Exporte em PDF."
+        subtitle="Escolha o cliente e o tipo de trabalho: o resto se preenche sozinho. Depois é só gerar o PDF."
         actions={
           <>
             <Button variant="outline" onClick={() => setListOpen(true)}>
               Abrir
             </Button>
-            <Button variant="outline" onClick={() => setD(blank())}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setD(blank());
+                setTouched(new Set());
+                setTimeout(() => refill({ name: "", company: "" }, true), 0);
+              }}
+            >
               Nova
             </Button>
             <Button variant="outline" onClick={() => save()}>
@@ -222,26 +336,86 @@ function PropostasPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className={cn("animate-rise space-y-3 p-5", mode === "preview" && "hidden lg:block")}>
-          <SelectField
-            label="Cliente cadastrado"
-            value={d.client_id ?? ""}
-            onChange={(id) => {
-              const c = (clients.data ?? []).find((x) => x.id === id);
-              setD((x) => ({
-                ...x,
-                client_id: c?.id ?? null,
-                client_name: c ? c.name : x.client_name,
-                company: c ? c.company || c.name : x.company,
-              }));
-            }}
-            options={[
-              [
-                "",
-                clients.data?.length ? "Escolher cliente cadastrado…" : "Nenhum cliente cadastrado",
-              ],
-              ...(clients.data ?? []).map((c): [string, string] => [c.id, c.company || c.name]),
-            ]}
-          />
+          <div className="space-y-3 rounded-xl bg-muted/50 p-4">
+            <p className="flex items-center gap-2 text-sm font-semibold">
+              <Sparkles className="h-4 w-4 text-primary" /> Preenchimento automático
+            </p>
+            <SelectField
+              label="Cliente cadastrado"
+              value={d.client_id ?? ""}
+              onChange={(id) => {
+                const c = (clients.data ?? []).find((x) => x.id === id);
+                const name = c ? c.name : d.client_name;
+                const company = c ? c.company || c.name : d.company;
+                setD((x) => ({ ...x, client_id: c?.id ?? null, client_name: name, company }));
+                setTouched((t) => {
+                  const n = new Set(t);
+                  n.delete("client_name");
+                  n.delete("company");
+                  return n;
+                });
+                refill({ name, company });
+              }}
+              options={[
+                [
+                  "",
+                  clients.data?.length
+                    ? "Escolher cliente cadastrado…"
+                    : "Nenhum cliente cadastrado",
+                ],
+                ...(clients.data ?? []).map((c): [string, string] => [c.id, c.company || c.name]),
+              ]}
+            />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <SelectField
+                label="Tipo de trabalho"
+                value={type}
+                onChange={(v) => {
+                  setType(v as ProposalType);
+                  refill({ type: v as ProposalType });
+                }}
+                options={[...PROPOSAL_TYPES]}
+              />
+              {type === "Conteúdo mensal" && (
+                <NumberField
+                  label="Vídeos por mês"
+                  value={qty}
+                  step="1"
+                  min={1}
+                  onChange={(v) => {
+                    const q = Math.max(1, Math.round(v ?? 4));
+                    setQty(q);
+                    refill({ qty: q });
+                  }}
+                />
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Preço sugerido: <b className="num text-foreground">{brl(suggestion.price)}</b> com
+              base no seu valor/hora mínimo (<span className="num">{brl(suggestion.hourly)}</span>
+              ). Ajuste renda, custos e horas em Perfil PJ.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" size="sm" variant="outline" onClick={() => refill({}, true)}>
+                Refazer tudo
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setD((x) => ({ ...x, price: suggestion.price }));
+                  setTouched((t) => {
+                    const n = new Set(t);
+                    n.delete("price");
+                    return n;
+                  });
+                }}
+              >
+                Usar preço sugerido
+              </Button>
+            </div>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <TextField
               label="Nome do cliente"
@@ -346,6 +520,7 @@ function PropostasPage() {
                       variant="outline"
                       onClick={() => {
                         setD(p);
+                        setTouched(new Set(Object.keys(p)));
                         setListOpen(false);
                       }}
                     >

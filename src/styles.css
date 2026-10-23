@@ -735,32 +735,63 @@ component's own variant. */
   }
 }
 
-/* Documentos (proposta/contrato): sempre "papel" branco, também no tema escuro e na impressão. */
+/* Documentos (proposta/contrato): sempre "papel" branco, também no tema escuro e na impressão (A4). */
 .doc {
+  --doc-accent: #111a4a;
   background: #fff;
-  color: #111;
+  color: #1b1f2a;
   border: 1px solid #e3e4e8;
   border-radius: 12px;
-  padding: 36px 40px;
+  padding: 40px 44px;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 .doc h2 { font-size: 22px; margin: 0 0 6px; }
-.doc h3 { font-size: 15px; margin: 22px 0 6px; }
+.doc h3 {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--doc-accent);
+  margin: 26px 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e3e4e8;
+  break-after: avoid;
+}
 .doc p { margin: 0 0 10px; }
-.doc ul { margin: 0 0 10px; padding-left: 20px; list-style: disc; }
+.doc ul { margin: 0 0 10px; padding: 0; list-style: none; }
+.doc ul li { position: relative; padding-left: 22px; margin-bottom: 5px; break-inside: avoid; }
+.doc ul li::before { content: "✓"; position: absolute; left: 0; color: var(--doc-accent); font-weight: 700; }
 .doc small { color: #666; }
-.doc-cover { border-bottom: 2px solid #111; padding-bottom: 14px; margin-bottom: 18px; }
-.doc-logo { max-height: 56px; max-width: 200px; object-fit: contain; display: block; margin-bottom: 10px; }
+.doc-header { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; padding-bottom: 16px; border-bottom: 3px solid var(--doc-accent); }
+.doc-brand { display: flex; align-items: center; gap: 12px; font-size: 16px; }
+.doc-logo { max-height: 52px; max-width: 160px; object-fit: contain; display: block; }
+.doc-issuer { display: flex; flex-direction: column; text-align: right; font-size: 11.5px; color: #555; line-height: 1.5; }
+.doc-hero { margin: 26px 0 20px; }
+.doc-hero small { letter-spacing: 0.18em; font-size: 11px; font-weight: 600; color: #6b7280; }
+.doc-hero h2 { font-size: 28px; line-height: 1.2; margin: 6px 0 14px; color: var(--doc-accent); }
+.doc-hero dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px 20px; margin: 0; padding: 12px 14px; background: #f6f6f8; border-radius: 10px; }
+.doc-hero dt { font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #6b7280; }
+.doc-hero dd { margin: 2px 0 0; font-weight: 600; }
 .doc-title { text-align: center; font-size: 17px !important; }
 .doc-muted { color: #777; font-size: 12px !important; font-weight: 400; }
-.doc-price { font-size: 28px; font-weight: 700; margin: 4px 0 8px; }
-.doc-note { margin-top: 28px; padding-top: 10px; border-top: 1px solid #ddd; color: #555; font-size: 12px; }
-.doc-sign { display: flex; gap: 30px; margin-top: 44px; }
-.doc-sign > div { flex: 1; border-top: 1px solid #111; padding-top: 4px; }
-@media (max-width: 640px) { .doc { padding: 22px 18px; } }
+.doc-invest { border: 2px solid var(--doc-accent); border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; break-inside: avoid; }
+.doc-price { font-size: 32px; font-weight: 700; color: var(--doc-accent); margin-bottom: 6px; }
+.doc-invest p { margin: 2px 0; }
+.doc-note { margin-top: 28px; padding-top: 10px; border-top: 1px solid #ddd; color: #555; font-size: 11.5px; text-align: center; }
+.doc-accept { margin-top: 28px; break-inside: avoid; }
+.doc-accept p { font-size: 12.5px; color: #444; }
+.doc-sign { display: flex; gap: 30px; margin-top: 48px; }
+.doc-sign > div { flex: 1; border-top: 1px solid #111; padding-top: 4px; font-size: 12px; }
+@media (max-width: 640px) {
+  .doc { padding: 22px 18px; }
+  .doc-header { flex-direction: column; }
+  .doc-issuer { text-align: left; }
+  .doc-hero h2 { font-size: 22px; }
+}
+@page { size: A4; margin: 14mm; }
 @media print {
-  .doc { border: 0; border-radius: 0; padding: 0; }
+  .doc { border: 0; border-radius: 0; padding: 0; font-size: 12.5px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .doc-hero dl { background: #f6f6f8 !important; }
 }
 
 /* Faixas roláveis (abas, etapas, ações) sem a barra de rolagem aparente. */
