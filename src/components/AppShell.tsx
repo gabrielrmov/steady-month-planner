@@ -1,89 +1,18 @@
 import { Logo, LogoMark } from "@/components/Logo";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import {
-  LayoutDashboard,
-  ListChecks,
-  LogOut,
-  Wallet,
-  Tag,
-  CreditCard,
-  CalendarDays,
-  Hourglass,
-  Landmark,
-  ArrowDownCircle,
-  ArrowUpCircle,
-  Zap,
-  BarChart3,
-  Settings,
-  FileUp,
-  Wand2,
-  ChevronDown,
-  Menu,
-  User,
-  Sparkles,
-  Calculator,
-  PieChart,
-  PiggyBank,
-  Sun,
-  Moon,
-} from "lucide-react";
+import { LayoutDashboard, ListChecks, LogOut, CreditCard, CalendarDays, Menu, User, Sparkles, Sun, Moon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePlan, PLAN_LABEL } from "@/lib/plan";
 import { useTheme } from "@/lib/theme";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useEffect, useState, type ReactNode } from "react";
 import { QuickAdd } from "@/components/QuickAdd";
-import { PJ_NAV } from "@/lib/pj/nav";
-
-const transactionSubItems = [
-  { to: "/transactions", label: "Recorrentes", tab: undefined, icon: ListChecks },
-  { to: "/transactions", label: "Esporádicos", tab: "sporadic", icon: Zap },
-  { to: "/transactions", label: "A receber", tab: "income", icon: ArrowDownCircle },
-  { to: "/transactions", label: "Recebidos", tab: "received", icon: ArrowUpCircle },
-] as const;
-
-const groups = [
-  {
-    title: "Visão geral",
-    items: [
-      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, tab: undefined },
-      { to: "/calendar", label: "Calendário", icon: CalendarDays, tab: undefined },
-    ],
-  },
-  {
-    title: "Lançamentos",
-    items: [
-      {
-        to: "/transactions",
-        label: "Contas",
-        icon: ListChecks,
-        tab: undefined,
-        sub: transactionSubItems,
-      },
-      { to: "/cards", label: "Cartões", icon: CreditCard, tab: undefined },
-      { to: "/installments", label: "Parcelas", icon: Hourglass, tab: undefined },
-      { to: "/savings", label: "Metas de economia", icon: PiggyBank, tab: undefined },
-      { to: "/open-finance", label: "Open Finance", icon: Landmark, tab: undefined },
-    ],
-  },
-  {
-    title: "Negócio",
-    items: [
-      { to: "/reports", label: "Relatórios", icon: BarChart3, tab: undefined },
-      { to: "/precificacao", label: "Precificação", icon: Calculator, tab: undefined },
-      { to: "/divisao-ganhos", label: "Divisão de Ganhos", icon: PieChart, tab: undefined },
-    ],
-  },
-  {
-    title: "Meu trabalho (PJ)",
-    items: PJ_NAV,
-  },
-] as const;
+import { SECTIONS, sectionOf } from "@/lib/nav";
+import { SectionTabs } from "@/components/SectionTabs";
 
 function useProfile() {
   return useQuery({
@@ -118,15 +47,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     navigate({ to: "/auth", replace: true });
   };
 
-  const isActive = (path: string, tab?: string) => {
-    if (path === "/pj") return location.pathname === "/pj";
-    if (path === "/transactions") {
-      const currentTab = (location.search as any)?.tab as string | undefined;
-      return location.pathname.startsWith("/transactions") && (currentTab ?? undefined) === tab;
-    }
-    return location.pathname.startsWith(path);
-  };
-
   const firstName = profile?.full_name?.split(" ")[0] ?? profile?.email?.split("@")[0] ?? "Usuário";
   const initials = (profile?.full_name ?? profile?.email ?? "U")
     .split(" ")
@@ -157,105 +77,31 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-2">
-        {(() => {
-          let itemIndex = 0;
-          return groups.map((group) => (
-            <div key={group.title} className="space-y-1">
-              <h3 className="px-3 text-[13px] font-semibold leading-[18px] tracking-[0.2px] text-muted-foreground">
-                {group.title}
-              </h3>
-              {group.items.map((item) => {
-                const delay = `${itemIndex++ * 45}ms`;
-                if ("sub" in item) {
-                  const anySubActive = item.sub.some((s) => isActive(s.to, s.tab));
-                  return (
-                    <Collapsible key={item.label} defaultOpen={anySubActive}>
-                      <CollapsibleTrigger asChild>
-                        <button
-                          className="animate-rise group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                          style={{ animationDelay: delay }}
-                        >
-                          <div className="flex items-center gap-3">
-                            <item.icon className="h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-110" />
-                            {item.label}
-                          </div>
-                          <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                        </button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="mt-1 ml-5 border-l border-sidebar-border">
-                          {item.sub.map((sub) => {
-                            const subActive = isActive(sub.to, sub.tab);
-                            return (
-                              <Link
-                                key={sub.label}
-                                to={sub.to}
-                                search={sub.tab ? { tab: sub.tab } : {}}
-                                onClick={onNavigate}
-                                className={cn(
-                                  "relative block py-2 pl-6 text-sm transition-colors before:absolute before:left-0 before:top-1/2 before:h-px before:w-2 before:-translate-y-1/2 before:bg-sidebar-border",
-                                  subActive
-                                    ? "font-medium text-primary"
-                                    : "text-muted-foreground hover:text-foreground",
-                                )}
-                              >
-                                {sub.label}
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  );
-                }
-
-                const active = isActive(item.to, item.tab);
-                return (
-                  <Link
-                    key={item.label}
-                    to={item.to}
-                    search={item.tab ? { tab: item.tab } : {}}
-                    onClick={onNavigate}
-                    style={{ animationDelay: delay }}
-                    className={cn(
-                      "animate-rise group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                      active
-                        ? "bg-sidebar-accent font-semibold text-sidebar-foreground [&>svg]:text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:animate-bar-in before:rounded-full before:bg-primary"
-                        : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                    )}
-                  >
-                    <item.icon className="h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-110" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-          ));
-        })()}
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2">
+        {SECTIONS.map((section, index) => {
+          const active = sectionOf(location.pathname)?.key === section.key;
+          return (
+            <Link
+              key={section.key}
+              to={section.items[0].to}
+              onClick={onNavigate}
+              style={{ animationDelay: `${index * 45}ms` }}
+              className={cn(
+                "animate-rise group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                active
+                  ? "bg-sidebar-accent font-semibold text-sidebar-foreground [&>svg]:text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:animate-bar-in before:rounded-full before:bg-primary"
+                  : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+              )}
+            >
+              <section.icon className="h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-110" />
+              {section.label}
+            </Link>
+          );
+        })}
       </nav>
 
       {/* Footer */}
       <div className="mt-auto border-t border-sidebar-border bg-sidebar/80 p-4 backdrop-blur-md">
-        <div className="mb-3 grid grid-cols-2 gap-1">
-          {[
-            { to: "/categories", label: "Categorias", icon: Tag },
-            { to: "/rules", label: "Regras", icon: Wand2 },
-            { to: "/import", label: "Importar", icon: FileUp },
-            { to: "/settings", label: "Ajustes", icon: Settings },
-          ].map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              onClick={onNavigate}
-              className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-muted-foreground transition-colors duration-200 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-            >
-              <l.icon className="h-3.5 w-3.5" />
-              {l.label}
-            </Link>
-          ))}
-        </div>
-
         <div className="flex items-center gap-3 rounded-2xl border border-sidebar-border bg-background p-2">
           <Avatar className="h-10 w-10 rounded-xl">
             <AvatarFallback className="bg-sidebar-accent text-xs font-semibold text-sidebar-foreground">
@@ -385,6 +231,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="md:pl-64">
         <main key={pathname} className="page-enter px-4 pb-36 pt-5 md:p-8 md:pb-8">
+          <SectionTabs />
           {children}
         </main>
       </div>
