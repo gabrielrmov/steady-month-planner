@@ -734,3 +734,31 @@ component's own variant. */
     outline-offset: 2px;
   }
 }
+
+/* Documentos (proposta/contrato): sempre "papel" branco, também no tema escuro e na impressão. */
+.doc {
+  background: #fff;
+  color: #111;
+  border: 1px solid #e3e4e8;
+  border-radius: 12px;
+  padding: 36px 40px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.doc h2 { font-size: 22px; margin: 0 0 6px; }
+.doc h3 { font-size: 15px; margin: 22px 0 6px; }
+.doc p { margin: 0 0 10px; }
+.doc ul { margin: 0 0 10px; padding-left: 20px; list-style: disc; }
+.doc small { color: #666; }
+.doc-cover { border-bottom: 2px solid #111; padding-bottom: 14px; margin-bottom: 18px; }
+.doc-logo { max-height: 56px; max-width: 200px; object-fit: contain; display: block; margin-bottom: 10px; }
+.doc-title { text-align: center; font-size: 17px !important; }
+.doc-muted { color: #777; font-size: 12px !important; font-weight: 400; }
+.doc-price { font-size: 28px; font-weight: 700; margin: 4px 0 8px; }
+.doc-note { margin-top: 28px; padding-top: 10px; border-top: 1px solid #ddd; color: #555; font-size: 12px; }
+.doc-sign { display: flex; gap: 30px; margin-top: 44px; }
+.doc-sign > div { flex: 1; border-top: 1px solid #111; padding-top: 4px; }
+@media (max-width: 640px) { .doc { padding: 22px 18px; } }
+@media print {
+  .doc { border: 0; border-radius: 0; padding: 0; }
+}

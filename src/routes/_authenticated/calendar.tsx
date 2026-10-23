@@ -48,6 +48,7 @@ function CalendarPage() {
       const { data, error } = await supabase
         .from("transactions")
         .select("id, description, amount, type, due_date, status, payment_method, cards(name, color), categories(name, color)")
+        .eq("scope", "personal")
         .gte("due_date", from)
         .lte("due_date", to)
         .order("due_date");

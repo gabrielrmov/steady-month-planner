@@ -47,6 +47,7 @@ function InstallmentsPage() {
       const { data, error } = await supabase
         .from("transactions")
         .select("id, description, amount, due_date, status, installment_number, installment_total, purchase_group_id, card_id, cards(id, name, color)")
+        .eq("scope", "personal")
         .eq("payment_method", "card")
         .not("installment_total", "is", null)
         .gt("installment_total", 1)
