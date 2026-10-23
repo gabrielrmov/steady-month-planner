@@ -2,6 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import type { BackupStore, Row } from "./backup";
 import { norm, today, toNumber } from "./format";
 import {
   BUSINESS_CATEGORIES,
@@ -364,3 +365,25 @@ export async function prolaboreToPersonal(
   if (error) throw new Error(error.message);
   return true;
 }
+
+/* --------------------------------- backup --------------------------------- */
+
+/** Acesso do backup ao banco do usuário (categorias e transações: só as do PJ). */
+export const backupStore: BackupStore = {
+  async list(table) {
+    let q = supabase.from(table).select("*");
+    if (table === "categories" || table === "transactions") q = q.eq("scope", "business");
+    const { data, error } = await q;
+    if (error) throw new Error(error.message);
+    return (data ?? []) as Row[];
+  },
+  async insert(table, row) {
+    const { data, error } = await supabase.from(table).insert(row).select().single();
+    if (error) throw new Error(error.message);
+    return data as Row;
+  },
+  async update(table, id, row) {
+    const { error } = await supabase.from(table).update(row).eq("id", id);
+    if (error) throw new Error(error.message);
+  },
+};

@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AreaField, NumberField, PageHeader, SelectField, TextField } from "@/components/pj/ui";
+import { BackupCard } from "@/components/pj/BackupCard";
 import { usePjProfile, useSaveProfile } from "@/lib/pj/data";
 import { resizeLogo } from "@/lib/pj/image";
 import { MEI_LIMIT, REGIMES, type PjProfile, type Regime } from "@/lib/pj/types";
@@ -27,6 +28,7 @@ function PerfilPage() {
       ) : (
         <ProfileForm initial={data} />
       )}
+      <BackupCard />
     </div>
   );
 }

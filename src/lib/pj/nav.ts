@@ -1,11 +1,13 @@
 import {
   BarChart3,
+  ClipboardList,
   Calculator,
   FileSignature,
   FileText,
   FolderKanban,
   Funnel,
   Home,
+  MessageSquareText,
   Receipt,
   Settings2,
   Users,
@@ -24,5 +26,7 @@ export const PJ_NAV = [
   { to: "/precificacao", label: "Orçamento", icon: Calculator, tab: undefined },
   { to: "/pj/equipamentos", label: "Equipamentos", icon: Wrench, tab: undefined },
   { to: "/pj/relatorios", label: "Relatórios PJ", icon: BarChart3, tab: undefined },
+  { to: "/pj/briefing", label: "Briefing", icon: ClipboardList, tab: undefined },
+  { to: "/pj/mensagens", label: "Prospecção e follow-up", icon: MessageSquareText, tab: undefined },
   { to: "/pj/perfil", label: "Perfil e backup", icon: Settings2, tab: undefined },
 ] as const;
