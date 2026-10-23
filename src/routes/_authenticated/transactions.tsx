@@ -74,7 +74,6 @@ function TransactionsPage() {
       const { data, error } = await supabase
         .from("transactions")
         .select("*, categories(name, color), cards(name, color)")
-        .eq("scope", "personal")
         .gte("due_date", from)
         .lte("due_date", to)
         .order("due_date");
@@ -473,7 +472,6 @@ function TransactionForm({
       const { data, error } = await supabase
         .from("categories")
         .select("*")
-        .eq("scope", "personal")
         .order("name");
       if (error) throw error;
       return data ?? [];

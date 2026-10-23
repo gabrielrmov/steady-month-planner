@@ -70,14 +70,12 @@ export async function ensureRecurringForMonth(month: Date) {
     supabase
       .from("transactions")
       .select("*")
-      .eq("scope", "personal")
       .eq("is_recurring", true)
       .gte("due_date", format(prev, "yyyy-MM-dd"))
       .lte("due_date", format(endOfMonth(prev), "yyyy-MM-dd")),
     supabase
       .from("transactions")
       .select("purchase_group_id")
-      .eq("scope", "personal")
       .eq("is_recurring", true)
       .gte("due_date", format(startOfMonth(month), "yyyy-MM-dd"))
       .lte("due_date", format(endOfMonth(month), "yyyy-MM-dd")),

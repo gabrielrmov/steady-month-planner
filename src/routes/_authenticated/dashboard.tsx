@@ -112,7 +112,6 @@ function Dashboard() {
         .select(
           "id, description, amount, type, status, due_date, category_id, categories(name, color)",
         )
-        .eq("scope", "personal")
         .gte("due_date", historyFrom)
         .lte("due_date", to)
         .order("due_date");
@@ -130,7 +129,6 @@ function Dashboard() {
       const { data, error } = await supabase
         .from("transactions")
         .select("id, amount, due_date")
-        .eq("scope", "personal")
         .eq("type", "expense")
         .neq("status", "paid")
         .gte("due_date", weekFrom)
@@ -162,8 +160,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("categories")
-        .select("id, name, color, monthly_budget")
-        .eq("scope", "personal");
+        .select("id, name, color, monthly_budget");
       if (error) throw error;
       return (data ?? []) as CategoryBudget[];
     },

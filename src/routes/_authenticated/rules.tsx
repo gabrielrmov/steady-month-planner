@@ -57,7 +57,6 @@ function RulesPage() {
       const { data, error } = await supabase
         .from("categories")
         .select("*")
-        .eq("scope", "personal")
         .order("name");
       if (error) throw error;
       return data ?? [];
@@ -69,8 +68,7 @@ function RulesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("transactions")
-        .select("id, description, type, category_id")
-        .eq("scope", "personal");
+        .select("id, description, type, category_id");
       if (error) throw error;
       return (data ?? []) as { id: string; description: string; type: string; category_id: string | null }[];
     },
@@ -134,7 +132,6 @@ function RulesPage() {
       const { data, error } = await supabase
         .from("transactions")
         .select("id, description, type, category_id")
-        .eq("scope", "personal")
         .is("category_id", null);
       if (error) throw error;
       let count = 0;

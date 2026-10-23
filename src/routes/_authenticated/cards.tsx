@@ -62,7 +62,6 @@ function CardsPage() {
       const { data, error } = await supabase
         .from("transactions")
         .select("id, amount, due_date, card_id, payment_method, status")
-        .eq("scope", "personal")
         .eq("payment_method", "card");
       if (error) throw error;
       return data ?? [];
