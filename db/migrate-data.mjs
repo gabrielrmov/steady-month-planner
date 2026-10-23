@@ -42,6 +42,16 @@ const columnsOf = async (c, table) =>
     [table],
   )).rows.map((r) => r.column_name);
 
+// --schema só precisa do Neon (o schema é idempotente: pode rodar de novo sem perder dados).
+if (mode === "schema") {
+  const dst = await connect("NEON_DATABASE_URL");
+  console.log("\n== Neon: aplicando schema ==");
+  await dst.query(readFileSync(root + "db/schema.sql", "utf8"));
+  console.log("  ok");
+  await dst.end();
+  process.exit(0);
+}
+
 const src = await connect("SUPABASE_DB_URL");
 
 console.log("\n== Supabase (somente leitura) ==");
@@ -69,12 +79,6 @@ const dst = await connect("NEON_DATABASE_URL");
 console.log("\n== Neon: aplicando schema ==");
 await dst.query(readFileSync(root + "db/schema.sql", "utf8"));
 console.log("  ok");
-if (mode === "schema") {
-  await src.end();
-  await dst.end();
-  process.exit(0);
-}
-
 console.log("\n== Copiando dados ==");
 // Gatilhos de "novo usuário" criariam perfil/categorias/assinatura duplicados: desligados só durante a cópia.
 await dst.query("ALTER TABLE public.users DISABLE TRIGGER on_user_created");
