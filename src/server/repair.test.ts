@@ -102,11 +102,11 @@ test("cadastro de clientes: pessoa vira cliente e cada trabalho vira projeto, se
   const clients = (await pg.query<{ name: string; notes: string }>("SELECT name, notes FROM pj_clients ORDER BY lower(name)")).rows;
   assert.deepEqual(
     clients.map((c) => c.name),
-    ["Agencia Nos", "Ana", "Aparavo", "Hora", "JG", "JP", "Kero+", "PL", "Richard", "Som Pst"],
+    ["Agencia Nos", "ANA", "Aparavo", "Hora", "JG", "JP", "Kero+", "PL", "Richard", "Som Pst"],
   );
   const by = Object.fromEntries(clients.map((c) => [c.name, c.notes]));
   assert.equal(by["Agencia Nos"], "Fixo | Recorrente");
-  assert.equal(by["Ana"], "Fixo | Recorrente | via ALMA");
+  assert.equal(by["ANA"], "Fixo | Recorrente | via ALMA");
   assert.equal(by["Kero+"], "Recorrente | via ALMA");
   assert.equal(by["JP"], "Avulso");
   assert.equal(by["PL"], "Avulso");
