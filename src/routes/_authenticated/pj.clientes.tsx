@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { MessageCircle, Plus, Search, Users } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -22,6 +23,14 @@ export const Route = createFileRoute("/_authenticated/pj/clientes")({
 });
 
 type Draft = Partial<PjClient>;
+
+/** Etiquetas (Fixo, Recorrente, Avulso, via ALMA) guardadas nas observações, separadas por " | ". */
+const TAGS = new Set(["Fixo", "Recorrente", "Avulso", "via ALMA"]);
+const tags = (notes: string | null) =>
+  (notes ?? "")
+    .split("|")
+    .map((x) => x.trim())
+    .filter((x) => TAGS.has(x));
 
 function ClientesPage() {
   const clients = useRows<PjClient>("pj_clients", { col: "name" });
@@ -95,6 +104,23 @@ function ClientesPage() {
               <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
                 <div className="min-w-0">
                   <p className="truncate font-medium">{c.company || c.name}</p>
+                  {tags(c.notes).length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {tags(c.notes).map((t) => (
+                        <span
+                          key={t}
+                          className={cn(
+                            "rounded-full px-2 py-0.5 text-[11px] font-medium",
+                            t === "Fixo" && "bg-success/15 text-success",
+                            t === "Recorrente" && "bg-primary/10 text-primary",
+                            t !== "Fixo" && t !== "Recorrente" && "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <p className="truncate text-xs text-muted-foreground">
                     {[c.company && c.name, c.phone, c.email].filter(Boolean).join(" · ")}
                   </p>

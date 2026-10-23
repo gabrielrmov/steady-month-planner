@@ -52,3 +52,44 @@ test("cadastro de clientes a partir das entradas: cria, liga e não duplica", as
   const linked = (await pg.query<{ n: number }>("SELECT count(*)::int n FROM transactions WHERE project_id IS NOT NULL")).rows[0].n;
   assert.equal(linked, 3, "Som Pst não casou com nenhum cliente e fica sem ligação");
 });
+
+test("cadastro de todas as entradas como clientes: nomes, tipo (fixo/recorrente/avulso) e ligação", async () => {
+  const pg = new PGlite();
+  await pg.exec(readFileSync(new URL("../../db/schema.sql", import.meta.url), "utf8"));
+  const u = (await pg.query<{ id: string }>("INSERT INTO users(email) VALUES ('eu@x.com') RETURNING id")).rows[0].id;
+  const fixos = (await pg.query<{ id: string }>("INSERT INTO categories(user_id, name, kind, scope) VALUES ($1,'Fixos','income','business') RETURNING id", [u])).rows[0].id;
+  const freelas = (await pg.query<{ id: string }>("INSERT INTO categories(user_id, name, kind, scope) VALUES ($1,'Freelas','income','business') RETURNING id", [u])).rows[0].id;
+  const rows: [string, number, string, boolean][] = [
+    ["AGENCIA NOS", 1650, fixos, true],
+    ["ANA - ALMA", 450, fixos, true],
+    ["KERO+ - ALMA", 950, freelas, true],
+    ["KERO+ - ALMA", 950, freelas, true],
+    ["Aparavo 21.09", 400, freelas, false],
+    ["Aparavo 22.09", 400, freelas, false],
+    ["Kerigma - 24.10", 350, freelas, false],
+    ["SOM PST", 350, freelas, false],
+    ["Som Pst", 175, freelas, false],
+  ];
+  for (const [d, v, c, rec] of rows) {
+    await pg.query("INSERT INTO transactions(user_id, description, amount, type, due_date, category_id, is_recurring, scope) VALUES ($1,$2,$3,'income','2026-10-01',$4,$5,'business')", [u, d, v, c, rec]);
+  }
+  await pg.query("INSERT INTO transactions(user_id, description, amount, type, due_date) VALUES ($1,'Mercado',50,'expense','2026-10-02')", [u]);
+  const sql = readFileSync(new URL("../../db/seed-all-clients.sql", import.meta.url), "utf8");
+  assert.ok(!/[^\x00-\x7F]/.test(sql));
+  await pg.exec(sql);
+  await pg.exec(sql);
+  const clients = (await pg.query<{ name: string; notes: string }>("SELECT name, notes FROM pj_clients ORDER BY lower(name)")).rows;
+  assert.deepEqual(clients.map((c) => c.name.toLowerCase()), ["agencia nos", "ana", "aparavo", "kerigma", "kero+", "som pst"]);
+  const by = Object.fromEntries(clients.map((c) => [c.name.toLowerCase(), c.notes]));
+  assert.equal(by["agencia nos"], "Fixo | Recorrente");
+  assert.equal(by["ana"], "Fixo | Recorrente | via ALMA");
+  assert.equal(by["kero+"], "Recorrente | via ALMA");
+  assert.equal(by["aparavo"], "Avulso");
+  const tot = (await pg.query<{ title: string; value: number }>("SELECT title, value::float FROM pj_projects ORDER BY title")).rows;
+  assert.equal(tot.length, 6);
+  assert.equal(tot.find((p) => p.title.includes("Aparavo"))!.value, 800);
+  assert.equal(tot.find((p) => p.title.toLowerCase().includes("som pst"))!.value, 525);
+  const unlinked = (await pg.query<{ n: number }>("SELECT count(*)::int n FROM transactions WHERE type='income' AND project_id IS NULL")).rows[0].n;
+  assert.equal(unlinked, 0);
+  assert.equal((await pg.query<{ n: number }>("SELECT count(*)::int n FROM transactions WHERE type='expense' AND project_id IS NOT NULL")).rows[0].n, 0);
+});
