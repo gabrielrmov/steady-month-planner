@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { StageBoard } from "@/components/pj/StageBoard";
 import {
   AreaField,
   DateField,
@@ -124,17 +125,14 @@ function CrmPage() {
       {leads.isLoading ? (
         <Card className="h-60 animate-pulse bg-muted/40" />
       ) : (
-        <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-3 md:mx-0 md:px-0">
-          {LEAD_STAGES.map((st, si) => {
+        <StageBoard
+          stages={LEAD_STAGES}
+          count={(st) => visible.filter((l) => l.stage === st).length}
+        >
+          {(st, si) => {
             const items = visible.filter((l) => l.stage === st);
             return (
-              <section key={st} aria-label={st} className="w-[270px] shrink-0 snap-start space-y-2">
-                <h2 className="flex items-center justify-between px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {st}
-                  <span className="num rounded-full bg-muted px-2 py-0.5 text-[11px]">
-                    {items.length}
-                  </span>
-                </h2>
+              <>
                 {items.map((l) => {
                   const late =
                     !!l.follow_up &&
@@ -165,7 +163,7 @@ function CrmPage() {
                           <Button
                             size="icon"
                             variant="outline"
-                            className="h-8 w-8"
+                            className="h-10 w-10 md:h-8 md:w-8"
                             title="Voltar etapa"
                             onClick={() => move(l, LEAD_STAGES[si - 1])}
                           >
@@ -176,7 +174,7 @@ function CrmPage() {
                           <Button
                             size="icon"
                             variant="outline"
-                            className="h-8 w-8"
+                            className="h-10 w-10 md:h-8 md:w-8"
                             title="Avançar etapa"
                             onClick={() => move(l, LEAD_STAGES[si + 1])}
                           >
@@ -186,13 +184,18 @@ function CrmPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-8"
+                          className="h-10 md:h-8"
                           onClick={() => setEditing(l)}
                         >
                           Editar
                         </Button>
                         {hasPhone(l.contact) && (
-                          <Button asChild size="icon" variant="outline" className="h-8 w-8">
+                          <Button
+                            asChild
+                            size="icon"
+                            variant="outline"
+                            className="h-10 w-10 md:h-8 md:w-8"
+                          >
                             <a
                               href={waLink(l.contact)}
                               target="_blank"
@@ -207,10 +210,10 @@ function CrmPage() {
                     </Card>
                   );
                 })}
-              </section>
+              </>
             );
-          })}
-        </div>
+          }}
+        </StageBoard>
       )}
 
       {editing && <LeadDialog initial={editing} onClose={() => setEditing(null)} />}

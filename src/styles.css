@@ -762,3 +762,7 @@ component's own variant. */
 @media print {
   .doc { border: 0; border-radius: 0; padding: 0; }
 }
+
+/* Faixas roláveis (abas, etapas, ações) sem a barra de rolagem aparente. */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

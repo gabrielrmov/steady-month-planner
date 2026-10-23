@@ -21,7 +21,11 @@ export function PageHeader({
         <h1 className="text-[26px] font-bold tracking-tight sm:text-[32px]">{title}</h1>
         {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+      {actions && (
+        <div className="no-scrollbar -mx-4 flex w-[calc(100%+2rem)] items-center gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:w-auto md:flex-wrap md:overflow-visible md:px-0 md:pb-0 [&>*]:shrink-0">
+          {actions}
+        </div>
+      )}
     </div>
   );
 }
@@ -262,6 +266,42 @@ export function Bar({ value, max, danger }: { value: number; max: number; danger
         className={cn("h-full rounded-full", danger ? "bg-destructive" : "bg-primary")}
         style={{ width: `${pct}%` }}
       />
+    </div>
+  );
+}
+
+/** No celular, editor e pré-visualização não cabem lado a lado: alterna entre os dois. */
+export function EditPreviewToggle({
+  value,
+  onChange,
+}: {
+  value: "edit" | "preview";
+  onChange: (v: "edit" | "preview") => void;
+}) {
+  return (
+    <div className="flex gap-1.5 lg:hidden" role="tablist" aria-label="Modo">
+      {(
+        [
+          ["edit", "Editar"],
+          ["preview", "Pré-visualizar"],
+        ] as const
+      ).map(([k, label]) => (
+        <button
+          key={k}
+          type="button"
+          role="tab"
+          aria-selected={value === k}
+          onClick={() => onChange(k)}
+          className={cn(
+            "min-h-10 flex-1 rounded-full px-3.5 text-sm font-medium transition-colors",
+            value === k
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted/70 text-muted-foreground",
+          )}
+        >
+          {label}
+        </button>
+      ))}
     </div>
   );
 }

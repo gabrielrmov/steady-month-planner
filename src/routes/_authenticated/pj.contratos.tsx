@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
+  EditPreviewToggle,
   AreaField,
   DateField,
   Field,
@@ -46,6 +47,7 @@ function ContratosPage() {
     ...(takePrefill<Draft>("contract") ?? {}),
   }));
   const [listOpen, setListOpen] = useState(false);
+  const [mode, setMode] = useState<"edit" | "preview">("edit");
 
   const set = <K extends keyof PjContract>(k: K, v: PjContract[K] | null) =>
     setD((x) => ({ ...x, [k]: v }));
@@ -96,8 +98,10 @@ function ContratosPage() {
         }
       />
 
+      <EditPreviewToggle value={mode} onChange={setMode} />
+
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="animate-rise space-y-3 p-5">
+        <Card className={cn("animate-rise space-y-3 p-5", mode === "preview" && "hidden lg:block")}>
           <Field label="Tipo de contrato" hint={CONTRACT_TYPES[type].hint}>
             <div className="flex flex-wrap gap-1.5">
               {(Object.keys(CONTRACT_TYPES) as ContractType[]).map((k) => (
@@ -213,7 +217,11 @@ function ContratosPage() {
           />
         </Card>
 
-        <div ref={paper} className="doc h-fit" aria-label="Pré-visualização do contrato">
+        <div
+          ref={paper}
+          className={cn("doc h-fit", mode === "edit" && "hidden lg:block")}
+          aria-label="Pré-visualização do contrato"
+        >
           {renderBlocks(blocks)}
         </div>
       </div>

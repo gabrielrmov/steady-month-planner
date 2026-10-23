@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
+  EditPreviewToggle,
   AreaField,
   DateField,
   NumberField,
@@ -71,6 +73,7 @@ function PropostasPage() {
     ...(takePrefill<Draft>("proposal") ?? {}),
   }));
   const [listOpen, setListOpen] = useState(false);
+  const [mode, setMode] = useState<"edit" | "preview">("edit");
   const [busy, setBusy] = useState(false);
   const [share, setShare] = useState<ShareRow | null>(null);
 
@@ -215,8 +218,10 @@ function PropostasPage() {
         }
       />
 
+      <EditPreviewToggle value={mode} onChange={setMode} />
+
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="animate-rise space-y-3 p-5">
+        <Card className={cn("animate-rise space-y-3 p-5", mode === "preview" && "hidden lg:block")}>
           <SelectField
             label="Cliente cadastrado"
             value={d.client_id ?? ""}
@@ -298,7 +303,11 @@ function PropostasPage() {
           />
         </Card>
 
-        <div ref={paper} className="doc h-fit" aria-label="Pré-visualização da proposta">
+        <div
+          ref={paper}
+          className={cn("doc h-fit", mode === "edit" && "hidden lg:block")}
+          aria-label="Pré-visualização da proposta"
+        >
           {renderBlocks(blocks)}
         </div>
       </div>

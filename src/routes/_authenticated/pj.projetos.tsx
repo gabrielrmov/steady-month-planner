@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { StageBoard } from "@/components/pj/StageBoard";
 import {
   AreaField,
   Bar,
@@ -144,17 +145,14 @@ function ProjetosPage() {
       {projects.isLoading ? (
         <Card className="h-60 animate-pulse bg-muted/40" />
       ) : view === "board" ? (
-        <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-3 md:mx-0 md:px-0">
-          {PROJECT_STAGES.map((st, si) => {
+        <StageBoard
+          stages={PROJECT_STAGES}
+          count={(st) => all.filter((p) => p.stage === st).length}
+        >
+          {(st, si) => {
             const items = all.filter((p) => p.stage === st);
             return (
-              <section key={st} aria-label={st} className="w-[270px] shrink-0 snap-start space-y-2">
-                <h2 className="flex items-center justify-between px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {st}
-                  <span className="num rounded-full bg-muted px-2 py-0.5 text-[11px]">
-                    {items.length}
-                  </span>
-                </h2>
+              <>
                 {items.map((p) => {
                   const due = dueLabel(p);
                   return (
@@ -183,7 +181,7 @@ function ProjetosPage() {
                           <Button
                             size="icon"
                             variant="outline"
-                            className="h-8 w-8"
+                            className="h-10 w-10 md:h-8 md:w-8"
                             title="Voltar etapa"
                             onClick={() => move(p, PROJECT_STAGES[si - 1])}
                           >
@@ -194,7 +192,7 @@ function ProjetosPage() {
                           <Button
                             size="icon"
                             variant="outline"
-                            className="h-8 w-8"
+                            className="h-10 w-10 md:h-8 md:w-8"
                             title="Avançar etapa"
                             onClick={() => move(p, PROJECT_STAGES[si + 1])}
                           >
@@ -204,7 +202,7 @@ function ProjetosPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-8"
+                          className="h-10 md:h-8"
                           onClick={() => setEditing(p)}
                         >
                           Abrir
@@ -213,10 +211,10 @@ function ProjetosPage() {
                     </Card>
                   );
                 })}
-              </section>
+              </>
             );
-          })}
-        </div>
+          }}
+        </StageBoard>
       ) : events.length === 0 ? (
         <Empty title="Sem datas cadastradas">
           Informe a data de captação e o prazo de entrega nos projetos.

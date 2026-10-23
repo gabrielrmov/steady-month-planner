@@ -1,6 +1,17 @@
 import { Logo, LogoMark } from "@/components/Logo";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, ListChecks, LogOut, CreditCard, CalendarDays, Menu, User, Sparkles, Sun, Moon } from "lucide-react";
+import {
+  LayoutDashboard,
+  ListChecks,
+  LogOut,
+  CreditCard,
+  CalendarDays,
+  Menu,
+  User,
+  Sparkles,
+  Sun,
+  Moon,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -147,32 +158,35 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 const mobileNav = [
-  { to: "/dashboard", label: "Início", icon: LayoutDashboard },
-  { to: "/transactions", label: "Contas", icon: ListChecks },
-  { to: "/calendar", label: "Agenda", icon: CalendarDays },
-  { to: "/cards", label: "Cartões", icon: CreditCard },
+  { section: "dashboard", label: "Início" },
+  { section: "contas", label: "Contas" },
+  { section: "planejamento", label: "Planejar" },
+  { section: "pj", label: "Trabalho" },
+  { section: "relatorios", label: "Relatórios" },
 ] as const;
 
 function MobileTabBar() {
   const location = useLocation();
+  const current = sectionOf(location.pathname)?.key;
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-sidebar-border bg-sidebar/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
-      <div className="grid grid-cols-4">
-        {mobileNav.map((item) => {
-          const active = location.pathname.startsWith(item.to);
+      <div className="grid grid-cols-5">
+        {mobileNav.map((tab) => {
+          const section = SECTIONS.find((s) => s.key === tab.section)!;
+          const active = current === section.key;
           return (
             <Link
-              key={item.to}
-              to={item.to}
+              key={section.key}
+              to={section.items[0].to}
               className={cn(
-                "flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
+                "flex min-h-14 flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors",
                 active ? "text-primary" : "text-sidebar-foreground/45",
               )}
             >
-              <item.icon
+              <section.icon
                 className={cn("h-5 w-5 transition-transform duration-200", active && "scale-110")}
               />
-              {item.label}
+              {tab.label}
             </Link>
           );
         })}
@@ -229,14 +243,15 @@ export function AppShell({ children }: { children: ReactNode }) {
         </header>
       </div>
 
-      <div className="md:pl-64">
+      <div className="overflow-x-clip md:pl-64">
         <main key={pathname} className="page-enter px-4 pb-36 pt-5 md:p-8 md:pb-8">
           <SectionTabs />
           {children}
         </main>
       </div>
 
-      <QuickAdd />
+      {/* Lançamento rápido é pessoal: some na área do trabalho para não confundir com o financeiro PJ */}
+      {sectionOf(pathname)?.key !== "pj" && <QuickAdd />}
       <MobileTabBar />
     </div>
   );

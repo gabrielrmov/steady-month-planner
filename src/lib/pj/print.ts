@@ -22,7 +22,9 @@ export function printElement(el: HTMLElement | null, title: string): boolean {
   const style = doc.createElement("style");
   style.textContent = `${css} body{background:#fff;margin:0;padding:24px} .doc{border:0;max-width:820px;margin:0 auto}`;
   doc.head.append(style);
-  doc.body.append(doc.importNode(el, true));
+  const copy = doc.importNode(el, true) as HTMLElement;
+  copy.classList.remove("hidden"); // no celular o documento pode estar escondido pela aba "Editar"
+  doc.body.append(copy);
   setTimeout(() => w.print(), 400);
   return true;
 }

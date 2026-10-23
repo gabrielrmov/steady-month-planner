@@ -10,7 +10,7 @@ const pill = (active: boolean) =>
       : "bg-muted/70 text-muted-foreground hover:text-foreground",
   );
 
-const strip = "-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 md:mx-0 md:px-0";
+const strip = "no-scrollbar -mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 md:mx-0 md:px-0";
 
 /** Abas da seção atual. Seções com grupos (Meu trabalho) mostram os grupos e, abaixo, as telas do grupo. */
 export function SectionTabs() {
