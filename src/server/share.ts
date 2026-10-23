@@ -15,7 +15,16 @@ export const MAX_EVENTS_PER_SHARE = 2000;
 export type PublicShare = {
   kind: "proposal" | "delivery";
   title: string;
-  brand: { name: string; logo: string; doc: string; phone: string; email: string };
+  brand: {
+    name: string;
+    logo: string;
+    doc: string;
+    phone: string;
+    email: string;
+    address: string;
+    city: string;
+    pix: string;
+  };
   data: Record<string, unknown>;
 };
 
@@ -42,6 +51,9 @@ function sanitizeBrand(raw: unknown): PublicShare["brand"] {
     doc: str(b.doc, 40),
     phone: str(b.phone, 40),
     email: str(b.email, 200),
+    address: str(b.address, 200),
+    city: str(b.city, 100),
+    pix: str(b.pix, 120),
   };
 }
 

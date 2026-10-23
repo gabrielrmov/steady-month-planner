@@ -125,13 +125,19 @@ export function useSaveProfile() {
 
 /** Marca (nome, logo, contato) que vai no topo das propostas e na página do cliente. */
 export const brandOf = (
-  p: Pick<PjProfile, "company" | "full_name" | "logo" | "doc" | "phone" | "email">,
+  p: Pick<
+    PjProfile,
+    "company" | "full_name" | "logo" | "doc" | "phone" | "email" | "address" | "city" | "pix"
+  >,
 ) => ({
   name: p.company || p.full_name || "",
   logo: p.logo || "",
   doc: p.doc || "",
   phone: p.phone || "",
   email: p.email || "",
+  address: p.address || "",
+  city: p.city || "",
+  pix: p.pix || "",
 });
 
 /* ------------------------------- automações ------------------------------- */

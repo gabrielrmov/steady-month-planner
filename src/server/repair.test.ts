@@ -52,3 +52,77 @@ test("cadastro de clientes a partir das entradas: cria, liga e não duplica", as
   const linked = (await pg.query<{ n: number }>("SELECT count(*)::int n FROM transactions WHERE project_id IS NOT NULL")).rows[0].n;
   assert.equal(linked, 3, "Som Pst não casou com nenhum cliente e fica sem ligação");
 });
+
+test("cadastro de clientes: pessoa vira cliente e cada trabalho vira projeto, sem duplicar", async () => {
+  const pg = new PGlite();
+  await pg.exec(readFileSync(new URL("../../db/schema.sql", import.meta.url), "utf8"));
+  const u = (await pg.query<{ id: string }>("INSERT INTO users(email) VALUES ('eu@x.com') RETURNING id")).rows[0].id;
+  const cat = async (name: string) =>
+    (await pg.query<{ id: string }>("INSERT INTO categories(user_id, name, kind, scope) VALUES ($1,$2,'income','business') RETURNING id", [u, name])).rows[0].id;
+  const fixos = await cat("Fixos");
+  const freelas = await cat("Freelas");
+  const rows: [string, number, string, boolean][] = [
+    ["AGENCIA NOS", 1650, fixos, true],
+    ["ANA - ALMA", 450, fixos, true],
+    ["KERO+ - ALMA", 950, freelas, true],
+    ["KERO+ - ALMA", 950, freelas, true],
+    ["Aparavo 21.09", 400, freelas, false],
+    ["Aparavo 22.09", 400, freelas, false],
+    ["FREELA JP - MELT", 450, freelas, false],
+    ["FREELA JP - RENNOVA", 300, freelas, false],
+    ["ROXO JP AO VIVO", 400, freelas, false],
+    ["FREELA JG - APARAVO", 350, freelas, false],
+    ["FREELA JG - WAKE PARKE", 200, freelas, false],
+    ["FREELA RICHARD - FEIRA", 1000, freelas, false],
+    ["RICHARD - LIVE", 600, freelas, false],
+    ["Casamento Richard", 300, freelas, false],
+    ["CASAMENTO HORA", 250, freelas, false],
+    ["FREELA PL", 3500, freelas, false],
+    ["SOM PST", 350, freelas, false],
+    ["Som Pst", 175, freelas, false],
+  ];
+  for (const [d, v, c, rec] of rows) {
+    await pg.query(
+      "INSERT INTO transactions(user_id, description, amount, type, due_date, category_id, is_recurring, scope) VALUES ($1,$2,$3,'income','2026-10-01',$4,$5,'business')",
+      [u, d, v, c, rec],
+    );
+  }
+  await pg.query("INSERT INTO transactions(user_id, description, amount, type, due_date) VALUES ($1,'Mercado',50,'expense','2026-10-02')", [u]);
+
+  // cadastro antigo (um projeto "Histórico" por nome inteiro) precisa ser desfeito pelo novo
+  const old = (await pg.query<{ id: string }>("INSERT INTO pj_clients(user_id, name, notes) VALUES ($1,'FREELA PL','Avulso') RETURNING id", [u])).rows[0].id;
+  const oldP = (await pg.query<{ id: string }>("INSERT INTO pj_projects(user_id, title, client_id, stage) VALUES ($1,'Histórico - FREELA PL',$2,'Pago') RETURNING id", [u, old])).rows[0].id;
+  await pg.query("UPDATE transactions SET project_id = $1 WHERE description = 'FREELA PL'", [oldP]);
+
+  const sql = readFileSync(new URL("../../db/seed-all-clients.sql", import.meta.url), "utf8");
+  assert.ok(!/[^\x00-\x7F]/.test(sql));
+  await pg.exec(sql);
+  await pg.exec(sql);
+
+  const clients = (await pg.query<{ name: string; notes: string }>("SELECT name, notes FROM pj_clients ORDER BY lower(name)")).rows;
+  assert.deepEqual(
+    clients.map((c) => c.name),
+    ["Agencia Nos", "ANA", "Aparavo", "Hora", "JG", "JP", "Kero+", "PL", "Richard", "Som Pst"],
+  );
+  const by = Object.fromEntries(clients.map((c) => [c.name, c.notes]));
+  assert.equal(by["Agencia Nos"], "Fixo | Recorrente");
+  assert.equal(by["ANA"], "Fixo | Recorrente | via ALMA");
+  assert.equal(by["Kero+"], "Recorrente | via ALMA");
+  assert.equal(by["JP"], "Avulso");
+  assert.equal(by["PL"], "Avulso");
+
+  const projs = (await pg.query<{ c: string; t: string; v: number }>(
+    "SELECT c.name c, p.title t, p.value::float v FROM pj_projects p JOIN pj_clients c ON c.id = p.client_id ORDER BY c.name, p.title",
+  )).rows;
+  const of = (c: string) => projs.filter((p) => p.c === c).map((p) => p.t);
+  assert.deepEqual(of("JP"), ["Melt", "Rennova", "Roxo Ao Vivo"]);
+  assert.deepEqual(of("JG"), ["Aparavo", "Wake Parke"]);
+  assert.deepEqual(of("Richard"), ["Casamento", "Feira", "Live"]);
+  assert.deepEqual(of("PL"), ["Freela"]);
+  assert.equal(projs.find((p) => p.c === "Som Pst")!.v, 525);
+  assert.equal(projs.find((p) => p.c === "PL")!.v, 3500);
+  assert.ok(!projs.some((p) => p.t.startsWith("Hist")), "cadastro antigo foi desfeito");
+  assert.equal((await pg.query<{ n: number }>("SELECT count(*)::int n FROM transactions WHERE type='income' AND project_id IS NULL")).rows[0].n, 0);
+  assert.equal((await pg.query<{ n: number }>("SELECT count(*)::int n FROM transactions WHERE type='expense' AND project_id IS NOT NULL")).rows[0].n, 0);
+  assert.equal((await pg.query<{ n: number }>("SELECT count(*)::int n FROM transactions")).rows[0].n, rows.length + 1, "nenhum lançamento foi apagado");
+});
