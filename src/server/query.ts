@@ -39,6 +39,8 @@ type TableDef = {
   actions: ReadonlyArray<QueryRequest["action"]>;
   /** Relações embutidas no select: nome → tabela e coluna local. */
   embeds?: Record<string, { table: string; fk: string }>;
+  /** Colunas que o cliente nunca grava (ex.: o token do link público é sempre gerado pelo banco). */
+  readonly?: ReadonlyArray<string>;
 };
 
 const ALL = ["select", "insert", "update", "delete"] as const;
@@ -64,6 +66,18 @@ export const TABLES: Record<string, TableDef> = {
   bank_connections: { scope: "user_id", actions: ALL },
   savings_goals: { scope: "user_id", actions: ALL },
   income_split_categories: { scope: "user_id", actions: ALL },
+  // Área "Meu trabalho (PJ)".
+  pj_profile: { scope: "user_id", actions: ALL },
+  pj_clients: { scope: "user_id", actions: ALL },
+  pj_leads: { scope: "user_id", actions: ALL },
+  pj_proposals: { scope: "user_id", actions: ALL },
+  pj_contracts: { scope: "user_id", actions: ALL },
+  pj_projects: { scope: "user_id", actions: ALL },
+  pj_equipment: { scope: "user_id", actions: ALL },
+  // Links públicos: o dono publica/atualiza o snapshot e acompanha os eventos; o cliente (sem login)
+  // só passa por src/server/share.ts. rate_limits fica de fora: só o servidor escreve.
+  shares: { scope: "user_id", actions: ALL, readonly: ["token"] },
+  share_events: { scope: "user_id", actions: ALL },
   // Plano/assinatura só é lido pelo app; quem escreve é o servidor (gatilhos e, no futuro, o pagamento).
   subscriptions: { scope: "user_id", actions: ["select"] },
 };
@@ -82,6 +96,9 @@ class QueryError extends Error {
 }
 
 const q = (id: string) => `"${id.replace(/"/g, '""')}"`;
+
+/** Colunas JSONB chegam como objeto/lista: o driver converteria uma lista em array do Postgres, então vai como texto JSON. */
+const param = (v: unknown) => (v !== null && typeof v === "object" ? JSON.stringify(v) : v);
 
 const columnCache = new WeakMap<object, Promise<Map<string, Set<string>>>>();
 
@@ -214,6 +231,7 @@ function writableColumns(table: string, cols: Map<string, Set<string>>): Set<str
   for (const c of cols.get(table)!) {
     if (NEVER_WRITABLE.has(c)) continue;
     if (c === "id" && def.scope === "id") continue;
+    if (def.readonly?.includes(c)) continue;
     out.add(c);
   }
   return out;
@@ -312,7 +330,7 @@ async function execute(db: Queryable, uid: string, req: QueryRequest): Promise<Q
           return `$${params.length}`;
         }
         if (!(c in row) || row[c] === undefined) return "DEFAULT";
-        params.push(row[c]);
+        params.push(param(row[c]));
         return `$${params.length}`;
       });
       return `(${cells.join(", ")})`;
@@ -332,7 +350,7 @@ async function execute(db: Queryable, uid: string, req: QueryRequest): Promise<Q
     if (keys.length === 0) throw new QueryError("Nada para atualizar", "22023");
     const sets = keys.map((k) => {
       if (!writable.has(k)) throw new QueryError(`Coluna não permitida: ${req.table}.${k}`, "42703");
-      params.push(patch[k]);
+      params.push(param(patch[k]));
       return `${q(k)} = $${params.length}`;
     });
     // O RETURNING usa o nome da tabela como alias; o WHERE também.

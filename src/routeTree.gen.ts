@@ -24,6 +24,7 @@ import { Route as AuthenticatedImportRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedInstallmentsRouteImport } from './routes/_authenticated/installments'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedOpenFinanceRouteImport } from './routes/_authenticated/open-finance'
+import { Route as AuthenticatedPjRouteImport } from './routes/_authenticated/pj'
 import { Route as AuthenticatedPrecificacaoRouteImport } from './routes/_authenticated/precificacao'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedRulesRouteImport } from './routes/_authenticated/rules'
@@ -31,6 +32,9 @@ import { Route as AuthenticatedSavingsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTransactionsRouteImport } from './routes/_authenticated/transactions'
 import { Route as ApiDbRouteImport } from './routes/api.db'
+import { Route as AuthenticatedPjIndexRouteImport } from './routes/_authenticated/pj.index'
+import { Route as AuthenticatedPjClientesRouteImport } from './routes/_authenticated/pj.clientes'
+import { Route as AuthenticatedPjPerfilRouteImport } from './routes/_authenticated/pj.perfil'
 import { Route as ApiAuthCallbackRouteImport } from './routes/api.auth.callback'
 import { Route as ApiAuthGoogleRouteImport } from './routes/api.auth.google'
 import { Route as ApiAuthSessionRouteImport } from './routes/api.auth.session'
@@ -113,6 +117,11 @@ const AuthenticatedOpenFinanceRoute =
     path: '/open-finance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPjRoute = AuthenticatedPjRouteImport.update({
+  id: '/pj',
+  path: '/pj',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPrecificacaoRoute =
   AuthenticatedPrecificacaoRouteImport.update({
     id: '/precificacao',
@@ -150,6 +159,21 @@ const ApiDbRoute = ApiDbRouteImport.update({
   path: '/api/db',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPjIndexRoute = AuthenticatedPjIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedPjRoute,
+} as any)
+const AuthenticatedPjClientesRoute = AuthenticatedPjClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => AuthenticatedPjRoute,
+} as any)
+const AuthenticatedPjPerfilRoute = AuthenticatedPjPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AuthenticatedPjRoute,
+} as any)
 const ApiAuthCallbackRoute = ApiAuthCallbackRouteImport.update({
   id: '/api/auth/callback',
   path: '/api/auth/callback',
@@ -186,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/installments': typeof AuthenticatedInstallmentsRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/open-finance': typeof AuthenticatedOpenFinanceRoute
+  '/pj': typeof AuthenticatedPjRouteWithChildren
   '/precificacao': typeof AuthenticatedPrecificacaoRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/rules': typeof AuthenticatedRulesRoute
@@ -193,10 +218,13 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/api/db': typeof ApiDbRoute
+  '/pj/clientes': typeof AuthenticatedPjClientesRoute
+  '/pj/perfil': typeof AuthenticatedPjPerfilRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
   '/api/auth/signout': typeof ApiAuthSignoutRoute
+  '/pj/': typeof AuthenticatedPjIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -220,10 +248,13 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/api/db': typeof ApiDbRoute
+  '/pj/clientes': typeof AuthenticatedPjClientesRoute
+  '/pj/perfil': typeof AuthenticatedPjPerfilRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
   '/api/auth/signout': typeof ApiAuthSignoutRoute
+  '/pj': typeof AuthenticatedPjIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -242,6 +273,7 @@ export interface FileRoutesById {
   '/_authenticated/installments': typeof AuthenticatedInstallmentsRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/open-finance': typeof AuthenticatedOpenFinanceRoute
+  '/_authenticated/pj': typeof AuthenticatedPjRouteWithChildren
   '/_authenticated/precificacao': typeof AuthenticatedPrecificacaoRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/rules': typeof AuthenticatedRulesRoute
@@ -249,10 +281,13 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/api/db': typeof ApiDbRoute
+  '/_authenticated/pj/clientes': typeof AuthenticatedPjClientesRoute
+  '/_authenticated/pj/perfil': typeof AuthenticatedPjPerfilRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
   '/api/auth/signout': typeof ApiAuthSignoutRoute
+  '/_authenticated/pj/': typeof AuthenticatedPjIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -271,6 +306,7 @@ export interface FileRouteTypes {
     | '/installments'
     | '/onboarding'
     | '/open-finance'
+    | '/pj'
     | '/precificacao'
     | '/reports'
     | '/rules'
@@ -278,10 +314,13 @@ export interface FileRouteTypes {
     | '/settings'
     | '/transactions'
     | '/api/db'
+    | '/pj/clientes'
+    | '/pj/perfil'
     | '/api/auth/callback'
     | '/api/auth/google'
     | '/api/auth/session'
     | '/api/auth/signout'
+    | '/pj/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -305,10 +344,13 @@ export interface FileRouteTypes {
     | '/settings'
     | '/transactions'
     | '/api/db'
+    | '/pj/clientes'
+    | '/pj/perfil'
     | '/api/auth/callback'
     | '/api/auth/google'
     | '/api/auth/session'
     | '/api/auth/signout'
+    | '/pj'
   id:
     | '__root__'
     | '/'
@@ -326,6 +368,7 @@ export interface FileRouteTypes {
     | '/_authenticated/installments'
     | '/_authenticated/onboarding'
     | '/_authenticated/open-finance'
+    | '/_authenticated/pj'
     | '/_authenticated/precificacao'
     | '/_authenticated/reports'
     | '/_authenticated/rules'
@@ -333,10 +376,13 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/transactions'
     | '/api/db'
+    | '/_authenticated/pj/clientes'
+    | '/_authenticated/pj/perfil'
     | '/api/auth/callback'
     | '/api/auth/google'
     | '/api/auth/session'
     | '/api/auth/signout'
+    | '/_authenticated/pj/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -460,6 +506,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOpenFinanceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/pj': {
+      id: '/_authenticated/pj'
+      path: '/pj'
+      fullPath: '/pj'
+      preLoaderRoute: typeof AuthenticatedPjRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/precificacao': {
       id: '/_authenticated/precificacao'
       path: '/precificacao'
@@ -509,6 +562,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDbRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/pj/': {
+      id: '/_authenticated/pj/'
+      path: '/'
+      fullPath: '/pj/'
+      preLoaderRoute: typeof AuthenticatedPjIndexRouteImport
+      parentRoute: typeof AuthenticatedPjRoute
+    }
+    '/_authenticated/pj/clientes': {
+      id: '/_authenticated/pj/clientes'
+      path: '/clientes'
+      fullPath: '/pj/clientes'
+      preLoaderRoute: typeof AuthenticatedPjClientesRouteImport
+      parentRoute: typeof AuthenticatedPjRoute
+    }
+    '/_authenticated/pj/perfil': {
+      id: '/_authenticated/pj/perfil'
+      path: '/perfil'
+      fullPath: '/pj/perfil'
+      preLoaderRoute: typeof AuthenticatedPjPerfilRouteImport
+      parentRoute: typeof AuthenticatedPjRoute
+    }
     '/api/auth/callback': {
       id: '/api/auth/callback'
       path: '/api/auth/callback'
@@ -540,6 +614,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedPjRouteChildren {
+  AuthenticatedPjClientesRoute: typeof AuthenticatedPjClientesRoute
+  AuthenticatedPjPerfilRoute: typeof AuthenticatedPjPerfilRoute
+  AuthenticatedPjIndexRoute: typeof AuthenticatedPjIndexRoute
+}
+
+const AuthenticatedPjRouteChildren: AuthenticatedPjRouteChildren = {
+  AuthenticatedPjClientesRoute: AuthenticatedPjClientesRoute,
+  AuthenticatedPjPerfilRoute: AuthenticatedPjPerfilRoute,
+  AuthenticatedPjIndexRoute: AuthenticatedPjIndexRoute,
+}
+
+const AuthenticatedPjRouteWithChildren = AuthenticatedPjRoute._addFileChildren(
+  AuthenticatedPjRouteChildren,
+)
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
   AuthenticatedCardsRoute: typeof AuthenticatedCardsRoute
@@ -550,6 +640,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInstallmentsRoute: typeof AuthenticatedInstallmentsRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedOpenFinanceRoute: typeof AuthenticatedOpenFinanceRoute
+  AuthenticatedPjRoute: typeof AuthenticatedPjRouteWithChildren
   AuthenticatedPrecificacaoRoute: typeof AuthenticatedPrecificacaoRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedRulesRoute: typeof AuthenticatedRulesRoute
@@ -568,6 +659,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInstallmentsRoute: AuthenticatedInstallmentsRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedOpenFinanceRoute: AuthenticatedOpenFinanceRoute,
+  AuthenticatedPjRoute: AuthenticatedPjRouteWithChildren,
   AuthenticatedPrecificacaoRoute: AuthenticatedPrecificacaoRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedRulesRoute: AuthenticatedRulesRoute,

@@ -38,6 +38,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useEffect, useState, type ReactNode } from "react";
 import { QuickAdd } from "@/components/QuickAdd";
+import { PJ_NAV } from "@/lib/pj/nav";
 
 const transactionSubItems = [
   { to: "/transactions", label: "Recorrentes", tab: undefined, icon: ListChecks },
@@ -78,6 +79,10 @@ const groups = [
       { to: "/divisao-ganhos", label: "Divisão de Ganhos", icon: PieChart, tab: undefined },
     ],
   },
+  {
+    title: "Meu trabalho (PJ)",
+    items: PJ_NAV,
+  },
 ] as const;
 
 function useProfile() {
@@ -114,6 +119,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   const isActive = (path: string, tab?: string) => {
+    if (path === "/pj") return location.pathname === "/pj";
     if (path === "/transactions") {
       const currentTab = (location.search as any)?.tab as string | undefined;
       return location.pathname.startsWith("/transactions") && (currentTab ?? undefined) === tab;
