@@ -2,6 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { withBase } from "@/lib/base";
 import type { BackupStore, Row } from "./backup";
 import { norm, today, toNumber } from "./format";
 import {
@@ -387,3 +388,112 @@ export const backupStore: BackupStore = {
     if (error) throw new Error(error.message);
   },
 };
+
+/* ------------------------------ links do cliente ------------------------------ */
+
+export type ShareRow = {
+  id: string;
+  token: string;
+  kind: "proposal" | "delivery";
+  ref_id: string | null;
+  title: string;
+};
+
+export type ShareEvent = {
+  id: string;
+  share_id: string;
+  type: "comment" | "approval" | "reply" | "view";
+  name: string | null;
+  body: string | null;
+  video: number | null;
+  time_seconds: number | null;
+  decision: "approved" | "changes" | null;
+  done: boolean;
+  seen: boolean;
+  created_at: string;
+};
+
+export const shareUrl = (token: string) => `${window.location.origin}${withBase(`/c/${token}`)}`;
+
+/** Cria o link (ou atualiza o conteúdo do que o cliente vê, mantendo o mesmo endereço). */
+export async function publishShare(input: {
+  kind: "proposal" | "delivery";
+  refId: string;
+  title: string;
+  brand: Record<string, unknown>;
+  snapshot: Record<string, unknown>;
+}): Promise<ShareRow> {
+  const found = await supabase
+    .from("shares")
+    .select("id")
+    .eq("kind", input.kind)
+    .eq("ref_id", input.refId)
+    .maybeSingle();
+  if (found.error) throw new Error(found.error.message);
+  const values = { title: input.title, brand: input.brand, snapshot: input.snapshot };
+  const q = found.data
+    ? supabase
+        .from("shares")
+        .update(values)
+        .eq("id", (found.data as { id: string }).id)
+        .select("id, token, kind, ref_id, title")
+        .single()
+    : supabase
+        .from("shares")
+        .insert({ ...values, kind: input.kind, ref_id: input.refId })
+        .select("id, token, kind, ref_id, title")
+        .single();
+  const { data, error } = await q;
+  if (error) throw new Error(error.message);
+  return data as ShareRow;
+}
+
+export function useShareEvents(shareId: string | null) {
+  return useQuery({
+    queryKey: [...pjKey("share_events"), shareId],
+    enabled: !!shareId,
+    refetchInterval: 15_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("share_events")
+        .select("*")
+        .eq("share_id", shareId)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as ShareEvent[];
+    },
+  });
+}
+
+/** Comentários e aprovações novos dos clientes, agrupados por link (para o Início PJ). */
+export function useUnseenInteractions() {
+  return useQuery({
+    queryKey: [...pjKey("share_events"), "unseen"],
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const ev = await supabase
+        .from("share_events")
+        .select("share_id")
+        .eq("seen", false)
+        .in("type", ["comment", "approval"]);
+      if (ev.error) throw ev.error;
+      const counts = new Map<string, number>();
+      for (const e of (ev.data ?? []) as { share_id: string }[])
+        counts.set(e.share_id, (counts.get(e.share_id) ?? 0) + 1);
+      if (counts.size === 0)
+        return [] as { title: string; kind: "proposal" | "delivery"; n: number }[];
+      const sh = await supabase
+        .from("shares")
+        .select("id, title, kind")
+        .in("id", [...counts.keys()]);
+      if (sh.error) throw sh.error;
+      return (
+        (sh.data ?? []) as { id: string; title: string; kind: "proposal" | "delivery" }[]
+      ).map((s) => ({
+        title: s.title || "Link",
+        kind: s.kind,
+        n: counts.get(s.id) ?? 0,
+      }));
+    },
+  });
+}

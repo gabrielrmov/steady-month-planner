@@ -32,6 +32,7 @@ import { Route as AuthenticatedSavingsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTransactionsRouteImport } from './routes/_authenticated/transactions'
 import { Route as ApiDbRouteImport } from './routes/api.db'
+import { Route as CTokenRouteImport } from './routes/c.$token'
 import { Route as AuthenticatedPjIndexRouteImport } from './routes/_authenticated/pj.index'
 import { Route as AuthenticatedPjBriefingRouteImport } from './routes/_authenticated/pj.briefing'
 import { Route as AuthenticatedPjClientesRouteImport } from './routes/_authenticated/pj.clientes'
@@ -48,6 +49,7 @@ import { Route as ApiAuthCallbackRouteImport } from './routes/api.auth.callback'
 import { Route as ApiAuthGoogleRouteImport } from './routes/api.auth.google'
 import { Route as ApiAuthSessionRouteImport } from './routes/api.auth.session'
 import { Route as ApiAuthSignoutRouteImport } from './routes/api.auth.signout'
+import { Route as ApiShareTokenRouteImport } from './routes/api.share.$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -168,6 +170,11 @@ const ApiDbRoute = ApiDbRouteImport.update({
   path: '/api/db',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CTokenRoute = CTokenRouteImport.update({
+  id: '/c/$token',
+  path: '/c/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedPjIndexRoute = AuthenticatedPjIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -254,6 +261,11 @@ const ApiAuthSignoutRoute = ApiAuthSignoutRouteImport.update({
   path: '/api/auth/signout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiShareTokenRoute = ApiShareTokenRouteImport.update({
+  id: '/api/share/$token',
+  path: '/api/share/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -278,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/api/db': typeof ApiDbRoute
+  '/c/$token': typeof CTokenRoute
   '/pj/briefing': typeof AuthenticatedPjBriefingRoute
   '/pj/clientes': typeof AuthenticatedPjClientesRoute
   '/pj/contratos': typeof AuthenticatedPjContratosRoute
@@ -293,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
   '/api/auth/signout': typeof ApiAuthSignoutRoute
+  '/api/share/$token': typeof ApiShareTokenRoute
   '/pj/': typeof AuthenticatedPjIndexRoute
 }
 export interface FileRoutesByTo {
@@ -317,6 +331,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/api/db': typeof ApiDbRoute
+  '/c/$token': typeof CTokenRoute
   '/pj/briefing': typeof AuthenticatedPjBriefingRoute
   '/pj/clientes': typeof AuthenticatedPjClientesRoute
   '/pj/contratos': typeof AuthenticatedPjContratosRoute
@@ -332,6 +347,7 @@ export interface FileRoutesByTo {
   '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
   '/api/auth/signout': typeof ApiAuthSignoutRoute
+  '/api/share/$token': typeof ApiShareTokenRoute
   '/pj': typeof AuthenticatedPjIndexRoute
 }
 export interface FileRoutesById {
@@ -359,6 +375,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/api/db': typeof ApiDbRoute
+  '/c/$token': typeof CTokenRoute
   '/_authenticated/pj/briefing': typeof AuthenticatedPjBriefingRoute
   '/_authenticated/pj/clientes': typeof AuthenticatedPjClientesRoute
   '/_authenticated/pj/contratos': typeof AuthenticatedPjContratosRoute
@@ -374,6 +391,7 @@ export interface FileRoutesById {
   '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
   '/api/auth/signout': typeof ApiAuthSignoutRoute
+  '/api/share/$token': typeof ApiShareTokenRoute
   '/_authenticated/pj/': typeof AuthenticatedPjIndexRoute
 }
 export interface FileRouteTypes {
@@ -401,6 +419,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/transactions'
     | '/api/db'
+    | '/c/$token'
     | '/pj/briefing'
     | '/pj/clientes'
     | '/pj/contratos'
@@ -416,6 +435,7 @@ export interface FileRouteTypes {
     | '/api/auth/google'
     | '/api/auth/session'
     | '/api/auth/signout'
+    | '/api/share/$token'
     | '/pj/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -440,6 +460,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/transactions'
     | '/api/db'
+    | '/c/$token'
     | '/pj/briefing'
     | '/pj/clientes'
     | '/pj/contratos'
@@ -455,6 +476,7 @@ export interface FileRouteTypes {
     | '/api/auth/google'
     | '/api/auth/session'
     | '/api/auth/signout'
+    | '/api/share/$token'
     | '/pj'
   id:
     | '__root__'
@@ -481,6 +503,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/transactions'
     | '/api/db'
+    | '/c/$token'
     | '/_authenticated/pj/briefing'
     | '/_authenticated/pj/clientes'
     | '/_authenticated/pj/contratos'
@@ -496,6 +519,7 @@ export interface FileRouteTypes {
     | '/api/auth/google'
     | '/api/auth/session'
     | '/api/auth/signout'
+    | '/api/share/$token'
     | '/_authenticated/pj/'
   fileRoutesById: FileRoutesById
 }
@@ -507,10 +531,12 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   ApiDbRoute: typeof ApiDbRoute
+  CTokenRoute: typeof CTokenRoute
   ApiAuthCallbackRoute: typeof ApiAuthCallbackRoute
   ApiAuthGoogleRoute: typeof ApiAuthGoogleRoute
   ApiAuthSessionRoute: typeof ApiAuthSessionRoute
   ApiAuthSignoutRoute: typeof ApiAuthSignoutRoute
+  ApiShareTokenRoute: typeof ApiShareTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -676,6 +702,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDbRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/c/$token': {
+      id: '/c/$token'
+      path: '/c/$token'
+      fullPath: '/c/$token'
+      preLoaderRoute: typeof CTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/pj/': {
       id: '/_authenticated/pj/'
       path: '/'
@@ -788,6 +821,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSignoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/share/$token': {
+      id: '/api/share/$token'
+      path: '/api/share/$token'
+      fullPath: '/api/share/$token'
+      preLoaderRoute: typeof ApiShareTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -874,10 +914,12 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   ApiDbRoute: ApiDbRoute,
+  CTokenRoute: CTokenRoute,
   ApiAuthCallbackRoute: ApiAuthCallbackRoute,
   ApiAuthGoogleRoute: ApiAuthGoogleRoute,
   ApiAuthSessionRoute: ApiAuthSessionRoute,
   ApiAuthSignoutRoute: ApiAuthSignoutRoute,
+  ApiShareTokenRoute: ApiShareTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

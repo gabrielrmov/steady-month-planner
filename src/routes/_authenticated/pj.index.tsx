@@ -3,7 +3,12 @@ import { useMemo } from "react";
 import { AlertTriangle, CalendarDays, CheckCircle2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Bar, Kpi, KpiGrid, PageHeader } from "@/components/pj/ui";
-import { useBusinessTransactions, usePjProfile, useRows } from "@/lib/pj/data";
+import {
+  useBusinessTransactions,
+  usePjProfile,
+  useRows,
+  useUnseenInteractions,
+} from "@/lib/pj/data";
 import { limitState, monthSummary, revenueLast12Months } from "@/lib/pj/calc";
 import { brl, dateBR, daysUntil, today } from "@/lib/pj/format";
 import type { PjLead, PjProject, PjProposal } from "@/lib/pj/types";
@@ -22,6 +27,7 @@ function InicioPjPage() {
   const projects = useRows<PjProject>("pj_projects");
   const leads = useRows<PjLead>("pj_leads");
   const proposals = useRows<PjProposal>("pj_proposals");
+  const interactions = useUnseenInteractions();
 
   const d = useMemo(() => {
     const now = today();
@@ -66,6 +72,11 @@ function InicioPjPage() {
 
   const first = (profile.data?.full_name ?? "").split(" ")[0];
   const alerts: { tone: "bad" | "info"; to: string; text: string }[] = [
+    ...(interactions.data ?? []).map((i) => ({
+      tone: "info" as const,
+      to: i.kind === "proposal" ? "/pj/propostas" : "/pj/projetos",
+      text: `Cliente interagiu: ${i.title} (${i.n} novo(s) comentário(s)/aprovação(ões))`,
+    })),
     ...(d.late.length
       ? [
           {

@@ -15,12 +15,15 @@ import {
 import {
   brandOf,
   createProjectFromDeal,
+  publishShare,
   saveRow,
   useDeleteRow,
   useInvalidatePj,
   usePjProfile,
   useRows,
+  type ShareRow,
 } from "@/lib/pj/data";
+import { ShareDialog } from "@/components/pj/ShareDialog";
 import { proposalBlocks, renderBlocks } from "@/lib/pj/doc";
 import { brl, today, toNumber } from "@/lib/pj/format";
 import { printElement } from "@/lib/pj/print";
@@ -69,6 +72,7 @@ function PropostasPage() {
   }));
   const [listOpen, setListOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [share, setShare] = useState<ShareRow | null>(null);
 
   const set = <K extends keyof PjProposal>(k: K, v: PjProposal[K] | null) =>
     setD((x) => ({ ...x, [k]: v }));
@@ -135,6 +139,45 @@ function PropostasPage() {
     navigate({ to: "/pj/contratos" });
   }
 
+  async function openShare() {
+    if (!profile.data) return;
+    setBusy(true);
+    try {
+      const row = await save(true);
+      if (!row) return;
+      const link = await publishShare({
+        kind: "proposal",
+        refId: row.id,
+        title: d.title ?? "Proposta",
+        brand: brandOf(profile.data),
+        snapshot: {
+          title: d.title,
+          client_name: d.client_name,
+          company: d.company,
+          proposal_date: d.proposal_date,
+          validity: d.validity,
+          intro: d.intro,
+          scope_of_work: d.scope_of_work,
+          deliverables: d.deliverables,
+          timeline: d.timeline,
+          price: toNumber(d.price),
+          payment_terms: d.payment_terms,
+          notes: d.notes,
+        },
+      });
+      if (d.status === "Rascunho") {
+        await saveRow<PjProposal>("pj_proposals", { id: row.id, status: "Enviada" });
+        set("status", "Enviada");
+        await invalidate("pj_proposals");
+      }
+      setShare(link);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function pdf() {
     if (!printElement(paper.current, d.title || "Proposta"))
       toast.error("Libere os pop-ups para gerar o PDF");
@@ -161,6 +204,9 @@ function PropostasPage() {
             </Button>
             <Button variant="outline" onClick={approve} disabled={busy}>
               Aprovar → projeto
+            </Button>
+            <Button variant="outline" onClick={openShare} disabled={busy}>
+              Link do cliente
             </Button>
             <Button onClick={pdf} className="hover-glow">
               Gerar PDF
@@ -256,6 +302,15 @@ function PropostasPage() {
           {renderBlocks(blocks)}
         </div>
       </div>
+
+      {share && (
+        <ShareDialog
+          share={share}
+          message={`Olá! Segue a proposta "${d.title}":`}
+          onApproved={approve}
+          onClose={() => setShare(null)}
+        />
+      )}
 
       <Dialog open={listOpen} onOpenChange={setListOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">

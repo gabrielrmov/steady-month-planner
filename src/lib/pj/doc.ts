@@ -5,6 +5,7 @@
  */
 import { createElement as h, Fragment, type ReactNode } from "react";
 import { brl, dateBR } from "./format.ts";
+import { safeHttpUrl, safeLogo } from "./safe.ts";
 
 export type DocBlock =
   | { t: "cover"; logo: string; brand: string; title: string; to: string; meta: string }
@@ -19,15 +20,7 @@ export type DocBlock =
 
 export type Brand = { name?: string; logo?: string; doc?: string; phone?: string; email?: string };
 
-/** Só aceita logo em data URL de imagem; qualquer outra coisa vira "sem logo". */
-export const safeLogo = (s: unknown): string =>
-  typeof s === "string" && /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(s)
-    ? s
-    : "";
-
-/** Só links http(s). */
-export const safeHttpUrl = (s: unknown): string =>
-  typeof s === "string" && /^https?:\/\//i.test(s) ? s : "";
+export { safeHttpUrl, safeLogo };
 
 export type ProposalData = {
   title?: string | null;
