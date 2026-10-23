@@ -70,6 +70,7 @@ function ReportsPage() {
       const { data, error } = await supabase
         .from("transactions")
         .select("amount, type, due_date, category_id, categories(name, color)")
+        .eq("scope", "personal")
         .gte("due_date", start)
         .lte("due_date", end);
       if (error) throw error;

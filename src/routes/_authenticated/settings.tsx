@@ -83,6 +83,7 @@ function SettingsPage() {
     const { data, error } = await supabase
       .from("transactions")
       .select("due_date, description, amount, type, status, payment_method, installment_number, installment_total, categories(name), cards(name)")
+      .eq("scope", "personal")
       .order("due_date");
     setExporting(false);
     if (error) return toast.error(error.message);

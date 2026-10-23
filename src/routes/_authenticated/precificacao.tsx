@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BudgetCalculator } from "@/components/pj/BudgetCalculator";
+import { kitSummary, minHourlyRate } from "@/lib/pj/calc";
+import { usePjProfile, useRows } from "@/lib/pj/data";
+import type { PjEquipment } from "@/lib/pj/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calculator, Clock, Percent, TrendingUp, Lock } from "lucide-react";
@@ -14,12 +19,14 @@ export const Route = createFileRoute("/_authenticated/precificacao")({
       { title: "Precificação de serviços PJ | FINLIST" },
       {
         name: "description",
-        content: "Calcule quanto cobrar por serviço considerando custos fixos, pró-labore, impostos e margem de lucro.",
+        content:
+          "Calcule quanto cobrar por serviço considerando custos fixos, pró-labore, impostos e margem de lucro.",
       },
       { property: "og:title", content: "Precificação de serviços PJ | FINLIST" },
       {
         property: "og:description",
-        content: "Calcule quanto cobrar por serviço considerando custos fixos, pró-labore, impostos e margem de lucro.",
+        content:
+          "Calcule quanto cobrar por serviço considerando custos fixos, pró-labore, impostos e margem de lucro.",
       },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex" },
@@ -70,10 +77,33 @@ function Pricing() {
   const [margin, setMargin] = useState(20);
   const [serviceHours, setServiceHours] = useState(20);
   const [directCosts, setDirectCosts] = useState(0);
+  const [rate, setRate] = useState(80);
+  const [tab, setTab] = useState("service");
   const plan = usePlan();
 
+  // Valores do perfil PJ (renda desejada, custos fixos, horas, imposto) entram como ponto de partida.
+  const profile = usePjProfile();
+  const equipment = useRows<PjEquipment>("pj_equipment");
+  const kit = useMemo(() => kitSummary(equipment.data ?? []), [equipment.data]);
+  const p = profile.data;
+  useEffect(() => {
+    if (!p?.id) return;
+    if (p.fixed_costs != null) setFixedCosts(p.fixed_costs);
+    if (p.desired_income != null) setProLabore(p.desired_income);
+    if (p.billable_hours != null) setHoursMonth(p.billable_hours);
+    if (p.tax_rate != null) setTaxRate(p.tax_rate);
+  }, [p?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const n = (v: number) => (Number.isFinite(v) ? v : 0);
-  const hourCost = n(hoursMonth) > 0 ? (n(fixedCosts) + n(proLabore)) / n(hoursMonth) : 0;
+  const minRate = minHourlyRate({
+    income: n(proLabore),
+    fixed: n(fixedCosts),
+    kitMonthly: kit.monthly,
+    hours: n(hoursMonth),
+    tax: n(taxRate),
+  });
+  const hourCost =
+    n(hoursMonth) > 0 ? (n(fixedCosts) + n(proLabore) + kit.monthly) / n(hoursMonth) : 0;
   const base = hourCost * n(serviceHours) + n(directCosts);
   const loadPct = Math.min(n(taxRate) + n(margin), 95) / 100;
   const price = base / (1 - loadPct);
@@ -84,14 +114,19 @@ function Pricing() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="animate-rise">
-        <h1 className="text-[26px] font-bold tracking-tight sm:text-[32px]">Precificação de serviços</h1>
+        <h1 className="text-[26px] font-bold tracking-tight sm:text-[32px]">
+          Precificação de serviços
+        </h1>
         <p className="text-sm text-muted-foreground">
           Descubra quanto cobrar por projeto cobrindo custos, impostos e lucro.
         </p>
       </div>
 
       {!plan.hasPj && (
-        <Card className="animate-rise flex flex-wrap items-center justify-between gap-4 border-primary/40 p-5" style={{ animationDelay: "60ms" }}>
+        <Card
+          className="animate-rise flex flex-wrap items-center justify-between gap-4 border-primary/40 p-5"
+          style={{ animationDelay: "60ms" }}
+        >
           <div className="flex items-start gap-3">
             <Lock className="mt-0.5 h-4 w-4 text-primary" />
             <div>
@@ -107,70 +142,151 @@ function Pricing() {
         </Card>
       )}
 
-      <div className={`grid gap-6 lg:grid-cols-[1.1fr_1fr] ${plan.hasPj ? "" : "pointer-events-none select-none opacity-60"}`}>
-        <Card className="animate-rise space-y-6 p-6" style={{ animationDelay: "120ms" }}>
-          <section className="space-y-4">
-            <h2 className="flex items-center gap-2 text-sm font-bold tracking-tight">
-              <Calculator className="h-4 w-4 text-muted-foreground" />
-              Estrutura da empresa
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <NumField label="Custos fixos mensais" value={fixedCosts} onChange={setFixedCosts} suffix="R$" />
-              <NumField label="Pró-labore desejado" value={proLabore} onChange={setProLabore} suffix="R$" />
-              <NumField label="Horas produtivas por mês" value={hoursMonth} onChange={setHoursMonth} suffix="h" />
+      <Tabs
+        value={tab}
+        onValueChange={setTab}
+        className={plan.hasPj ? "" : "pointer-events-none select-none opacity-60"}
+      >
+        <TabsList>
+          <TabsTrigger value="service">Por serviço</TabsTrigger>
+          <TabsTrigger value="budget">Orçamento de vídeo</TabsTrigger>
+        </TabsList>
+        <TabsContent value="service" className="mt-6">
+          <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
+            <Card className="animate-rise space-y-6 p-6" style={{ animationDelay: "120ms" }}>
+              <section className="space-y-4">
+                <h2 className="flex items-center gap-2 text-sm font-bold tracking-tight">
+                  <Calculator className="h-4 w-4 text-muted-foreground" />
+                  Estrutura da empresa
+                </h2>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <NumField
+                    label="Custos fixos mensais"
+                    value={fixedCosts}
+                    onChange={setFixedCosts}
+                    suffix="R$"
+                  />
+                  <NumField
+                    label="Pró-labore desejado"
+                    value={proLabore}
+                    onChange={setProLabore}
+                    suffix="R$"
+                  />
+                  <NumField
+                    label="Horas produtivas por mês"
+                    value={hoursMonth}
+                    onChange={setHoursMonth}
+                    suffix="h"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Kit de equipamentos: <span className="num">{brl(kit.monthly)}</span> de
+                  depreciação por mês entram no custo da hora (cadastre os itens em Equipamentos).
+                </p>
+              </section>
+
+              <section className="space-y-4 border-t border-border pt-6">
+                <h2 className="flex items-center gap-2 text-sm font-bold tracking-tight">
+                  <Percent className="h-4 w-4 text-muted-foreground" />
+                  Impostos e margem
+                </h2>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <NumField
+                    label="Impostos sobre a nota"
+                    value={taxRate}
+                    onChange={setTaxRate}
+                    suffix="%"
+                  />
+                  <NumField
+                    label="Margem de lucro"
+                    value={margin}
+                    onChange={setMargin}
+                    suffix="%"
+                  />
+                </div>
+              </section>
+
+              <section className="space-y-4 border-t border-border pt-6">
+                <h2 className="flex items-center gap-2 text-sm font-bold tracking-tight">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  Este serviço
+                </h2>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <NumField
+                    label="Horas estimadas"
+                    value={serviceHours}
+                    onChange={setServiceHours}
+                    suffix="h"
+                  />
+                  <NumField
+                    label="Custos diretos do projeto"
+                    value={directCosts}
+                    onChange={setDirectCosts}
+                    suffix="R$"
+                  />
+                </div>
+              </section>
+            </Card>
+
+            <div className="space-y-4">
+              <Card className="animate-rise glow-ring p-6" style={{ animationDelay: "180ms" }}>
+                <p className="font-mono text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Preço sugerido do serviço
+                </p>
+                <p className="num mt-2 text-4xl">{brl(price)}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  <span className="num">{brl(pricePerHour)}</span> por hora trabalhada
+                </p>
+              </Card>
+
+              <Card
+                className="animate-rise divide-y divide-border p-6"
+                style={{ animationDelay: "240ms" }}
+              >
+                <Row label="Custo por hora da empresa (com o kit)" value={brl(hourCost)} />
+                <Row label="Custo total do serviço" value={brl(base)} />
+                <Row label="Impostos estimados" value={brl(taxes)} />
+                <Row label="Lucro estimado" value={brl(profit)} strong />
+              </Card>
+
+              <Card className="animate-rise space-y-3 p-6" style={{ animationDelay: "270ms" }}>
+                <p className="font-mono text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Quanto cobrar por hora (mínimo)
+                </p>
+                <p className="num text-3xl">{brl(minRate)}</p>
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  (renda desejada + custos fixos + depreciação do kit) ÷ horas faturáveis ÷ (1 −
+                  imposto).
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setRate(Math.ceil(minRate));
+                    setTab("budget");
+                  }}
+                >
+                  Usar como valor da hora no orçamento
+                </Button>
+              </Card>
+
+              <Card className="animate-rise p-5" style={{ animationDelay: "300ms" }}>
+                <div className="flex gap-3">
+                  <TrendingUp className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    O preço é calculado por markup: custo total dividido por (1 − impostos −
+                    margem), garantindo que a margem seja sobre o valor final cobrado, e não sobre o
+                    custo.
+                  </p>
+                </div>
+              </Card>
             </div>
-          </section>
-
-          <section className="space-y-4 border-t border-border pt-6">
-            <h2 className="flex items-center gap-2 text-sm font-bold tracking-tight">
-              <Percent className="h-4 w-4 text-muted-foreground" />
-              Impostos e margem
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <NumField label="Impostos sobre a nota" value={taxRate} onChange={setTaxRate} suffix="%" />
-              <NumField label="Margem de lucro" value={margin} onChange={setMargin} suffix="%" />
-            </div>
-          </section>
-
-          <section className="space-y-4 border-t border-border pt-6">
-            <h2 className="flex items-center gap-2 text-sm font-bold tracking-tight">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              Este serviço
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <NumField label="Horas estimadas" value={serviceHours} onChange={setServiceHours} suffix="h" />
-              <NumField label="Custos diretos do projeto" value={directCosts} onChange={setDirectCosts} suffix="R$" />
-            </div>
-          </section>
-        </Card>
-
-        <div className="space-y-4">
-          <Card className="animate-rise glow-ring p-6" style={{ animationDelay: "180ms" }}>
-            <p className="font-mono text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Preço sugerido do serviço
-            </p>
-            <p className="num mt-2 text-4xl">{brl(price)}</p>
-            <p className="mt-1 text-xs text-muted-foreground"><span className="num">{brl(pricePerHour)}</span> por hora trabalhada</p>
-          </Card>
-
-          <Card className="animate-rise divide-y divide-border p-6" style={{ animationDelay: "240ms" }}>
-            <Row label="Custo por hora da empresa" value={brl(hourCost)} />
-            <Row label="Custo total do serviço" value={brl(base)} />
-            <Row label="Impostos estimados" value={brl(taxes)} />
-            <Row label="Lucro estimado" value={brl(profit)} strong />
-          </Card>
-
-          <Card className="animate-rise p-5" style={{ animationDelay: "300ms" }}>
-            <div className="flex gap-3">
-              <TrendingUp className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                O preço é calculado por markup: custo total dividido por (1 − impostos − margem), garantindo que a
-                margem seja sobre o valor final cobrado, e não sobre o custo.
-              </p>
-            </div>
-          </Card>
-        </div>
-      </div>
+          </div>
+        </TabsContent>
+        <TabsContent value="budget" className="mt-6">
+          <BudgetCalculator rate={rate} onRateChange={setRate} tax={n(taxRate)} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

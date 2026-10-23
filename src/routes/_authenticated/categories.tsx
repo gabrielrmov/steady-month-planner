@@ -47,7 +47,11 @@ function CategoriesPage() {
   const { data: cats = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("categories").select("*").order("name");
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("scope", "personal")
+        .order("name");
       if (error) throw error;
       return (data ?? []) as Category[];
     },
