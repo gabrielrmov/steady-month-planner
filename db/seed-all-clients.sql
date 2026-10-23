@@ -1,61 +1,88 @@
--- Cadastra como CLIENTE todo nome que aparece nas suas entradas (type = income) e liga cada entrada a um
--- projeto "Historico - <cliente>" (assim "Clientes" mostra quanto cada um pagou).
--- Marca em "Observacoes" do cliente: Fixo (categoria Fixos), Recorrente (lancamento recorrente), Avulso
--- (nenhum dos dois) e "via ALMA" quando o nome termina em "- ALMA".
--- Datas no fim do nome ("Aparavo 21.09") sao ignoradas, entao viram o mesmo cliente. Nao apaga nada,
--- nao duplica ao rodar de novo. So ASCII (escapes U&'...').
+-- Cadastra os CLIENTES das suas entradas (type = income) e os TRABALHOS de cada um como projetos.
+-- Regras pelo nome da entrada (sem diferenciar maiuscula/minuscula, datas no fim sao ignoradas):
+--   "FREELA JP - MELT"        -> cliente JP,       projeto Melt
+--   "FREELA PL"               -> cliente PL,       projeto Freela
+--   "RICHARD - LIVE"          -> cliente Richard,  projeto Live
+--   "Casamento Richard"       -> cliente Richard,  projeto Casamento
+--   "ROXO JP AO VIVO"         -> cliente JP,       projeto Roxo Ao Vivo
+--   "KERO+ - ALMA"            -> cliente Kero+,    projeto Geral, etiqueta "via ALMA"
+--   "AGENCIA NOS", "Dr Jorge" -> cliente com o proprio nome, projeto Geral
+-- Etiquetas nas observacoes do cliente: Fixo (categoria Fixos), Recorrente (lancamento recorrente), Avulso.
+-- Tambem desfaz o cadastro anterior (projetos "Historico - ..." e os clientes que so tinham eles).
+-- Nao apaga lancamentos e pode rodar de novo sem duplicar. So ASCII (escapes U&'...').
 
 DO $$
-DECLARE uid uuid; r record; cid uuid; pid uuid; flags text;
+DECLARE
+  uid uuid; t record; base text; rest text; cname text; job text; via boolean;
+  cid uuid; pid uuid; tags text[]; touched_c uuid[] := '{}'; touched_p uuid[] := '{}';
+  tagonly constant text := '^(Fixo|Recorrente|Avulso|via ALMA)( \| (Fixo|Recorrente|Avulso|via ALMA))*$';
 BEGIN
   SELECT id INTO uid FROM public.users ORDER BY created_at LIMIT 1;
-  FOR r IN
-    WITH inc AS (
-      SELECT t.id, t.amount, t.is_recurring, c.name AS cat,
-             trim(regexp_replace(t.description, '\s*-?\s*\d{1,2}[./]\d{1,2}\s*$', '')) AS base
-      FROM public.transactions t
-      LEFT JOIN public.categories c ON c.id = t.category_id
-      WHERE t.user_id = uid AND t.type = 'income'
-    ), named AS (
-      SELECT *,
-             (base ~* '\s-\s*alma$') AS via_alma,
-             CASE WHEN base ~* '\s-\s*alma$' THEN trim(regexp_replace(base, '\s*-\s*alma$', '', 'i')) ELSE base END AS cname
-      FROM inc
-    )
-    SELECT min(cname) AS cname,
-           COALESCE(bool_or(cat ILIKE 'fixo%'), false) AS fixo,
-           COALESCE(bool_or(is_recurring), false) AS rec,
-           bool_or(via_alma) AS alma,
-           array_agg(id) AS ids
-    FROM named
-    WHERE cname <> ''
-    GROUP BY lower(cname)
-  LOOP
-    SELECT id INTO cid FROM public.pj_clients WHERE user_id = uid AND lower(name) = lower(r.cname) LIMIT 1;
-    IF cid IS NULL THEN
-      flags := concat_ws(' | ',
-        CASE WHEN r.fixo THEN 'Fixo' END,
-        CASE WHEN r.rec THEN 'Recorrente' END,
-        CASE WHEN NOT r.fixo AND NOT r.rec THEN 'Avulso' END,
-        CASE WHEN r.alma THEN 'via ALMA' END);
-      INSERT INTO public.pj_clients (user_id, name, company, notes) VALUES (uid, r.cname, '', flags) RETURNING id INTO cid;
-    END IF;
 
-    SELECT id INTO pid FROM public.pj_projects
-      WHERE user_id = uid AND client_id = cid AND title = U&'Hist\00f3rico - ' || r.cname LIMIT 1;
+  DELETE FROM public.pj_projects WHERE user_id = uid AND title LIKE U&'Hist\00f3rico - %';
+  DELETE FROM public.pj_clients c
+    WHERE c.user_id = uid AND c.notes ~ tagonly
+      AND NOT EXISTS (SELECT 1 FROM public.pj_projects p WHERE p.client_id = c.id)
+      AND NOT EXISTS (SELECT 1 FROM public.pj_proposals q WHERE q.client_id = c.id);
+
+  FOR t IN
+    SELECT x.id, x.description, x.is_recurring, c.name AS cat
+    FROM public.transactions x LEFT JOIN public.categories c ON c.id = x.category_id
+    WHERE x.user_id = uid AND x.type = 'income' AND x.project_id IS NULL
+    ORDER BY x.due_date
+  LOOP
+    base := trim(regexp_replace(t.description, '\s*-?\s*\d{1,2}[./]\d{1,2}\s*$', ''));
+    CONTINUE WHEN base = '';
+    via := false; job := 'Geral';
+    IF base ~* '^freela\s+' THEN
+      rest := trim(regexp_replace(base, '^freela\s+', '', 'i')); job := 'Freela';
+    ELSIF base ~* '^casamento\s+' THEN
+      rest := trim(regexp_replace(base, '^casamento\s+', '', 'i')); job := 'Casamento';
+    ELSIF base ~* '^roxo\s+.+\s+ao vivo$' THEN
+      rest := trim(regexp_replace(regexp_replace(base, '^roxo\s+', '', 'i'), '\s+ao vivo$', '', 'i')); job := 'Roxo ao vivo';
+    ELSE
+      rest := base;
+    END IF;
+    IF rest ~* '\s-\s*alma$' THEN
+      via := true; rest := trim(regexp_replace(rest, '\s*-\s*alma$', '', 'i'));
+    ELSIF rest ~ '\s-\s' THEN
+      job := trim(substring(rest from '\s-\s(.*)$')); rest := trim(regexp_replace(rest, '\s-\s.*$', ''));
+    END IF;
+    CONTINUE WHEN rest = '';
+    cname := CASE WHEN length(rest) <= 3 THEN upper(rest) ELSE initcap(lower(rest)) END;
+    job := CASE WHEN length(job) <= 3 THEN upper(job) ELSE initcap(lower(job)) END;
+
+    SELECT id INTO cid FROM public.pj_clients WHERE user_id = uid AND lower(name) = lower(cname) LIMIT 1;
+    IF cid IS NULL THEN
+      INSERT INTO public.pj_clients (user_id, name, company, notes) VALUES (uid, cname, '', '') RETURNING id INTO cid;
+    END IF;
+    SELECT id INTO pid FROM public.pj_projects WHERE user_id = uid AND client_id = cid AND lower(title) = lower(job) LIMIT 1;
     IF pid IS NULL THEN
       INSERT INTO public.pj_projects (user_id, title, client_id, client_name, project_type, stage, value)
-      VALUES (uid, U&'Hist\00f3rico - ' || r.cname, cid, r.cname, 'Outro', 'Pago', 0) RETURNING id INTO pid;
+      VALUES (uid, job, cid, cname, 'Outro', 'Pago', 0) RETURNING id INTO pid;
     END IF;
+    UPDATE public.transactions SET project_id = pid WHERE id = t.id;
 
-    UPDATE public.transactions SET project_id = pid WHERE id = ANY(r.ids) AND project_id IS NULL;
-    UPDATE public.pj_projects
-      SET value = COALESCE((SELECT sum(amount) FROM public.transactions WHERE project_id = pid AND type = 'income'), 0)
-      WHERE id = pid;
+    tags := ARRAY[]::text[];
+    IF t.cat ILIKE 'fixo%' THEN tags := array_append(tags, 'Fixo'); END IF;
+    IF t.is_recurring THEN tags := array_append(tags, 'Recorrente'); END IF;
+    IF via THEN tags := array_append(tags, 'via ALMA'); END IF;
+    UPDATE public.pj_clients SET notes = (
+        SELECT string_agg(tag, ' | ' ORDER BY CASE tag WHEN 'Fixo' THEN 1 WHEN 'Recorrente' THEN 2 WHEN 'Avulso' THEN 3 ELSE 4 END)
+        FROM (SELECT DISTINCT unnest(string_to_array(COALESCE(notes, ''), ' | ') || tags) AS tag) s WHERE tag <> '')
+      WHERE id = cid AND (COALESCE(notes, '') = '' OR notes ~ tagonly);
+    touched_c := array_append(touched_c, cid); touched_p := array_append(touched_p, pid);
   END LOOP;
+
+  UPDATE public.pj_clients SET notes = concat_ws(' | ', 'Avulso', NULLIF(notes, ''))
+    WHERE id = ANY(touched_c) AND (COALESCE(notes, '') = '' OR notes ~ tagonly) AND COALESCE(notes, '') !~ '(Fixo|Recorrente|Avulso)';
+  UPDATE public.pj_projects p
+    SET value = COALESCE((SELECT sum(amount) FROM public.transactions WHERE project_id = p.id AND type = 'income'), 0)
+    WHERE id = ANY(touched_p);
 END $$;
 
-SELECT c.name AS cliente, c.notes AS tipo, count(t.id) AS entradas, COALESCE(sum(t.amount), 0) AS total
+SELECT c.name AS cliente, c.notes AS tipo, string_agg(DISTINCT p.title, ', ') AS projetos,
+       count(t.id) AS entradas, COALESCE(sum(t.amount), 0) AS total
 FROM public.pj_clients c
 LEFT JOIN public.pj_projects p ON p.client_id = c.id
 LEFT JOIN public.transactions t ON t.project_id = p.id AND t.type = 'income'
