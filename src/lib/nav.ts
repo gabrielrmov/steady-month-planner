@@ -10,7 +10,6 @@ import {
   FileUp,
   FolderKanban,
   Funnel,
-  Home,
   Hourglass,
   Landmark,
   LayoutDashboard,
@@ -71,7 +70,6 @@ export const SECTIONS: NavSection[] = [
     label: "Meu trabalho (PJ)",
     icon: Briefcase,
     items: [
-      { to: "/pj", label: "Início", icon: Home, group: "Início" },
       { to: "/pj/crm", label: "CRM", icon: Funnel, group: "Comercial" },
       { to: "/pj/clientes", label: "Clientes", icon: Users, group: "Comercial" },
       { to: "/pj/briefing", label: "Briefing", icon: ClipboardList, group: "Comercial" },
