@@ -223,9 +223,12 @@ export function Kpi({
 }
 
 export function KpiGrid({ children, cols = 4 }: { children: ReactNode; cols?: 3 | 4 | 5 | 6 }) {
-  const c = { 3: "lg:grid-cols-3", 4: "lg:grid-cols-4", 5: "lg:grid-cols-5", 6: "lg:grid-cols-6" }[
-    cols
-  ];
+  const c = {
+    3: "lg:grid-cols-3",
+    4: "lg:grid-cols-4",
+    5: "md:grid-cols-3 xl:grid-cols-5",
+    6: "md:grid-cols-3 2xl:grid-cols-6",
+  }[cols];
   return <div className={cn("grid grid-cols-2 gap-3", c)}>{children}</div>;
 }
 

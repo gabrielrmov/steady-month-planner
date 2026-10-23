@@ -274,3 +274,93 @@ export function useBusinessTransactions() {
     },
   });
 }
+
+/** Cria as categorias padrão do PJ que ainda não existem (por nome). */
+export async function seedBusinessCategories(existingNames: string[]): Promise<number> {
+  const have = new Set(existingNames.map(norm));
+  const rows = BUSINESS_CATEGORIES.filter((c) => !have.has(norm(c.name))).map((c) => ({
+    name: c.name,
+    color: c.color,
+    kind: c.kind,
+    scope: "business",
+  }));
+  if (rows.length === 0) return 0;
+  const { error } = await supabase.from("categories").insert(rows);
+  if (error) throw new Error(error.message);
+  return rows.length;
+}
+
+export function useBusinessCategories() {
+  return useQuery({
+    queryKey: [...pjKey("categories"), "business"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, name, color, kind")
+        .eq("scope", "business")
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as {
+        id: string;
+        name: string;
+        color: string;
+        kind: "income" | "expense";
+      }[];
+    },
+  });
+}
+
+/** Lançamentos pessoais de um mês (para a visão consolidada do financeiro PJ). */
+export function usePersonalMonth(from: string, to: string, enabled: boolean) {
+  return useQuery({
+    queryKey: [...pjKey("transactions"), "personal", from, to],
+    enabled,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("*, categories(name, color)")
+        .eq("scope", "personal")
+        .gte("due_date", from)
+        .lte("due_date", to)
+        .order("due_date", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as PjTransaction[];
+    },
+  });
+}
+
+/** Pró-labore pago pela empresa vira entrada no financeiro pessoal (uma vez só por lançamento). */
+export async function prolaboreToPersonal(
+  t: Pick<PjTransaction, "id" | "amount" | "due_date" | "status">,
+  company: string,
+) {
+  const marker = `prolabore:${t.id}`;
+  const dup = await supabase
+    .from("transactions")
+    .select("id")
+    .eq("scope", "personal")
+    .eq("notes", marker)
+    .limit(1);
+  if (dup.error) throw new Error(dup.error.message);
+  if ((dup.data ?? []).length) return false;
+  const cat = await supabase
+    .from("categories")
+    .select("id")
+    .eq("scope", "personal")
+    .eq("name", "Salário")
+    .limit(1);
+  const { error } = await supabase.from("transactions").insert({
+    description: `Pró-labore${company ? ` — ${company}` : ""}`,
+    amount: t.amount,
+    type: "income",
+    status: t.status,
+    paid_at: t.status === "paid" ? new Date().toISOString() : null,
+    due_date: t.due_date,
+    scope: "personal",
+    category_id: (cat.data ?? [])[0]?.id ?? null,
+    notes: marker,
+    payment_method: "pix",
+  });
+  if (error) throw new Error(error.message);
+  return true;
+}

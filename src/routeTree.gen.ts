@@ -36,9 +36,12 @@ import { Route as AuthenticatedPjIndexRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPjClientesRouteImport } from './routes/_authenticated/pj.clientes'
 import { Route as AuthenticatedPjContratosRouteImport } from './routes/_authenticated/pj.contratos'
 import { Route as AuthenticatedPjCrmRouteImport } from './routes/_authenticated/pj.crm'
+import { Route as AuthenticatedPjEquipamentosRouteImport } from './routes/_authenticated/pj.equipamentos'
+import { Route as AuthenticatedPjFinanceiroRouteImport } from './routes/_authenticated/pj.financeiro'
 import { Route as AuthenticatedPjPerfilRouteImport } from './routes/_authenticated/pj.perfil'
 import { Route as AuthenticatedPjProjetosRouteImport } from './routes/_authenticated/pj.projetos'
 import { Route as AuthenticatedPjPropostasRouteImport } from './routes/_authenticated/pj.propostas'
+import { Route as AuthenticatedPjRelatoriosRouteImport } from './routes/_authenticated/pj.relatorios'
 import { Route as ApiAuthCallbackRouteImport } from './routes/api.auth.callback'
 import { Route as ApiAuthGoogleRouteImport } from './routes/api.auth.google'
 import { Route as ApiAuthSessionRouteImport } from './routes/api.auth.session'
@@ -184,6 +187,18 @@ const AuthenticatedPjCrmRoute = AuthenticatedPjCrmRouteImport.update({
   path: '/crm',
   getParentRoute: () => AuthenticatedPjRoute,
 } as any)
+const AuthenticatedPjEquipamentosRoute =
+  AuthenticatedPjEquipamentosRouteImport.update({
+    id: '/equipamentos',
+    path: '/equipamentos',
+    getParentRoute: () => AuthenticatedPjRoute,
+  } as any)
+const AuthenticatedPjFinanceiroRoute =
+  AuthenticatedPjFinanceiroRouteImport.update({
+    id: '/financeiro',
+    path: '/financeiro',
+    getParentRoute: () => AuthenticatedPjRoute,
+  } as any)
 const AuthenticatedPjPerfilRoute = AuthenticatedPjPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
@@ -198,6 +213,12 @@ const AuthenticatedPjPropostasRoute =
   AuthenticatedPjPropostasRouteImport.update({
     id: '/propostas',
     path: '/propostas',
+    getParentRoute: () => AuthenticatedPjRoute,
+  } as any)
+const AuthenticatedPjRelatoriosRoute =
+  AuthenticatedPjRelatoriosRouteImport.update({
+    id: '/relatorios',
+    path: '/relatorios',
     getParentRoute: () => AuthenticatedPjRoute,
   } as any)
 const ApiAuthCallbackRoute = ApiAuthCallbackRouteImport.update({
@@ -247,9 +268,12 @@ export interface FileRoutesByFullPath {
   '/pj/clientes': typeof AuthenticatedPjClientesRoute
   '/pj/contratos': typeof AuthenticatedPjContratosRoute
   '/pj/crm': typeof AuthenticatedPjCrmRoute
+  '/pj/equipamentos': typeof AuthenticatedPjEquipamentosRoute
+  '/pj/financeiro': typeof AuthenticatedPjFinanceiroRoute
   '/pj/perfil': typeof AuthenticatedPjPerfilRoute
   '/pj/projetos': typeof AuthenticatedPjProjetosRoute
   '/pj/propostas': typeof AuthenticatedPjPropostasRoute
+  '/pj/relatorios': typeof AuthenticatedPjRelatoriosRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
@@ -281,9 +305,12 @@ export interface FileRoutesByTo {
   '/pj/clientes': typeof AuthenticatedPjClientesRoute
   '/pj/contratos': typeof AuthenticatedPjContratosRoute
   '/pj/crm': typeof AuthenticatedPjCrmRoute
+  '/pj/equipamentos': typeof AuthenticatedPjEquipamentosRoute
+  '/pj/financeiro': typeof AuthenticatedPjFinanceiroRoute
   '/pj/perfil': typeof AuthenticatedPjPerfilRoute
   '/pj/projetos': typeof AuthenticatedPjProjetosRoute
   '/pj/propostas': typeof AuthenticatedPjPropostasRoute
+  '/pj/relatorios': typeof AuthenticatedPjRelatoriosRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
@@ -318,9 +345,12 @@ export interface FileRoutesById {
   '/_authenticated/pj/clientes': typeof AuthenticatedPjClientesRoute
   '/_authenticated/pj/contratos': typeof AuthenticatedPjContratosRoute
   '/_authenticated/pj/crm': typeof AuthenticatedPjCrmRoute
+  '/_authenticated/pj/equipamentos': typeof AuthenticatedPjEquipamentosRoute
+  '/_authenticated/pj/financeiro': typeof AuthenticatedPjFinanceiroRoute
   '/_authenticated/pj/perfil': typeof AuthenticatedPjPerfilRoute
   '/_authenticated/pj/projetos': typeof AuthenticatedPjProjetosRoute
   '/_authenticated/pj/propostas': typeof AuthenticatedPjPropostasRoute
+  '/_authenticated/pj/relatorios': typeof AuthenticatedPjRelatoriosRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
@@ -355,9 +385,12 @@ export interface FileRouteTypes {
     | '/pj/clientes'
     | '/pj/contratos'
     | '/pj/crm'
+    | '/pj/equipamentos'
+    | '/pj/financeiro'
     | '/pj/perfil'
     | '/pj/projetos'
     | '/pj/propostas'
+    | '/pj/relatorios'
     | '/api/auth/callback'
     | '/api/auth/google'
     | '/api/auth/session'
@@ -389,9 +422,12 @@ export interface FileRouteTypes {
     | '/pj/clientes'
     | '/pj/contratos'
     | '/pj/crm'
+    | '/pj/equipamentos'
+    | '/pj/financeiro'
     | '/pj/perfil'
     | '/pj/projetos'
     | '/pj/propostas'
+    | '/pj/relatorios'
     | '/api/auth/callback'
     | '/api/auth/google'
     | '/api/auth/session'
@@ -425,9 +461,12 @@ export interface FileRouteTypes {
     | '/_authenticated/pj/clientes'
     | '/_authenticated/pj/contratos'
     | '/_authenticated/pj/crm'
+    | '/_authenticated/pj/equipamentos'
+    | '/_authenticated/pj/financeiro'
     | '/_authenticated/pj/perfil'
     | '/_authenticated/pj/projetos'
     | '/_authenticated/pj/propostas'
+    | '/_authenticated/pj/relatorios'
     | '/api/auth/callback'
     | '/api/auth/google'
     | '/api/auth/session'
@@ -640,6 +679,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPjCrmRouteImport
       parentRoute: typeof AuthenticatedPjRoute
     }
+    '/_authenticated/pj/equipamentos': {
+      id: '/_authenticated/pj/equipamentos'
+      path: '/equipamentos'
+      fullPath: '/pj/equipamentos'
+      preLoaderRoute: typeof AuthenticatedPjEquipamentosRouteImport
+      parentRoute: typeof AuthenticatedPjRoute
+    }
+    '/_authenticated/pj/financeiro': {
+      id: '/_authenticated/pj/financeiro'
+      path: '/financeiro'
+      fullPath: '/pj/financeiro'
+      preLoaderRoute: typeof AuthenticatedPjFinanceiroRouteImport
+      parentRoute: typeof AuthenticatedPjRoute
+    }
     '/_authenticated/pj/perfil': {
       id: '/_authenticated/pj/perfil'
       path: '/perfil'
@@ -659,6 +712,13 @@ declare module '@tanstack/react-router' {
       path: '/propostas'
       fullPath: '/pj/propostas'
       preLoaderRoute: typeof AuthenticatedPjPropostasRouteImport
+      parentRoute: typeof AuthenticatedPjRoute
+    }
+    '/_authenticated/pj/relatorios': {
+      id: '/_authenticated/pj/relatorios'
+      path: '/relatorios'
+      fullPath: '/pj/relatorios'
+      preLoaderRoute: typeof AuthenticatedPjRelatoriosRouteImport
       parentRoute: typeof AuthenticatedPjRoute
     }
     '/api/auth/callback': {
@@ -696,9 +756,12 @@ interface AuthenticatedPjRouteChildren {
   AuthenticatedPjClientesRoute: typeof AuthenticatedPjClientesRoute
   AuthenticatedPjContratosRoute: typeof AuthenticatedPjContratosRoute
   AuthenticatedPjCrmRoute: typeof AuthenticatedPjCrmRoute
+  AuthenticatedPjEquipamentosRoute: typeof AuthenticatedPjEquipamentosRoute
+  AuthenticatedPjFinanceiroRoute: typeof AuthenticatedPjFinanceiroRoute
   AuthenticatedPjPerfilRoute: typeof AuthenticatedPjPerfilRoute
   AuthenticatedPjProjetosRoute: typeof AuthenticatedPjProjetosRoute
   AuthenticatedPjPropostasRoute: typeof AuthenticatedPjPropostasRoute
+  AuthenticatedPjRelatoriosRoute: typeof AuthenticatedPjRelatoriosRoute
   AuthenticatedPjIndexRoute: typeof AuthenticatedPjIndexRoute
 }
 
@@ -706,9 +769,12 @@ const AuthenticatedPjRouteChildren: AuthenticatedPjRouteChildren = {
   AuthenticatedPjClientesRoute: AuthenticatedPjClientesRoute,
   AuthenticatedPjContratosRoute: AuthenticatedPjContratosRoute,
   AuthenticatedPjCrmRoute: AuthenticatedPjCrmRoute,
+  AuthenticatedPjEquipamentosRoute: AuthenticatedPjEquipamentosRoute,
+  AuthenticatedPjFinanceiroRoute: AuthenticatedPjFinanceiroRoute,
   AuthenticatedPjPerfilRoute: AuthenticatedPjPerfilRoute,
   AuthenticatedPjProjetosRoute: AuthenticatedPjProjetosRoute,
   AuthenticatedPjPropostasRoute: AuthenticatedPjPropostasRoute,
+  AuthenticatedPjRelatoriosRoute: AuthenticatedPjRelatoriosRoute,
   AuthenticatedPjIndexRoute: AuthenticatedPjIndexRoute,
 }
 
