@@ -43,13 +43,12 @@ export const Route = createFileRoute("/api/prospect/advice")({
         ]);
 
         try {
-          const { default: Anthropic } = await import("@anthropic-ai/sdk");
-          const advice = await getAdvice(new Anthropic({ apiKey: key }), parsed.value, {
+          const advice = await getAdvice(key, parsed.value, {
             name: (me.rows[0]?.full_name as string | null) ?? null,
           });
           return json(advice);
         } catch (e) {
-          if (e instanceof AdviceError) return json({ error: e.message }, 422);
+          if (e instanceof AdviceError) return json({ error: e.message }, e.status);
           console.error(
             "[advice] falha na análise",
             e instanceof Error ? e.constructor.name : "erro",

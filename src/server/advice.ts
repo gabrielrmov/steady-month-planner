@@ -1,12 +1,11 @@
 /**
+ * Chamada direta à API (fetch): o SDK oficial importa node:fs, que o Cloudflare Workers não oferece.
+ *
  * Análise de prospecção por IA: o usuário envia prints da conversa (WhatsApp, Instagram…) e recebe um resumo do
  * andamento, o próximo passo e novas mensagens. Os prints são tratados como DADOS: texto escrito dentro deles
  * nunca é instrução. A resposta é estruturada e só é exibida como texto (nunca como HTML).
  */
-import Anthropic from "@anthropic-ai/sdk";
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-// O helper do SDK usa o zod v4 (subcaminho incluído no zod 3.25).
-import * as z from "zod/v4";
+import { z } from "zod";
 
 export const MODEL = "claude-opus-5-5";
 export const MAX_IMAGES = 4;
@@ -81,11 +80,48 @@ Regras:
 - "mensagens": 3 sugestões prontas para enviar agora, com tons diferentes (ex.: direto, leve, com benefício). Escreva como uma pessoa no WhatsApp: curtas, naturais, sem formalidade exagerada e sem pressão. Nunca ofereça desconto de cara: primeiro entenda a objeção. "quando" diz em que situação cada uma funciona melhor.
 - Se as imagens não forem uma conversa de prospecção, explique em "resumo", use etapa "Primeiro contato" e devolva "mensagens" vazia.`;
 
-/** Monta o pedido e chama o modelo. `client` é injetável para teste. */
+const str = { type: "string" } as const;
+/** Mesmo formato do AdviceSchema, em JSON Schema, para a saída estruturada da API. */
+export const ADVICE_JSON_SCHEMA = {
+  type: "object",
+  properties: {
+    resumo: str,
+    etapa: { type: "string", enum: [...STAGES] },
+    proximo_passo: str,
+    alertas: { type: "array", items: str },
+    mensagens: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: { tom: str, quando: str, texto: str },
+        required: ["tom", "quando", "texto"],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ["resumo", "etapa", "proximo_passo", "alertas", "mensagens"],
+  additionalProperties: false,
+} as const;
+
+export class AdviceError extends Error {
+  status: number;
+  constructor(message: string, status = 422) {
+    super(message);
+    this.status = status;
+  }
+}
+
+type FetchLike = (
+  url: string,
+  init: { method: string; headers: Record<string, string>; body: string },
+) => Promise<Response>;
+
+/** Monta o pedido e chama a API de mensagens. `fetchImpl` é injetável para teste. */
 export async function getAdvice(
-  client: Pick<Anthropic, "messages">,
+  apiKey: string,
   input: AdviceInput,
   me: { name?: string | null } = {},
+  fetchImpl: FetchLike = fetch as unknown as FetchLike,
 ): Promise<Advice> {
   const text = [
     me.name ? `O videomaker se chama ${me.name}.` : "",
@@ -97,30 +133,57 @@ export async function getAdvice(
     .filter(Boolean)
     .join("\n\n");
 
-  const response = await client.messages.parse({
-    model: MODEL,
-    max_tokens: 4000,
-    system: SYSTEM,
-    output_config: { effort: "low", format: zodOutputFormat(AdviceSchema) },
-    messages: [
-      {
-        role: "user",
-        content: [
-          ...input.images.map((i) => ({
-            type: "image" as const,
-            source: { type: "base64" as const, media_type: i.media_type, data: i.data },
-          })),
-          { type: "text" as const, text },
-        ],
-      },
-    ],
+  const res = await fetchImpl("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 4000,
+      system: SYSTEM,
+      output_config: { effort: "low", format: { type: "json_schema", schema: ADVICE_JSON_SCHEMA } },
+      messages: [
+        {
+          role: "user",
+          content: [
+            ...input.images.map((i) => ({
+              type: "image",
+              source: { type: "base64", media_type: i.media_type, data: i.data },
+            })),
+            { type: "text", text },
+          ],
+        },
+      ],
+    }),
   });
-  if (response.stop_reason === "refusal" || !response.parsed_output) {
+  if (!res.ok) {
+    if (res.status === 429 || res.status === 529)
+      throw new AdviceError("A IA está ocupada agora. Tente de novo em instantes.", 503);
+    if (res.status === 401 || res.status === 403)
+      throw new AdviceError("A chave da IA foi recusada. Confira o ANTHROPIC_API_KEY.", 503);
+    throw new AdviceError("A análise falhou. Tente de novo em instantes.", 502);
+  }
+  const body = (await res.json().catch(() => null)) as {
+    stop_reason?: string;
+    content?: { type: string; text?: string }[];
+  } | null;
+  const out = body?.content?.find((b) => b.type === "text")?.text;
+  if (!body || body.stop_reason === "refusal" || !out) {
     throw new AdviceError(
       "Não consegui analisar esses prints. Tente com outros ou escreva o contexto.",
     );
   }
-  return response.parsed_output;
+  let json: unknown;
+  try {
+    json = JSON.parse(out);
+  } catch {
+    throw new AdviceError("A resposta da IA veio num formato inesperado. Tente de novo.");
+  }
+  const parsed = AdviceSchema.safeParse(json);
+  if (!parsed.success)
+    throw new AdviceError("A resposta da IA veio num formato inesperado. Tente de novo.");
+  return parsed.data;
 }
-
-export class AdviceError extends Error {}
