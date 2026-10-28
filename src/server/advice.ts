@@ -189,6 +189,7 @@ export async function adviceWithAnthropic(
 }
 
 export const GEMINI_MODEL = "gemini-3.8-flash";
+const GEMINI_FALLBACKS = ["gemini-flash-latest", "gemini-flash-lite-latest"];
 
 /** O Gemini não recebe o schema como parâmetro aqui: o formato vai descrito no prompt e é validado depois com zod. */
 const GEMINI_FORMAT = `
@@ -214,32 +215,44 @@ export async function adviceWithGemini(
     .filter(Boolean)
     .join("\n\n");
 
-  const res = await fetchImpl(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-    {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM + GEMINI_FORMAT }] },
-        contents: [
-          {
-            role: "user",
-            parts: [
-              ...input.images.map((i) => ({
-                inline_data: { mime_type: i.media_type, data: i.data },
-              })),
-              { text },
-            ],
+  const call = (m: string) =>
+    fetchImpl(
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM + GEMINI_FORMAT }] },
+          contents: [
+            {
+              role: "user",
+              parts: [
+                ...input.images.map((i) => ({
+                  inline_data: { mime_type: i.media_type, data: i.data },
+                })),
+                { text },
+              ],
+            },
+          ],
+          generationConfig: {
+            responseMimeType: "application/json",
+            maxOutputTokens: 4000,
+            temperature: 0.8,
           },
-        ],
-        generationConfig: {
-          responseMimeType: "application/json",
-          maxOutputTokens: 4000,
-          temperature: 0.8,
-        },
-      }),
-    },
-  );
+        }),
+      },
+    );
+  // Modelo sobrecarregado (503) costuma passar em segundos; se persistir, cai para um alias mais leve.
+  const tries = [model, ...GEMINI_FALLBACKS.filter((m) => m !== model)];
+  let res = await call(tries[0]);
+  for (let t = 0; t < tries.length; t++) {
+    if (t > 0) res = await call(tries[t]);
+    if (res.status === 503 && t === 0) {
+      await new Promise((r) => setTimeout(r, 1500));
+      res = await call(tries[0]);
+    }
+    if (res.status !== 503 && res.status !== 404) break;
+  }
   if (!res.ok) {
     if (res.status === 429)
       throw new AdviceError(
