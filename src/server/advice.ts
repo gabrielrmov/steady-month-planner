@@ -214,32 +214,39 @@ export async function adviceWithGemini(
     .filter(Boolean)
     .join("\n\n");
 
-  const res = await fetchImpl(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-    {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM + GEMINI_FORMAT }] },
-        contents: [
-          {
-            role: "user",
-            parts: [
-              ...input.images.map((i) => ({
-                inline_data: { mime_type: i.media_type, data: i.data },
-              })),
-              { text },
-            ],
+  const call = () =>
+    fetchImpl(
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM + GEMINI_FORMAT }] },
+          contents: [
+            {
+              role: "user",
+              parts: [
+                ...input.images.map((i) => ({
+                  inline_data: { mime_type: i.media_type, data: i.data },
+                })),
+                { text },
+              ],
+            },
+          ],
+          generationConfig: {
+            responseMimeType: "application/json",
+            maxOutputTokens: 4000,
+            temperature: 0.8,
           },
-        ],
-        generationConfig: {
-          responseMimeType: "application/json",
-          maxOutputTokens: 4000,
-          temperature: 0.8,
-        },
-      }),
-    },
-  );
+        }),
+      },
+    );
+  // 503 do Gemini é pico de demanda e costuma passar em segundos.
+  let res = await call();
+  for (let i = 0; i < 2 && res.status === 503; i++) {
+    await new Promise((r) => setTimeout(r, 1500 * (i + 1)));
+    res = await call();
+  }
   if (!res.ok) {
     if (res.status === 429)
       throw new AdviceError(
