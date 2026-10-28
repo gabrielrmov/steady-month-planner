@@ -188,7 +188,7 @@ export async function adviceWithAnthropic(
   return parsed.data;
 }
 
-export const GEMINI_MODEL = "gemini-2.5-flash";
+export const GEMINI_MODEL = "gemini-3.8-flash";
 
 /** O Gemini não recebe o schema como parâmetro aqui: o formato vai descrito no prompt e é validado depois com zod. */
 const GEMINI_FORMAT = `
