@@ -248,12 +248,15 @@ export async function adviceWithGemini(
       );
     if (res.status === 401 || res.status === 403)
       throw new AdviceError("A chave do Gemini foi recusada. Confira o GEMINI_API_KEY.", 503);
-    if (res.status === 400) {
-      const e = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
-      if (/API key/i.test(e?.error?.message ?? ""))
-        throw new AdviceError("A chave do Gemini é inválida. Confira o GEMINI_API_KEY.", 503);
-    }
-    throw new AdviceError("A análise falhou. Tente de novo em instantes.", 502);
+    const e = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
+    const reason = (e?.error?.message ?? "").replace(/\s+/g, " ").slice(0, 200);
+    if (res.status === 400 && /API key/i.test(reason))
+      throw new AdviceError("A chave do Gemini é inválida. Confira o GEMINI_API_KEY.", 503);
+    console.error("[advice] gemini", res.status, reason);
+    throw new AdviceError(
+      `A análise falhou (Gemini ${res.status}${reason ? `: ${reason}` : ""}). Tente de novo em instantes.`,
+      502,
+    );
   }
   const body = (await res.json().catch(() => null)) as {
     promptFeedback?: { blockReason?: string };
