@@ -16,8 +16,9 @@ export const Route = createFileRoute("/api/prospect/advice")({
         const user = await getSessionUser(request);
         if (!user) return json({ error: "Sessão expirada. Entre de novo." }, 401);
 
-        const key = process.env.ANTHROPIC_API_KEY;
-        if (!key)
+        const { pickProvider } = await import("@/server/advice");
+        const provider = pickProvider(process.env);
+        if (!provider)
           return json({ error: "A análise por IA ainda não foi ativada neste servidor." }, 503);
 
         const raw = await request.text();
@@ -43,7 +44,7 @@ export const Route = createFileRoute("/api/prospect/advice")({
         ]);
 
         try {
-          const advice = await getAdvice(key, parsed.value, {
+          const advice = await getAdvice(provider, parsed.value, {
             name: (me.rows[0]?.full_name as string | null) ?? null,
           });
           return json(advice);

@@ -116,8 +116,8 @@ type FetchLike = (
   init: { method: string; headers: Record<string, string>; body: string },
 ) => Promise<Response>;
 
-/** Monta o pedido e chama a API de mensagens. `fetchImpl` é injetável para teste. */
-export async function getAdvice(
+/** Anthropic: monta o pedido e chama a API de mensagens. `fetchImpl` é injetável para teste. */
+export async function adviceWithAnthropic(
   apiKey: string,
   input: AdviceInput,
   me: { name?: string | null } = {},
@@ -186,4 +186,115 @@ export async function getAdvice(
   if (!parsed.success)
     throw new AdviceError("A resposta da IA veio num formato inesperado. Tente de novo.");
   return parsed.data;
+}
+
+export const GEMINI_MODEL = "gemini-2.5-flash";
+
+/** O Gemini não recebe o schema como parâmetro aqui: o formato vai descrito no prompt e é validado depois com zod. */
+const GEMINI_FORMAT = `
+
+Responda SOMENTE com um objeto JSON (sem markdown, sem texto fora do JSON) neste formato:
+{"resumo": string, "etapa": ${STAGES.map((s) => `"${s}"`).join(" | ")}, "proximo_passo": string, "alertas": string[], "mensagens": [{"tom": string, "quando": string, "texto": string}]}`;
+
+/** Google Gemini (generateContent). `model` vem de GEMINI_MODEL no servidor, para trocar sem mexer no código. */
+export async function adviceWithGemini(
+  apiKey: string,
+  input: AdviceInput,
+  me: { name?: string | null } = {},
+  fetchImpl: FetchLike = fetch as unknown as FetchLike,
+  model: string = GEMINI_MODEL,
+): Promise<Advice> {
+  const text = [
+    me.name ? `O videomaker se chama ${me.name}.` : "",
+    input.context
+      ? `Contexto informado pelo videomaker (pode conter o que ele quer da conversa):\n${input.context}`
+      : "Sem contexto adicional.",
+    "Analise os prints acima e responda.",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const res = await fetchImpl(
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: SYSTEM + GEMINI_FORMAT }] },
+        contents: [
+          {
+            role: "user",
+            parts: [
+              ...input.images.map((i) => ({
+                inline_data: { mime_type: i.media_type, data: i.data },
+              })),
+              { text },
+            ],
+          },
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
+          maxOutputTokens: 4000,
+          temperature: 0.8,
+        },
+      }),
+    },
+  );
+  if (!res.ok) {
+    if (res.status === 429)
+      throw new AdviceError(
+        "A IA está ocupada agora (limite de uso). Tente de novo em instantes.",
+        503,
+      );
+    if (res.status === 401 || res.status === 403)
+      throw new AdviceError("A chave do Gemini foi recusada. Confira o GEMINI_API_KEY.", 503);
+    if (res.status === 400) {
+      const e = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
+      if (/API key/i.test(e?.error?.message ?? ""))
+        throw new AdviceError("A chave do Gemini é inválida. Confira o GEMINI_API_KEY.", 503);
+    }
+    throw new AdviceError("A análise falhou. Tente de novo em instantes.", 502);
+  }
+  const body = (await res.json().catch(() => null)) as {
+    promptFeedback?: { blockReason?: string };
+    candidates?: { finishReason?: string; content?: { parts?: { text?: string }[] } }[];
+  } | null;
+  const cand = body?.candidates?.[0];
+  const out = cand?.content?.parts?.map((p) => p.text ?? "").join("");
+  if (!body || body.promptFeedback?.blockReason || cand?.finishReason === "SAFETY" || !out) {
+    throw new AdviceError(
+      "A IA não analisou esses prints. Tente com outros ou escreva o contexto.",
+    );
+  }
+  let json: unknown;
+  try {
+    json = JSON.parse(out.replace(/^```(?:json)?\s*|\s*```$/g, ""));
+  } catch {
+    throw new AdviceError("A resposta da IA veio num formato inesperado. Tente de novo.");
+  }
+  const parsed = AdviceSchema.safeParse(json);
+  if (!parsed.success)
+    throw new AdviceError("A resposta da IA veio num formato inesperado. Tente de novo.");
+  return parsed.data;
+}
+
+export type Provider = { name: "gemini" | "anthropic"; key: string; model?: string };
+
+/** Gemini tem prioridade quando GEMINI_API_KEY existe; senão usa a Anthropic. */
+export function pickProvider(env: Record<string, string | undefined>): Provider | null {
+  if (env.GEMINI_API_KEY)
+    return { name: "gemini", key: env.GEMINI_API_KEY, model: env.GEMINI_MODEL || undefined };
+  if (env.ANTHROPIC_API_KEY) return { name: "anthropic", key: env.ANTHROPIC_API_KEY };
+  return null;
+}
+
+export function getAdvice(
+  provider: Provider,
+  input: AdviceInput,
+  me: { name?: string | null } = {},
+  fetchImpl?: FetchLike,
+): Promise<Advice> {
+  return provider.name === "gemini"
+    ? adviceWithGemini(provider.key, input, me, fetchImpl, provider.model)
+    : adviceWithAnthropic(provider.key, input, me, fetchImpl);
 }
