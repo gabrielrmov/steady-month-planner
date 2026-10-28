@@ -49,6 +49,7 @@ import { Route as ApiAuthCallbackRouteImport } from './routes/api.auth.callback'
 import { Route as ApiAuthGoogleRouteImport } from './routes/api.auth.google'
 import { Route as ApiAuthSessionRouteImport } from './routes/api.auth.session'
 import { Route as ApiAuthSignoutRouteImport } from './routes/api.auth.signout'
+import { Route as ApiProspectAdviceRouteImport } from './routes/api.prospect.advice'
 import { Route as ApiShareTokenRouteImport } from './routes/api.share.$token'
 
 const IndexRoute = IndexRouteImport.update({
@@ -261,6 +262,11 @@ const ApiAuthSignoutRoute = ApiAuthSignoutRouteImport.update({
   path: '/api/auth/signout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiProspectAdviceRoute = ApiProspectAdviceRouteImport.update({
+  id: '/api/prospect/advice',
+  path: '/api/prospect/advice',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiShareTokenRoute = ApiShareTokenRouteImport.update({
   id: '/api/share/$token',
   path: '/api/share/$token',
@@ -306,6 +312,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
   '/api/auth/signout': typeof ApiAuthSignoutRoute
+  '/api/prospect/advice': typeof ApiProspectAdviceRoute
   '/api/share/$token': typeof ApiShareTokenRoute
   '/pj/': typeof AuthenticatedPjIndexRoute
 }
@@ -347,6 +354,7 @@ export interface FileRoutesByTo {
   '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
   '/api/auth/signout': typeof ApiAuthSignoutRoute
+  '/api/prospect/advice': typeof ApiProspectAdviceRoute
   '/api/share/$token': typeof ApiShareTokenRoute
   '/pj': typeof AuthenticatedPjIndexRoute
 }
@@ -391,6 +399,7 @@ export interface FileRoutesById {
   '/api/auth/google': typeof ApiAuthGoogleRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
   '/api/auth/signout': typeof ApiAuthSignoutRoute
+  '/api/prospect/advice': typeof ApiProspectAdviceRoute
   '/api/share/$token': typeof ApiShareTokenRoute
   '/_authenticated/pj/': typeof AuthenticatedPjIndexRoute
 }
@@ -435,6 +444,7 @@ export interface FileRouteTypes {
     | '/api/auth/google'
     | '/api/auth/session'
     | '/api/auth/signout'
+    | '/api/prospect/advice'
     | '/api/share/$token'
     | '/pj/'
   fileRoutesByTo: FileRoutesByTo
@@ -476,6 +486,7 @@ export interface FileRouteTypes {
     | '/api/auth/google'
     | '/api/auth/session'
     | '/api/auth/signout'
+    | '/api/prospect/advice'
     | '/api/share/$token'
     | '/pj'
   id:
@@ -519,6 +530,7 @@ export interface FileRouteTypes {
     | '/api/auth/google'
     | '/api/auth/session'
     | '/api/auth/signout'
+    | '/api/prospect/advice'
     | '/api/share/$token'
     | '/_authenticated/pj/'
   fileRoutesById: FileRoutesById
@@ -536,6 +548,7 @@ export interface RootRouteChildren {
   ApiAuthGoogleRoute: typeof ApiAuthGoogleRoute
   ApiAuthSessionRoute: typeof ApiAuthSessionRoute
   ApiAuthSignoutRoute: typeof ApiAuthSignoutRoute
+  ApiProspectAdviceRoute: typeof ApiProspectAdviceRoute
   ApiShareTokenRoute: typeof ApiShareTokenRoute
 }
 
@@ -821,6 +834,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSignoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/prospect/advice': {
+      id: '/api/prospect/advice'
+      path: '/api/prospect/advice'
+      fullPath: '/api/prospect/advice'
+      preLoaderRoute: typeof ApiProspectAdviceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/share/$token': {
       id: '/api/share/$token'
       path: '/api/share/$token'
@@ -919,6 +939,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthGoogleRoute: ApiAuthGoogleRoute,
   ApiAuthSessionRoute: ApiAuthSessionRoute,
   ApiAuthSignoutRoute: ApiAuthSignoutRoute,
+  ApiProspectAdviceRoute: ApiProspectAdviceRoute,
   ApiShareTokenRoute: ApiShareTokenRoute,
 }
 export const routeTree = rootRouteImport
