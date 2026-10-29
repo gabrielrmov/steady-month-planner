@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BudgetCalculator } from "@/components/pj/BudgetCalculator";
+import { AdjustmentCalculator } from "@/components/pj/AdjustmentCalculator";
 import { kitSummary, minHourlyRate } from "@/lib/pj/calc";
 import { usePjProfile, useRows } from "@/lib/pj/data";
 import type { PjEquipment } from "@/lib/pj/types";
@@ -150,6 +151,7 @@ function Pricing() {
         <TabsList>
           <TabsTrigger value="service">Por serviço</TabsTrigger>
           <TabsTrigger value="budget">Orçamento de vídeo</TabsTrigger>
+          <TabsTrigger value="adjust">Reajuste de valores</TabsTrigger>
         </TabsList>
         <TabsContent value="service" className="mt-6">
           <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
@@ -285,6 +287,9 @@ function Pricing() {
         </TabsContent>
         <TabsContent value="budget" className="mt-6">
           <BudgetCalculator rate={rate} onRateChange={setRate} tax={n(taxRate)} />
+        </TabsContent>
+        <TabsContent value="adjust" className="mt-6">
+          <AdjustmentCalculator />
         </TabsContent>
       </Tabs>
     </div>

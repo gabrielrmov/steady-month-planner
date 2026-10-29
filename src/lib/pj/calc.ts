@@ -194,3 +194,30 @@ export function projectMargins(projects: ProjectLike[], tx: TxLike[]) {
 }
 
 export const monthRange = (ym: string) => ({ from: `${ym}-01`, to: monthEnd(ym) });
+
+export type AdjustInput = {
+  current: number;
+  /** Índice acumulado no período (IPCA, IGP-M…), em %. */
+  index: number;
+  /** Ganho real sobre a inflação, em %. */
+  real: number;
+  /** Arredonda para o múltiplo mais próximo (0 = sem arredondar). */
+  round: number;
+};
+
+export type AdjustResult = { value: number; diff: number; pct: number };
+
+/** Reajuste composto: (1 + índice) × (1 + ganho real). `pct` é o aumento efetivo, já com o arredondamento. */
+export function adjust(i: AdjustInput): AdjustResult {
+  const raw = i.current * (1 + i.index / 100) * (1 + i.real / 100);
+  const value = i.round > 0 ? Math.round(raw / i.round) * i.round : Math.round(raw * 100) / 100;
+  return {
+    value,
+    diff: Math.round((value - i.current) * 100) / 100,
+    pct: i.current > 0 ? (value / i.current - 1) * 100 : 0,
+  };
+}
+
+/** Percentual necessário para sair de `current` e chegar em `target`. */
+export const requiredPct = (current: number, target: number) =>
+  current > 0 ? (target / current - 1) * 100 : 0;
