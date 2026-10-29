@@ -192,3 +192,16 @@ test("formatação: números, datas, tempo, WhatsApp e CSV seguro", () => {
   assert.equal(csvCell('a "b"'), '"a ""b"""');
   assert.equal(csvCell("=HYPERLINK(1)"), `"'=HYPERLINK(1)"`);
 });
+
+test("reajuste: índice e ganho real compõem, arredonda e calcula o percentual inverso", async () => {
+  const { adjust, requiredPct } = await import("../lib/pj/calc.ts");
+  const r = adjust({ current: 1000, index: 5, real: 2, round: 0 });
+  assert.equal(r.value, 1071);
+  assert.equal(r.diff, 71);
+  assert.ok(Math.abs(r.pct - 7.1) < 1e-9);
+  assert.equal(adjust({ current: 1234, index: 4.5, real: 0, round: 10 }).value, 1290);
+  assert.equal(adjust({ current: 0, index: 5, real: 0, round: 0 }).pct, 0);
+  assert.equal(adjust({ current: 500, index: -2, real: 0, round: 0 }).value, 490);
+  assert.ok(Math.abs(requiredPct(2000, 2300) - 15) < 1e-9);
+  assert.equal(requiredPct(0, 100), 0);
+});
