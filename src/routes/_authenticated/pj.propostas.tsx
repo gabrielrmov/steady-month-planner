@@ -288,7 +288,7 @@ function PropostasPage() {
     setMode("preview");
     setTimeout(() => {
       const name = [d.title, d.company || d.client_name].filter(Boolean).join(" - ");
-      if (!printElement(paper.current, name || "Proposta"))
+      if (!printElement(paper.current, name || "Proposta", { onePage: true }))
         toast.error("Libere os pop-ups para gerar o PDF");
     }, 150);
   }
