@@ -410,14 +410,6 @@ function Dashboard() {
 
   return (
     <div className="relative isolate mx-auto max-w-6xl space-y-6 sm:space-y-8">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-24 left-1/2 -z-10 h-80 w-[64rem] max-w-[140vw] -translate-x-1/2 opacity-70 blur-3xl dark:opacity-30"
-        style={{
-          background:
-            "radial-gradient(40% 60% at 25% 40%, rgba(91,108,255,.22), transparent), radial-gradient(35% 55% at 75% 30%, rgba(16,163,127,.18), transparent)",
-        }}
-      />
       <header className="animate-rise flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <h1 className="truncate text-[26px] font-bold leading-tight tracking-tight sm:text-[32px]">
@@ -462,10 +454,10 @@ function Dashboard() {
       <Fragment key={from}>
         {alerts.length > 0 && (
           <div
-            className="animate-rise flex flex-wrap items-center gap-3 rounded-2xl bg-[#fff1e8] px-4 py-3 text-[#7a3200] ring-1 ring-[#f6c9aa] dark:bg-[#3a1d0b] dark:text-[#ffd9bd] dark:ring-[#6b3410]"
+            className="animate-rise flex flex-wrap items-center gap-3 rounded-2xl bg-[#f3fbc9] px-4 py-3 text-[#2c3300] ring-1 ring-[#d9f545] dark:bg-[#232a08] dark:text-[#eaf7a8] dark:ring-[#d9f545]/30"
             role="status"
           >
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#ec652b] text-white">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#0b0b0c] text-[#d9f545]">
               <BellRing className="h-4 w-4" />
             </span>
             <p className="min-w-0 flex-1 text-[14px] leading-5">
@@ -497,25 +489,25 @@ function Dashboard() {
 
         <section aria-label="Indicadores" className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-4">
           <div
-            className="animate-rise relative col-span-2 min-h-[210px] overflow-hidden rounded-3xl bg-gradient-to-br from-[#111a4a] via-[#1b2a78] to-[#2f4fd0] p-5 text-white shadow-[var(--soft)] sm:p-6 xl:col-span-1"
+            className="animate-rise relative col-span-2 min-h-[210px] overflow-hidden rounded-3xl bg-[#0b0b0c] p-5 text-white shadow-[var(--soft)] ring-1 ring-white/10 sm:p-6 xl:col-span-1"
           >
-            <span className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+            <span className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#d9f545]/20 blur-2xl" />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 opacity-90" aria-hidden="true">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={series} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="gHero" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#ffffff" stopOpacity={0.35} />
-                      <stop offset="100%" stopColor="#ffffff" stopOpacity={0} />
+                      <stop offset="0%" stopColor="#d9f545" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="#d9f545" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <Area type="monotone" dataKey="saldo" stroke="#ffffff" strokeOpacity={0.85} strokeWidth={2} fill="url(#gHero)" dot={false} animationDuration={1100} />
+                  <Area type="monotone" dataKey="saldo" stroke="#d9f545" strokeOpacity={1} strokeWidth={2} fill="url(#gHero)" dot={false} animationDuration={1100} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
             <div className="relative flex items-center justify-between">
               <span className="text-[13px] font-medium text-white/75">Saldo do mês</span>
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-white/15">
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-[#d9f545] text-[#0b0b0c]">
                 <Wallet className="h-4 w-4" />
               </span>
             </div>
@@ -529,6 +521,23 @@ function Dashboard() {
                   {balanceDelta > 0 ? "▲" : "▼"} {Math.abs(balanceDelta)}%
                 </span>
               )}
+            </div>
+            <div className="relative mt-5">
+              <div className="flex items-center justify-between text-[12px] text-white/70">
+                <span>Gasto do mês</span>
+                <span className="num">
+                  {brl(expenseTotal)}
+                  {incomeTotal > 0 ? ` de ${brl(incomeTotal)}` : ""}
+                </span>
+              </div>
+              <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-white/15">
+                <div
+                  className="animate-grow-x h-full rounded-full bg-[#d9f545]"
+                  style={{
+                    width: `${incomeTotal > 0 ? Math.min(100, Math.round((expenseTotal / incomeTotal) * 100)) : 0}%`,
+                  }}
+                />
+              </div>
             </div>
           </div>
 
@@ -559,7 +568,7 @@ function Dashboard() {
           >
             <div className="flex items-center justify-between">
               <span className="text-[13px] font-medium text-muted-foreground">Metas</span>
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-[#7c5cfc]/15 text-[#7c5cfc]">
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-[#d9f545] text-[#0b0b0c]">
                 <PiggyBank className="h-4 w-4" />
               </span>
             </div>
@@ -568,7 +577,7 @@ function Dashboard() {
             </p>
             <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
-                className="animate-grow-x h-full rounded-full bg-gradient-to-r from-[#7c5cfc] to-[#b39bff]"
+                className="animate-grow-x h-full rounded-full bg-[#0b0b0c] dark:bg-[#d9f545]"
                 style={{ width: `${goalsPct}%` }}
               />
             </div>
@@ -600,9 +609,9 @@ function Dashboard() {
                 key={w.key}
                 className={`flex flex-col items-center gap-1 rounded-2xl px-1 py-3 text-center transition-colors sm:py-4 ${
                   w.isToday
-                    ? "bg-[#111a4a] text-white dark:bg-[#5b6cff]"
+                    ? "bg-[#d9f545] text-[#0b0b0c]"
                     : w.count > 0
-                      ? "bg-[#fff4e8] text-[#7a3200] dark:bg-[#35210a] dark:text-[#ffd9bd]"
+                      ? "bg-[#f3fbc9] text-[#2c3300] dark:bg-[#232a08] dark:text-[#eaf7a8]"
                       : "bg-muted/60 text-muted-foreground"
                 }`}
               >
@@ -625,10 +634,10 @@ function Dashboard() {
           <Panel title="Entradas e saídas" subtitle="Últimos 6 meses" delay={320}>
             <div className="mb-2 flex items-center gap-5 text-[12px] font-medium text-muted-foreground">
               <span className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#10a37f]" /> Entrou
+                <span className="h-2.5 w-2.5 rounded-full bg-[#d9f545] ring-1 ring-black/10" /> Entrou
               </span>
               <span className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#5b6cff]" /> Saiu
+                <span className="h-2.5 w-2.5 rounded-full bg-foreground" /> Saiu
               </span>
             </div>
             <div className="h-64 w-full">
@@ -636,12 +645,12 @@ function Dashboard() {
                 <BarChart data={series} margin={{ top: 8, right: 4, left: 0, bottom: 0 }} barGap={6}>
                   <defs>
                     <linearGradient id="bIn" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#2dd4a7" />
-                      <stop offset="100%" stopColor="#10a37f" />
+                      <stop offset="0%" stopColor="#e4fb6a" />
+                      <stop offset="100%" stopColor="#d9f545" />
                     </linearGradient>
                     <linearGradient id="bOut" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#8b97ff" />
-                      <stop offset="100%" stopColor="#5b6cff" />
+                      <stop offset="0%" stopColor="var(--foreground)" stopOpacity={0.85} />
+                      <stop offset="100%" stopColor="var(--foreground)" />
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="var(--border)" strokeDasharray="3 6" vertical={false} />
@@ -884,10 +893,10 @@ function Dashboard() {
                       <li key={g.id}>
                         <div className="flex items-baseline justify-between gap-3">
                           <span className="truncate text-[14px] font-semibold">{g.name}</span>
-                          <span className="num text-[13px] font-semibold text-[#7c5cfc]">{pct}%</span>
+                          <span className="num text-[13px] font-semibold">{pct}%</span>
                         </div>
                         <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
-                          <div className="animate-grow-x h-full rounded-full bg-gradient-to-r from-[#7c5cfc] to-[#b39bff]" style={{ width: `${pct}%` }} />
+                          <div className="animate-grow-x h-full rounded-full bg-[#0b0b0c] dark:bg-[#d9f545]" style={{ width: `${pct}%` }} />
                         </div>
                         <p className="num mt-1 text-[12px] text-muted-foreground">
                           {brl(Number(g.current_amount))} de {brl(Number(g.target_amount))}
@@ -932,7 +941,7 @@ const insightTone: Record<"destructive" | "warning" | "success" | "primary", str
   destructive: "bg-[#ffe9ea] text-[#8f1d23] dark:bg-[#3a1215] dark:text-[#ffb3b8]",
   warning: "bg-[#fff4e0] text-[#80500a] dark:bg-[#35210a] dark:text-[#ffd699]",
   success: "bg-[#e8f8f2] text-[#0b5f4a] dark:bg-[#0b2f27] dark:text-[#9be8cf]",
-  primary: "bg-[#eef1ff] text-[#26327f] dark:bg-[#15193d] dark:text-[#b9c2ff]",
+  primary: "bg-muted text-foreground",
 };
 
 function Panel({
