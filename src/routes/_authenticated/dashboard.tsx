@@ -23,7 +23,8 @@ import {
   ChevronRight,
   PiggyBank,
   Plus,
-  Wallet,
+  Receipt,
+  BarChart3,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { ensureRecurringForMonth } from "@/lib/automation";
@@ -404,6 +405,25 @@ function Dashboard() {
       isToday: i === 0,
     };
   });
+  const spentPct = incomeTotal > 0 ? Math.min(100, Math.round((expenseTotal / incomeTotal) * 100)) : 0;
+  const history = useMemo(() => {
+    const groups: { key: string; label: string; items: Row[] }[] = [];
+    const todayKey = format(new Date(), "yyyy-MM-dd");
+    for (const t of [...txs].sort((a, b) => b.due_date.localeCompare(a.due_date)).slice(0, 8)) {
+      let g = groups.find((x) => x.key === t.due_date);
+      if (!g) {
+        const d = new Date(t.due_date + "T00:00:00");
+        g = {
+          key: t.due_date,
+          label: `${t.due_date === todayKey ? "Hoje, " : ""}${format(d, "d 'de' MMM", { locale: ptBR })}`,
+          items: [],
+        };
+        groups.push(g);
+      }
+      g.items.push(t);
+    }
+    return groups;
+  }, [txs]);
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
   const pie = topCategories.map((c) => ({ name: c.name, value: c.total, color: c.color }));
@@ -487,293 +507,121 @@ function Dashboard() {
           </div>
         )}
 
-        <section aria-label="Indicadores" className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-4">
-          <div
-            className="animate-rise relative col-span-2 min-h-[210px] overflow-hidden rounded-3xl bg-[#0b0b0c] p-5 text-white shadow-[var(--soft)] ring-1 ring-white/10 sm:p-6 xl:col-span-1"
+        <div className="grid gap-4 sm:gap-6 xl:grid-cols-[minmax(0,320px)_minmax(0,1fr)_minmax(0,1fr)]">
+          {/* Coluna esquerda: cartão preto de saldo */}
+          <div className="min-w-0 space-y-4 sm:space-y-6">
+          <section
+            aria-label="Saldo"
+            className="animate-rise flex flex-col gap-5 rounded-[28px] bg-[#0b0b0c] p-5 text-white shadow-[var(--soft)] ring-1 ring-white/10 sm:p-6 "
           >
-            <span className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#d9f545]/20 blur-2xl" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 opacity-90" aria-hidden="true">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={series} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="gHero" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#d9f545" stopOpacity={0.4} />
-                      <stop offset="100%" stopColor="#d9f545" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <Area type="monotone" dataKey="saldo" stroke="#d9f545" strokeOpacity={1} strokeWidth={2} fill="url(#gHero)" dot={false} animationDuration={1100} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="relative flex items-center justify-between">
-              <span className="text-[13px] font-medium text-white/75">Saldo do mês</span>
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-[#d9f545] text-[#0b0b0c]">
-                <Wallet className="h-4 w-4" />
-              </span>
-            </div>
-            <Money value={balance} className="relative mt-4 block whitespace-nowrap text-[30px] font-semibold leading-none sm:text-[34px]" />
-            <div className="relative mt-4 flex flex-wrap items-center gap-2 text-[12px]">
-              <span className="rounded-full bg-white/15 px-2.5 py-1">
-                {incomeTotal > 0 ? `${savingRate}% da renda sobra` : "Sem entradas"}
-              </span>
-              {balanceDelta !== null && balanceDelta !== 0 && (
-                <span className="num rounded-full bg-white/15 px-2.5 py-1">
-                  {balanceDelta > 0 ? "▲" : "▼"} {Math.abs(balanceDelta)}%
+            <div>
+              <p className="text-[13px] text-white/60">Saldo do mês</p>
+              <Money value={balance} className="mt-1 block whitespace-nowrap text-[38px] font-semibold leading-none" />
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">
+                <span className="rounded-full bg-white/10 px-2.5 py-1">
+                  {incomeTotal > 0 ? `${savingRate}% da renda sobra` : "Sem entradas"}
                 </span>
-              )}
-            </div>
-            <div className="relative mt-5">
-              <div className="flex items-center justify-between text-[12px] text-white/70">
-                <span>Gasto do mês</span>
-                <span className="num">
-                  {brl(expenseTotal)}
-                  {incomeTotal > 0 ? ` de ${brl(incomeTotal)}` : ""}
-                </span>
+                {balanceDelta !== null && balanceDelta !== 0 && (
+                  <span className="num rounded-full bg-[#d9f545] px-2.5 py-1 font-semibold text-[#0b0b0c]">
+                    {balanceDelta > 0 ? "▲" : "▼"} {Math.abs(balanceDelta)}%
+                  </span>
+                )}
               </div>
-              <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-white/15">
+            </div>
+
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { to: "/transactions", label: "Novo", icon: <Plus className="h-5 w-5" /> },
+                { to: "/transactions", label: "Contas", icon: <Receipt className="h-5 w-5" /> },
+                { to: "/calendar", label: "Agenda", icon: <CalendarClock className="h-5 w-5" /> },
+                { to: "/reports", label: "Relatórios", icon: <BarChart3 className="h-5 w-5" /> },
+              ].map((a) => (
+                <Link key={a.label} to={a.to} className="group flex flex-col items-center gap-1.5">
+                  <span className="grid h-12 w-12 place-items-center rounded-full bg-white/10 transition-colors group-hover:bg-[#d9f545] group-hover:text-[#0b0b0c]">
+                    {a.icon}
+                  </span>
+                  <span className="text-[11px] text-white/60">{a.label}</span>
+                </Link>
+              ))}
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between text-[12px] text-white/60">
+                <span>Gasto do mês</span>
+                <span className="num">{incomeTotal > 0 ? `${spentPct}% da renda` : "—"}</span>
+              </div>
+              <div
+                className="relative mt-3 h-5 w-full overflow-hidden rounded-full"
+                style={{
+                  background:
+                    "repeating-linear-gradient(135deg, rgba(255,255,255,.22) 0 3px, transparent 3px 7px)",
+                }}
+              >
                 <div
                   className="animate-grow-x h-full rounded-full bg-[#d9f545]"
-                  style={{
-                    width: `${incomeTotal > 0 ? Math.min(100, Math.round((expenseTotal / incomeTotal) * 100)) : 0}%`,
-                  }}
+                  style={{ width: `${Math.max(spentPct, 4)}%` }}
                 />
               </div>
-            </div>
-          </div>
-
-          <Kpi
-            index={1}
-            label="Receitas"
-            value={incomeTotal}
-            icon={<ArrowDownLeft className="h-4 w-4" />}
-            color="#10a37f"
-            data={series.map((m) => m.entradas)}
-            delta={delta(incomeTotal, prevIncome)}
-            upIsGood
-            note={incomePending > 0 ? `${brl(incomePending)} a receber` : incomeTotal > 0 ? "Tudo recebido" : "Sem entradas"}
-          />
-          <Kpi
-            index={2}
-            label="Despesas"
-            value={expenseTotal}
-            icon={<ArrowUpRight className="h-4 w-4" />}
-            color="#e5484d"
-            data={series.map((m) => m.saidas)}
-            delta={delta(expenseTotal, prevExpense)}
-            note={expensePending > 0 ? `${brl(expensePending)} a pagar` : expenseTotal > 0 ? "Tudo pago" : "Sem saídas"}
-          />
-          <div
-            className="animate-rise col-span-2 rounded-3xl bg-card p-5 shadow-[var(--soft)] ring-1 ring-black/5 sm:p-6 xl:col-span-1 dark:ring-white/10"
-            style={{ animationDelay: "270ms" }}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium text-muted-foreground">Metas</span>
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-[#d9f545] text-[#0b0b0c]">
-                <PiggyBank className="h-4 w-4" />
-              </span>
-            </div>
-            <p className="num mt-4 text-[30px] font-semibold leading-none sm:text-[34px]">
-              {goalsTarget > 0 ? `${goalsPct}%` : "—"}
-            </p>
-            <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="animate-grow-x h-full rounded-full bg-[#0b0b0c] dark:bg-[#d9f545]"
-                style={{ width: `${goalsPct}%` }}
-              />
-            </div>
-            <p className="mt-2 text-[12px] text-muted-foreground">
-              {goalsTarget > 0 ? (
-                `${brl(goalsSaved)} de ${brl(goalsTarget)}`
-              ) : (
-                <Link to="/savings" className="font-semibold text-primary hover:underline">
-                  Criar a primeira meta
-                </Link>
-              )}
-            </p>
-          </div>
-        </section>
-
-        <Panel
-          title="Próximos 7 dias"
-          subtitle="O que vence a partir de hoje"
-          delay={300}
-          action={
-            <Link to="/calendar" className="text-[13px] font-semibold text-primary hover:underline">
-              Calendário
-            </Link>
-          }
-        >
-          <ol className="grid grid-cols-7 gap-1.5 sm:gap-3">
-            {week.map((w) => (
-              <li
-                key={w.key}
-                className={`flex flex-col items-center gap-1 rounded-2xl px-1 py-3 text-center transition-colors sm:py-4 ${
-                  w.isToday
-                    ? "bg-[#d9f545] text-[#0b0b0c]"
-                    : w.count > 0
-                      ? "bg-[#f3fbc9] text-[#2c3300] dark:bg-[#232a08] dark:text-[#eaf7a8]"
-                      : "bg-muted/60 text-muted-foreground"
-                }`}
-              >
-                <span className="text-[11px] font-semibold uppercase tracking-wide opacity-80">
-                  {format(w.d, "EEE", { locale: ptBR }).replace(".", "").slice(0, 3)}
-                </span>
-                <span className="num text-[18px] font-semibold leading-none sm:text-[22px]">
-                  {format(w.d, "d")}
-                </span>
-                <span className="num min-h-[16px] text-[10.5px] font-semibold leading-4 sm:text-[12px]">
-                  {w.count > 0 ? brlShort(w.total) : "·"}
-                </span>
-                <span className="hidden h-1 w-1 rounded-full bg-current opacity-60 sm:block" style={{ visibility: w.count > 0 ? "visible" : "hidden" }} />
-              </li>
-            ))}
-          </ol>
-        </Panel>
-
-        <div className="grid gap-4 sm:gap-6 xl:grid-cols-[1.55fr_1fr]">
-          <Panel title="Entradas e saídas" subtitle="Últimos 6 meses" delay={320}>
-            <div className="mb-2 flex items-center gap-5 text-[12px] font-medium text-muted-foreground">
-              <span className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#d9f545] ring-1 ring-black/10" /> Entrou
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-foreground" /> Saiu
-              </span>
-            </div>
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={series} margin={{ top: 8, right: 4, left: 0, bottom: 0 }} barGap={6}>
-                  <defs>
-                    <linearGradient id="bIn" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#e4fb6a" />
-                      <stop offset="100%" stopColor="#d9f545" />
-                    </linearGradient>
-                    <linearGradient id="bOut" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--foreground)" stopOpacity={0.85} />
-                      <stop offset="100%" stopColor="var(--foreground)" />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 6" vertical={false} />
-                  <XAxis
-                    dataKey="mes"
-                    tickLine={false}
-                    axisLine={false}
-                    fontSize={12}
-                    tickMargin={10}
-                    stroke="var(--muted-foreground)"
-                  />
-                  <YAxis
-                    tickFormatter={(v) => brlShort(Number(v))}
-                    tickLine={false}
-                    axisLine={false}
-                    fontSize={12}
-                    stroke="var(--muted-foreground)"
-                    width={40}
-                  />
-                  <RTooltip
-                    cursor={{ fill: "var(--muted)", radius: 8 }}
-                    contentStyle={{
-                      background: "var(--popover)",
-                      border: "none",
-                      borderRadius: 12,
-                      fontSize: 13,
-                      boxShadow: "0 8px 24px -8px rgba(16,24,40,.25)",
-                      color: "var(--popover-foreground)",
-                    }}
-                    formatter={(v: number | string, n) => [
-                      brl(Number(v)),
-                      n === "entradas" ? "Entrou" : "Saiu",
-                    ]}
-                  />
-                  <Bar dataKey="entradas" fill="url(#bIn)" radius={[10, 10, 4, 4]} maxBarSize={22} animationDuration={900} />
-                  <Bar dataKey="saidas" fill="url(#bOut)" radius={[10, 10, 4, 4]} maxBarSize={22} animationDuration={900} animationBegin={150} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Panel>
-
-          <Panel
-            title="Para onde vai o dinheiro"
-            subtitle={period}
-            delay={400}
-            action={
-              <Link to="/categories" className="text-[13px] font-semibold text-primary hover:underline">
-                Orçamentos
-              </Link>
-            }
-          >
-            {topCategories.length === 0 ? (
-              <p className="py-10 text-center text-[14px] text-muted-foreground">
-                Nenhuma despesa categorizada neste mês.
+              <p className="num mt-2 text-[22px] font-semibold">{brl(expenseTotal)}</p>
+              <p className="text-[12px] text-white/50">
+                {incomeTotal > 0 ? `de ${brl(incomeTotal)} previstos` : "Cadastre suas entradas"}
               </p>
-            ) : (
-              <div className="flex flex-col gap-5">
-                <div className="relative mx-auto h-44 w-44 shrink-0">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pie}
-                        dataKey="value"
-                        innerRadius={58}
-                        outerRadius={84}
-                        paddingAngle={3}
-                        cornerRadius={6}
-                        stroke="none"
-                        animationDuration={900}
-                      >
-                        {pie.map((e) => (
-                          <Cell key={e.name} fill={e.color} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-[11px] font-medium text-muted-foreground">Gasto</span>
-                    <span className="num text-[16px] font-semibold">{brl(expenseTotal)}</span>
-                  </div>
-                </div>
-                <ul className="space-y-3.5">
-                  {topCategories.map((c) => {
-                    const pct = expenseTotal > 0 ? Math.round((c.total / expenseTotal) * 100) : 0;
-                    const hasBudget = c.budget !== null && c.budget > 0;
-                    const isOver = hasBudget && c.total > c.budget!;
-                    return (
-                      <li key={c.name}>
-                        <div className="flex items-center gap-3">
-                          <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: c.color }} />
-                          <span className="min-w-0 flex-1 truncate text-[14px] font-medium">{c.name}</span>
-                          <span className="num text-[13px] text-muted-foreground">{pct}%</span>
-                          <span className={`num w-24 text-right text-[14px] font-semibold ${isOver ? "text-negative" : ""}`}>
-                            {brl(c.total)}
-                          </span>
-                        </div>
-                        {hasBudget && (
-                          <div className="ml-6 mt-1.5 flex items-center gap-2">
-                            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                              <div
-                                className="h-full rounded-full"
-                                style={{
-                                  width: `${Math.min(100, (c.total / c.budget!) * 100)}%`,
-                                  background: isOver ? "#e5484d" : c.color,
-                                }}
-                              />
-                            </div>
-                            <span className={`text-[11px] ${isOver ? "font-semibold text-negative" : "text-muted-foreground"}`}>
-                              {isOver ? `${brl(c.total - c.budget!)} acima` : `de ${brl(c.budget!)}`}
-                            </span>
-                          </div>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
-          </Panel>
-        </div>
+            </div>
 
-        <div className="grid gap-4 sm:gap-6 xl:grid-cols-[1.55fr_1fr]">
-          <Panel
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-3 rounded-2xl bg-white/[0.07] p-3.5">
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-[#d9f545] text-[#0b0b0c]">
+                  <ArrowDownLeft className="h-4 w-4" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[12px] text-white/55">Receitas</p>
+                  <Money value={incomeTotal} className="text-[17px] font-semibold" />
+                </div>
+                <span className="max-w-[88px] text-right text-[11px] leading-4 text-white/55">
+                  {incomePending > 0 ? `${brl(incomePending)} a receber` : incomeTotal > 0 ? "Tudo recebido" : ""}
+                </span>
+              </div>
+              <div className="flex items-center gap-3 rounded-2xl bg-white/[0.07] p-3.5">
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-white text-[#0b0b0c]">
+                  <ArrowUpRight className="h-4 w-4" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[12px] text-white/55">Despesas</p>
+                  <Money value={expenseTotal} className="text-[17px] font-semibold" />
+                </div>
+                <span className="max-w-[88px] text-right text-[11px] leading-4 text-white/55">
+                  {expensePending > 0 ? `${brl(expensePending)} a pagar` : expenseTotal > 0 ? "Tudo pago" : ""}
+                </span>
+              </div>
+            </div>
+          </section>
+          <Panel title="Resumo inteligente" delay={620}>
+              <ul className="space-y-2.5">
+                {topInsights.map((ins, i) => (
+                  <li
+                    key={i}
+                    className={`animate-rise rounded-2xl px-4 py-3 text-[13.5px] leading-5 ${insightTone[ins.tone]}`}
+                    style={{ animationDelay: `${680 + i * 80}ms` }}
+                  >
+                    {ins.text}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-5">
+                <div className="flex items-center justify-between text-[13px] font-semibold">
+                  <span className="flex items-center gap-2"><CalendarClock className="h-4 w-4 text-muted-foreground" /> Contas pagas no mês</span>
+                  <span className="num">{paidRatio}%</span>
+                </div>
+                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div className="animate-grow-x h-full rounded-full bg-gradient-to-r from-[#10a37f] to-[#5ad1b3]" style={{ width: `${paidRatio}%` }} />
+                </div>
+              </div>
+            </Panel>
+          </div>
+
+          {/* Coluna do meio: contas a pagar e categorias */}
+          <div className="min-w-0 space-y-4 sm:space-y-6">
+            <Panel
             title="Contas a pagar"
             subtitle={
               nextDue
@@ -875,8 +723,205 @@ function Dashboard() {
               </>
             )}
           </Panel>
+            <Panel
+            title="Para onde vai o dinheiro"
+            subtitle={period}
+            delay={400}
+            action={
+              <Link to="/categories" className="text-[13px] font-semibold text-primary hover:underline">
+                Orçamentos
+              </Link>
+            }
+          >
+            {topCategories.length === 0 ? (
+              <p className="py-10 text-center text-[14px] text-muted-foreground">
+                Nenhuma despesa categorizada neste mês.
+              </p>
+            ) : (
+              <div className="flex flex-col gap-5">
+                <div className="relative mx-auto h-44 w-44 shrink-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pie}
+                        dataKey="value"
+                        innerRadius={58}
+                        outerRadius={84}
+                        paddingAngle={3}
+                        cornerRadius={6}
+                        stroke="none"
+                        animationDuration={900}
+                      >
+                        {pie.map((e) => (
+                          <Cell key={e.name} fill={e.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-[11px] font-medium text-muted-foreground">Gasto</span>
+                    <span className="num text-[16px] font-semibold">{brl(expenseTotal)}</span>
+                  </div>
+                </div>
+                <ul className="space-y-3.5">
+                  {topCategories.map((c) => {
+                    const pct = expenseTotal > 0 ? Math.round((c.total / expenseTotal) * 100) : 0;
+                    const hasBudget = c.budget !== null && c.budget > 0;
+                    const isOver = hasBudget && c.total > c.budget!;
+                    return (
+                      <li key={c.name}>
+                        <div className="flex items-center gap-3">
+                          <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: c.color }} />
+                          <span className="min-w-0 flex-1 truncate text-[14px] font-medium">{c.name}</span>
+                          <span className="num text-[13px] text-muted-foreground">{pct}%</span>
+                          <span className={`num w-24 text-right text-[14px] font-semibold ${isOver ? "text-negative" : ""}`}>
+                            {brl(c.total)}
+                          </span>
+                        </div>
+                        {hasBudget && (
+                          <div className="ml-6 mt-1.5 flex items-center gap-2">
+                            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                              <div
+                                className="h-full rounded-full"
+                                style={{
+                                  width: `${Math.min(100, (c.total / c.budget!) * 100)}%`,
+                                  background: isOver ? "#e5484d" : c.color,
+                                }}
+                              />
+                            </div>
+                            <span className={`text-[11px] ${isOver ? "font-semibold text-negative" : "text-muted-foreground"}`}>
+                              {isOver ? `${brl(c.total - c.budget!)} acima` : `de ${brl(c.budget!)}`}
+                            </span>
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+          </Panel>
+            <Panel title="Seus gastos" subtitle="Últimos 6 meses" delay={320}>
+              <div className="mb-2 flex items-center gap-5 text-[12px] font-medium text-muted-foreground">
+                <span className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#d9f545] ring-1 ring-black/10" /> Entrou
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-foreground" /> Saiu
+                </span>
+              </div>
+              <div className="h-56 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={series} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="wIn" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#d9f545" stopOpacity={0.55} />
+                        <stop offset="100%" stopColor="#d9f545" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid stroke="var(--border)" strokeDasharray="3 6" vertical={false} />
+                    <XAxis dataKey="mes" tickLine={false} axisLine={false} fontSize={12} tickMargin={10} stroke="var(--muted-foreground)" />
+                    <YAxis tickFormatter={(v) => brlShort(Number(v))} tickLine={false} axisLine={false} fontSize={12} stroke="var(--muted-foreground)" width={40} />
+                    <RTooltip
+                      cursor={{ stroke: "var(--border-strong)", strokeDasharray: "3 3" }}
+                      contentStyle={{ background: "#d9f545", border: "none", borderRadius: 999, fontSize: 13, color: "#0b0b0c", padding: "6px 14px" }}
+                      itemStyle={{ color: "#0b0b0c" }}
+                      formatter={(v: number | string, n) => [brl(Number(v)), n === "entradas" ? "Entrou" : "Saiu"]}
+                    />
+                    <Area type="monotone" dataKey="entradas" stroke="#b8d62a" strokeWidth={2.5} fill="url(#wIn)" dot={false} animationDuration={900} />
+                    <Area type="monotone" dataKey="saidas" stroke="var(--foreground)" strokeWidth={2.5} fill="none" dot={false} animationDuration={900} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </Panel>
+          </div>
 
-          <div className="space-y-4 sm:space-y-6">
+          {/* Coluna da direita: atalhos coloridos, histórico e metas */}
+          <div className="min-w-0 space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-3 gap-3">
+              <Link
+                to="/savings"
+                className="animate-rise flex min-h-[132px] flex-col justify-between rounded-3xl bg-[#d9f545] p-4 text-[#0b0b0c]"
+              >
+                <PiggyBank className="h-6 w-6" />
+                <div>
+                  <p className="num text-[24px] font-bold leading-none">{goalsTarget > 0 ? `${goalsPct}%` : "—"}</p>
+                  <p className="mt-1 text-[12px] font-semibold leading-4">Metas de economia</p>
+                </div>
+              </Link>
+              <Link
+                to="/calendar"
+                className="animate-rise flex min-h-[132px] flex-col justify-between rounded-3xl bg-[#0b0b0c] p-4 text-white ring-1 ring-white/10"
+              >
+                <CalendarClock className="h-6 w-6 text-[#d9f545]" />
+                <div>
+                  <p className="num text-[24px] font-bold leading-none">{upcoming.length}</p>
+                  <p className="mt-1 text-[12px] font-semibold leading-4">Vencem em 7 dias</p>
+                </div>
+              </Link>
+              <Link
+                to="/transactions"
+                className="animate-rise flex min-h-[132px] flex-col justify-between rounded-3xl bg-[#d9f545] p-4 text-[#0b0b0c]"
+              >
+                <CheckCircle2 className="h-6 w-6" />
+                <div>
+                  <p className="num text-[24px] font-bold leading-none">{paidRatio}%</p>
+                  <p className="mt-1 text-[12px] font-semibold leading-4">Contas pagas</p>
+                </div>
+              </Link>
+            </div>
+
+            <Panel
+              title="Histórico"
+              subtitle={period}
+              delay={200}
+              action={
+                <Link to="/transactions" className="text-[13px] font-semibold hover:underline">
+                  Ver tudo
+                </Link>
+              }
+            >
+              {history.length === 0 ? (
+                <p className="py-6 text-center text-[14px] text-muted-foreground">
+                  Nenhum lançamento neste mês.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {history.map((g) => (
+                    <div key={g.key}>
+                      <p className="mb-1 text-[12px] font-medium text-muted-foreground">{g.label}</p>
+                      <ul className="divide-y divide-border">
+                        {g.items.map((t) => {
+                          const color = t.categories?.color ?? "#64748B";
+                          const inc = t.type === "income";
+                          return (
+                            <li key={t.id} className="flex items-center gap-3 py-2.5">
+                              <span
+                                className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-[14px] font-bold"
+                                style={{ background: `${color}22`, color }}
+                                aria-hidden="true"
+                              >
+                                {t.description.charAt(0).toUpperCase()}
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-[14px] font-semibold">{t.description}</p>
+                                <p className="truncate text-[12px] text-muted-foreground">
+                                  {t.categories?.name ?? "Sem categoria"} · {t.status === "paid" ? (inc ? "Recebido" : "Pago") : "Pendente"}
+                                </p>
+                              </div>
+                              <span className={`num shrink-0 text-[14px] font-semibold ${inc ? "text-positive" : ""}`}>
+                                {inc ? "+" : "-"}{brl(Number(t.amount))}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Panel>
+
             <Panel title="Metas de economia" delay={560} action={
               <Link to="/savings" className="text-[13px] font-semibold text-primary hover:underline">Ver</Link>
             }>
@@ -907,30 +952,44 @@ function Dashboard() {
                 </ul>
               )}
             </Panel>
-
-            <Panel title="Resumo inteligente" delay={620}>
-              <ul className="space-y-2.5">
-                {topInsights.map((ins, i) => (
-                  <li
-                    key={i}
-                    className={`animate-rise rounded-2xl px-4 py-3 text-[13.5px] leading-5 ${insightTone[ins.tone]}`}
-                    style={{ animationDelay: `${680 + i * 80}ms` }}
-                  >
-                    {ins.text}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-5">
-                <div className="flex items-center justify-between text-[13px] font-semibold">
-                  <span className="flex items-center gap-2"><CalendarClock className="h-4 w-4 text-muted-foreground" /> Contas pagas no mês</span>
-                  <span className="num">{paidRatio}%</span>
-                </div>
-                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
-                  <div className="animate-grow-x h-full rounded-full bg-gradient-to-r from-[#10a37f] to-[#5ad1b3]" style={{ width: `${paidRatio}%` }} />
-                </div>
-              </div>
-            </Panel>
+            <Panel
+          title="Próximos 7 dias"
+          subtitle="O que vence a partir de hoje"
+          delay={300}
+          action={
+            <Link to="/calendar" className="text-[13px] font-semibold text-primary hover:underline">
+              Calendário
+            </Link>
+          }
+        >
+          <ol className="grid grid-cols-7 gap-1.5 sm:gap-3">
+            {week.map((w) => (
+              <li
+                key={w.key}
+                className={`flex flex-col items-center gap-1 rounded-2xl px-1 py-3 text-center transition-colors sm:py-4 ${
+                  w.isToday
+                    ? "bg-[#d9f545] text-[#0b0b0c]"
+                    : w.count > 0
+                      ? "bg-[#f3fbc9] text-[#2c3300] dark:bg-[#232a08] dark:text-[#eaf7a8]"
+                      : "bg-muted/60 text-muted-foreground"
+                }`}
+              >
+                <span className="text-[11px] font-semibold uppercase tracking-wide opacity-80">
+                  {format(w.d, "EEE", { locale: ptBR }).replace(".", "").slice(0, 3)}
+                </span>
+                <span className="num text-[18px] font-semibold leading-none sm:text-[22px]">
+                  {format(w.d, "d")}
+                </span>
+                <span className="num min-h-[16px] text-[10.5px] font-semibold leading-4 sm:text-[12px]">
+                  {w.count > 0 ? brlShort(w.total) : "·"}
+                </span>
+                <span className="hidden h-1 w-1 rounded-full bg-current opacity-60 sm:block" style={{ visibility: w.count > 0 ? "visible" : "hidden" }} />
+              </li>
+            ))}
+          </ol>
+        </Panel>
           </div>
+
         </div>
       </Fragment>
     </div>
