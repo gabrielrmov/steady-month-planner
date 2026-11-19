@@ -98,9 +98,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               onClick={onNavigate}
               style={{ animationDelay: `${index * 45}ms` }}
               className={cn(
-                "animate-rise group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                "animate-rise group relative flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium transition-colors",
                 active
-                  ? "bg-sidebar-accent font-semibold text-sidebar-foreground [&>svg]:text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:animate-bar-in before:rounded-full before:bg-primary"
+                  ? "bg-primary font-semibold text-primary-foreground"
                   : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground",
               )}
             >
